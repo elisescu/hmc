@@ -18,13 +18,16 @@ package com.hmc.project.hmc.ui;
 
 import java.util.List;
 
+import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.R.id;
 import com.hmc.project.hmc.R.layout;
 import com.hmc.project.hmc.R.string;
 import com.hmc.project.hmc.service.HMCService;
+import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -55,35 +58,47 @@ public class LocalServiceActivities {
      * all together; typically this code would appear in some separate class.
      */
     public static class Controller extends Activity {
-    	
 
-    	private SharedPreferences mSettings;
 
-		@Override
-    	public final boolean onCreateOptionsMenu(Menu menu) {
-    		super.onCreateOptionsMenu(menu);
-    		MenuInflater inflater = getMenuInflater();
-    		inflater.inflate(R.menu.controler_service, menu);
-    		return true;
-    	}
+        private SharedPreferences mSettings;
+
+        private HMCApplication mHMCApplication;
+
+        @Override
+        public final boolean onCreateOptionsMenu(Menu menu) {
+            super.onCreateOptionsMenu(menu);
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.controler_service, menu);
+            return true;
+        }
 
         @Override
         public final boolean onOptionsItemSelected(MenuItem item) {
-    	switch (item.getItemId()) {
-    	case R.id.controler_list_menu_preferences:
-    		startActivityForResult(new Intent(this, HMCSettings.class),23);
-    		
-//    		SharedPreferences settings = getSharedPreferences("preferences", 0);
-//    		boolean silent = settings.getBoolean("silentMode", false);
-
-
-    		Toast.makeText(this, "Returned with username"+mSettings.getString("hmc_username_key", "DefaulValue"),
-                    Toast.LENGTH_SHORT).show();
-    		
-    		return true;
-    	default:
-    		return false;
-    	}
+            switch (item.getItemId()) {
+                case R.id.controler_list_menu_preferences:
+                    startActivityForResult(new Intent(this, HMCSettings.class),23);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        
+        @Override
+        protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+            Log.d("CheckStartActivity","onActivityResult and resultCode = "+resultCode);
+            // TODO Auto-generated method stub
+            super.onActivityResult(requestCode, resultCode, data);
+            if (resultCode == 23) {
+                if (mHMCApplication.isAccountConfigured())
+                    HMCUserNotifications.normalToast(this, "Account configured");
+                else {
+                    HMCUserNotifications.normalToast(this, "You must configure the account");
+                    startActivityForResult(new Intent(this, HMCSettings.class),23);
+                }
+            }
+            else{
+                HMCUserNotifications.normalToast(this, "Returned from wrong activity: "+resultCode);
+            }
         }
 
         @Override
@@ -91,13 +106,15 @@ public class LocalServiceActivities {
             super.onCreate(savedInstanceState);
 
             setContentView(R.layout.local_service_controller);
+            
+            mHMCApplication = (HMCApplication)getApplication();
 
             // Watch for button clicks.
             Button button = (Button)findViewById(R.id.start);
             button.setOnClickListener(mStartListener);
             button = (Button)findViewById(R.id.stop);
             button.setOnClickListener(mStopListener);
-            
+
             mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         }
 
@@ -139,7 +156,7 @@ public class LocalServiceActivities {
 
 
         private HMCService mBoundService;
-        
+
         private ServiceConnection mConnection = new ServiceConnection() {
             public void onServiceConnected(ComponentName className, IBinder service) {
                 // This is called when the connection with the service has been
@@ -148,7 +165,7 @@ public class LocalServiceActivities {
                 // service that we know is running in our own process, we can
                 // cast its IBinder to a concrete class and directly access it.
                 mBoundService = ((HMCService.LocalBinder)service).getService();
-                
+
                 // Tell the user about this for our demo.
                 Toast.makeText(Binding.this, R.string.local_service_connected,
                         Toast.LENGTH_SHORT).show();
@@ -164,17 +181,17 @@ public class LocalServiceActivities {
                         Toast.LENGTH_SHORT).show();
             }
         };
-        
+
         void doBindService() {
             // Establish a connection with the service.  We use an explicit
             // class name because we want a specific service implementation that
             // we know will be running in our own process (and thus won't be
             // supporting component replacement by other applications).
             bindService(new Intent(Binding.this, 
-            		HMCService.class), mConnection, Context.BIND_AUTO_CREATE);
+                    HMCService.class), mConnection, Context.BIND_AUTO_CREATE);
             mIsBound = true;
         }
-        
+
         void doUnbindService() {
             if (mIsBound) {
                 // Detach our existing connection.
@@ -182,7 +199,7 @@ public class LocalServiceActivities {
                 mIsBound = false;
             }
         }
-        
+
         @Override
         protected void onDestroy() {
             super.onDestroy();
@@ -201,7 +218,7 @@ public class LocalServiceActivities {
                 doUnbindService();
             }
         };
-        
+
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);

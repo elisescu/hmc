@@ -10,7 +10,7 @@
 -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     
-       <PreferenceCategory
+	<PreferenceCategory
             android:title="@string/hmc_account_settings" android:persistent="true">
 
         <EditTextPreference
@@ -19,8 +19,8 @@
                 android:summary="@string/hmc_username_summary"
                 android:dialogTitle="@string/hmc_username_dialog_title" />
         
-     <EditTextPreference
-                android:key="hmc_password_key"
+    	 <EditTextPreference
+                android:key="hmc_pass_key"
                 android:title="@string/hmc_pass_title"
                 android:summary="@string/hmc_pass_summary"
                 android:dialogTitle="@string/hmc_pass_dialog_title" />

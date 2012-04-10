@@ -1,0 +1,11 @@
+.idea/
+hmc-android.iml
+out/
+.classpath
+.project
+build.xml
+local.properties
+proguard-project.txt
+project.properties
+bin/*
+gen/*

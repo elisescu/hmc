@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/vidAct_menu_streaming_server"
+		android:visible="true"
+		android:title="Streaming server"/>
+    <item android:id="@+id/vidAct_refreshResources"
+		android:visible="true"
+		android:title="Refresh streams"/>
+</menu>

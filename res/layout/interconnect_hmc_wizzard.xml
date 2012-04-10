@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="4dip" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Interconnect to another HMC"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter here the JID of external HMC"
+        android:layout_gravity="left"/>
+
+    <EditText
+        android:id="@+id/add_new_dev_text_jid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:inputType="textEmailAddress" />
+
+    <Button
+        android:id="@+id/interconnect_hmc_butt_interc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Interconnect" />
+
+</LinearLayout>

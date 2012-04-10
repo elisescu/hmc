@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#50202020"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="4dip" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="HMC Interconnect"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textView_hmc_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="26dp"
+        android:text="HMC name: %s"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        android:id="@+id/confirm_join_button_yes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="Approve" />
+
+    <Button
+        android:id="@+id/confirm_join_button_no"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="Cancel" />
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:stretchColumns="1"
+    android:layout_below="@+id/textView_hmc_name">
+       
+	<TableRow>
+		 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/RelativeLayout1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_hmcserver_name_title"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:lines="1"
+			        android:text="Name:"
+			        android:textAppearance="?android:attr/textAppearanceSmall" />
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_hmcserver_name"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_below="@+id/textView_confirmjoin_hmcserver_name_title"
+			        android:lines="1"
+			        android:text="set here the name"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+    	</RelativeLayout>
+    </TableRow>
+    
+	<TableRow>
+		 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/RelativeLayout1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_hmcserver_fingerprint_title"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:lines="1"
+			        android:text="Fingerprint:"
+			        android:textAppearance="?android:attr/textAppearanceSmall" />
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_fingerprint"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_below="@+id/textView_confirmjoin_hmcserver_fingerprint_title"
+			        android:lines="2"
+			        android:layout_weight="0"
+			        android:text="set fingerprint here"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+    	</RelativeLayout>
+    </TableRow>
+
+	<TableRow>
+		 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/RelativeLayout1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_my_fingerprint_title"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:lines="1"
+			        android:text="My fingerprint:"
+			        android:textAppearance="?android:attr/textAppearanceSmall" />
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_my_fingerprint"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_below="@+id/textView_confirmjoin_my_fingerprint_title"
+			        android:lines="2"
+			        android:layout_weight="0"
+			        android:text="set fingerprint here"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+    	</RelativeLayout>
+    </TableRow>
+	
+
+</TableLayout>
+
+
+</RelativeLayout>

@@ -1,0 +1,16 @@
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/login_menu_preferences"
+		android:visible="true"
+		android:title="@string/login_menu_preferences"/>
+	
+	
+	<item android:id="@+id/login_menu_clearHMC_soft"
+		android:visible="true"
+		android:title="Clear devices" />
+	
+	<item android:id="@+id/login_menu_clearHMC"
+		android:visible="true"
+		android:title="@string/login_menu_clearHMC" />
+	
+</menu>

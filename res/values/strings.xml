@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HMC-android</string>    
+
+    <string name="local_service_label">HMC Service</string>
+
+    <!-- HMC Preferences !! -->
+    <string name="hmc_account_settings">HMC account settings</string>
+    	<!-- Username -->
+    	<string name="hmc_jid_title">HMC user name</string>
+    	<string name="hmc_jid_summary">Tap to enter username</string>
+    	<string name="hmc_jid_dialog_title">Enter HMC username here</string>
+   		<!-- password -->
+    	<string name="hmc_pass_title">HMC password</string>
+    	<string name="hmc_pass_summary">Tap to enter password</string>
+    	<string name="hmc_pass_dialog_title">Enter HMC password here</string>
+    	<!-- Device type -->
+    	<string name="hmc_dev_type_list_title">Choose device type</string>
+		<string name="hmc_dev_type_list_summary">Press to choose</string>
+		<string name="hmc_dev_type_list_dialog_title">Choose one</string>
+    	<!-- Device name -->
+    	<string name="hmc_devname_title">HMC device name</string>
+    	<string name="hmc_devname_summary">Tap to enter name</string>
+    	<string name="hmc_devname_dialog_title">Enter device name here</string>
+    	<!-- Device name -->
+    	<string name="hmc_hmcname_title">HMC name</string>
+    	<string name="hmc_hmcname_summary">Tap to enter name</string>
+    	<string name="hmc_hmcname_dialog_title">Enter HMC name here (only if we are HMCServer!)</string>
+    	<!-- User name != username -->
+    	<string name="hmc_usrname_title">Name of the user</string>
+    	<string name="hmc_usrname_summary">Tap to enter users name</string>
+    	<string name="hmc_usrname_dialog_title">Enter users name here</string>
+    				
+                
+                
+		
+		
+    
+	<!-- Login activity !! -->
+		<string name="login_menu_preferences">Configure device</string>
+		<string name="login_menu_clearHMC">Clear HMC data</string>
+
+
+
+
+	<!-- =======================HMC Server main screen=========================== -->
+		<string name="test_method_button_name">Test RPC</string>
+		<string name="test_method_description">Press the button and increment remotely 
+		    the value send as parameter</string>
+	    <string name="hmc_server_default_screen_stop_hmc">Log out</string>    
+    	<string name="hmc_server_default_screen_add_new_device">Add new device</string>
+	    <string name="hmc_server_default_screen_hmc_interconnect">Interconnect to HMC</string>
+
+
+	<!-- =======================HMC media client main screen=========================== -->
+		<string name="mediaclient_default_screen_description">
+		    HMC Devices
+		</string>
+		<string name="mediaclient_no_hmc">
+		    This device is not part of an HMC network. Ask an administrator to add you.
+		</string>
+		<string name="test_method_button_media_client">Test button</string>
+		<string name="hmc_mediaclient_default_screen_stop_hmc">Log out</string>
+		
+
+
+	<!-- SSL unknown certif related !! -->	
+		<string name="mtm_accept_cert">Accept certificate</string>
+		<string name="mtm_decision_always">Always</string>
+		<string name="mtm_decision_once">Once</string>
+		<string name="mtm_decision_abort">Abort</string>
+		
+		<string name="mtm_notification">SSL notif. Modify me!!</string>
+		
+        <string name="activity_local_service_controller">App/Service/Local Service Controller</string>
+    <string name="local_service_controller">This demonstrates how you can implement persistent services that
+        may be started and stopped as desired.</string>
+    <string name="start_service">Start Service</string>
+    <string name="stop_service">Stop Service</string>
+
+    <string name="activity_local_service_binding">App/Service/Local Service Binding</string>
+    <string name="local_service_binding">This demonstrates how you can connect with a persistent
+        service.  Notice how it automatically starts for you, and play around with the
+        interaction between this and Local Service Controller.</string>
+    <string name="bind_service">Bind Service</string>
+    <string name="unbind_service">Unbind Service</string>
+    <string name="local_service_connected">Connected to local service</string>
+    <string name="local_service_disconnected">Disconnected from local service</string>
+    <string name="enter_username_text"></string>
+    
+</resources>

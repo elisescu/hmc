@@ -1,4 +1,4 @@
-package com.hmc.project.hmc;
+package com.hmc.project.hmc.ui;
 
 /*
  * Copyright (C) 2007 The Android Open Source Project
@@ -17,6 +17,9 @@ package com.hmc.project.hmc;
  */
 
 import com.hmc.project.hmc.R;
+import com.hmc.project.hmc.R.id;
+import com.hmc.project.hmc.R.layout;
+import com.hmc.project.hmc.R.string;
 import com.hmc.project.hmc.service.HMCService;
 
 import android.app.Activity;

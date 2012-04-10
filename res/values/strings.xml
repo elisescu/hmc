@@ -6,7 +6,27 @@
 
     <string name="local_service_label">HMC Service</string>
 
-        
+    <!-- HMC Preferences !! -->
+    <string name="hmc_account_settings">HMC account settings</string>
+    	<!-- Username -->
+    	<string name="hmc_username_title">HMC user name</string>
+    	<string name="hmc_username_summary">Tap to enter username</string>
+    	<string name="hmc_username_dialog_title">Enter HMC username here</string>
+   		<!-- password -->
+    	<string name="hmc_pass_title">HMC password name</string>
+    	<string name="hmc_pass_summary">Tap to enter password</string>
+    	<string name="hmc_pass_dialog_title">Enter HMC password here</string>
+    	<!-- Device type -->
+    	<string name="hmc_dev_type_list_title">Choose device type</string>
+		<string name="hmc_dev_type_list_summary">Press to choose</string>
+		<string name="hmc_dev_type_list_dialog_title">Choose one</string>
+    
+    
+	<!-- Controller activity !! -->
+		<string name="controler_list_menu_preferences">Configure device</string>
+		<string name="controler_list_menu_login">Login</string>
+		
+		
         <string name="activity_local_service_controller">App/Service/Local Service Controller</string>
     <string name="local_service_controller">This demonstrates how you can implement persistent services that
         may be started and stopped as desired.</string>

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2012 Vasile Popescu (elisescu@gmail.com)
+ * 
+ * This source file CANNOT be distributed and/or modified
+ * without prior written consent of the author.
+**/
+
 package com.hmc.project.hmc.service;
 
 import android.app.Notification;
@@ -12,23 +19,13 @@ import android.widget.Toast;
 
 // Need the following import to get access to the app resources, since this
 // class is in a sub-package.
-import com.hmc.project.hmc.LocalServiceActivities;
 import com.hmc.project.hmc.R;
+import com.hmc.project.hmc.ui.LocalServiceActivities;
 
-/**
- * This is an example of implementing an application service that runs locally
- * in the same process as the application.  The {@link LocalServiceActivities.Controller}
- * and {@link LocalServiceActivities.Binding} classes show how to interact with the
- * service.
- *
- * <p>Notice the use of the {@link NotificationManager} when interesting things
- * happen in the service.  This is generally how background services should
- * interact with the user, rather than doing something more disruptive such as
- * calling startActivity().
- */
 
 public class HMCService extends Service {
-	private NotificationManager mNM;
+	private NotificationManager mNotificationManager;
+	private int mNotificationId = 0xbaba;
 
 	/**
 	 * Class for clients to access.  Because we know this service always
@@ -43,7 +40,7 @@ public class HMCService extends Service {
 
 	@Override
 	public void onCreate() {
-		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
 		// Display a notification about us starting.  We put an icon in the status bar.
 		showNotification();
@@ -60,10 +57,10 @@ public class HMCService extends Service {
 	@Override
 	public void onDestroy() {
 		// Cancel the persistent notification.
-		mNM.cancel(R.string.local_service_started);
+		mNotificationManager.cancel(mNotificationId);
 
 		// Tell the user we stopped.
-		Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "HMC was stopped", Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
@@ -80,7 +77,7 @@ public class HMCService extends Service {
 	 */
 	private void showNotification() {
 		// In this sample, we'll use the same text for the ticker and the expanded notification
-		CharSequence text = getText(R.string.local_service_started);
+		CharSequence text = "HMC was started";
 
 		// Set the icon, scrolling text and timestamp
 		Notification notification = new Notification(R.drawable.stat_sample, text,
@@ -96,7 +93,7 @@ public class HMCService extends Service {
 
 		// Send the notification.
 		// We use a layout id because it is a unique number.  We use it later to cancel.
-		mNM.notify(R.string.local_service_started, notification);
+		mNotificationManager.notify(mNotificationId, notification);
 	}
 }
 

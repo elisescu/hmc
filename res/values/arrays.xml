@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="hmc_dev_type_list_entries">
+        <item>HMC Server</item>
+        <item>HMC Client Device</item>
+        <item>HMC Service Device</item>  
+    </string-array>
+
+    <string-array name="hmc_dev_type_list_entryvalues">
+        <item>HMCServer</item>
+        <item>HMCMediaClientDevice</item>
+        <item>HMCMediaServiceDevice</item>  
+    </string-array>
+    
+</resources>

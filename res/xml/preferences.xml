@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+ /**
+ * Copyright (c) 2012 Vasile Popescu (elisescu@gmail.com)
+ * 
+ * This source file CANNOT be distributed and/or modified
+ * without prior written consent of the author.
+**/
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    
+       <PreferenceCategory
+            android:title="@string/hmc_account_settings" android:persistent="true">
+
+        <EditTextPreference
+                android:key="hmc_username_key"
+                android:title="@string/hmc_username_title"
+                android:summary="@string/hmc_username_summary"
+                android:dialogTitle="@string/hmc_username_dialog_title" />
+        
+     <EditTextPreference
+                android:key="hmc_password_key"
+                android:title="@string/hmc_pass_title"
+                android:summary="@string/hmc_pass_summary"
+                android:dialogTitle="@string/hmc_pass_dialog_title" />
+                
+        <ListPreference
+                android:key="hmc_device_type"
+                android:title="@string/hmc_dev_type_list_title"
+                android:summary="@string/hmc_dev_type_list_summary"
+                android:entries="@array/hmc_dev_type_list_entries"
+                android:entryValues="@array/hmc_dev_type_list_entryvalues"
+                android:dialogTitle="@string/hmc_dev_type_list_dialog_title" />
+
+    </PreferenceCategory>
+    
+</PreferenceScreen>

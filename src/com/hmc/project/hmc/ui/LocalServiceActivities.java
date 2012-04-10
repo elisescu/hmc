@@ -16,6 +16,8 @@ package com.hmc.project.hmc.ui;
  * limitations under the License.
  */
 
+import java.util.List;
+
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.R.id;
 import com.hmc.project.hmc.R.layout;
@@ -23,12 +25,20 @@ import com.hmc.project.hmc.R.string;
 import com.hmc.project.hmc.service.HMCService;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -45,6 +55,37 @@ public class LocalServiceActivities {
      * all together; typically this code would appear in some separate class.
      */
     public static class Controller extends Activity {
+    	
+
+    	private SharedPreferences mSettings;
+
+		@Override
+    	public final boolean onCreateOptionsMenu(Menu menu) {
+    		super.onCreateOptionsMenu(menu);
+    		MenuInflater inflater = getMenuInflater();
+    		inflater.inflate(R.menu.controler_service, menu);
+    		return true;
+    	}
+
+        @Override
+        public final boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case R.id.controler_list_menu_preferences:
+    		startActivityForResult(new Intent(this, HMCSettings.class),23);
+    		
+//    		SharedPreferences settings = getSharedPreferences("preferences", 0);
+//    		boolean silent = settings.getBoolean("silentMode", false);
+
+
+    		Toast.makeText(this, "Returned with username"+mSettings.getString("hmc_username_key", "DefaulValue"),
+                    Toast.LENGTH_SHORT).show();
+    		
+    		return true;
+    	default:
+    		return false;
+    	}
+        }
+
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -56,6 +97,8 @@ public class LocalServiceActivities {
             button.setOnClickListener(mStartListener);
             button = (Button)findViewById(R.id.stop);
             button.setOnClickListener(mStopListener);
+            
+            mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         }
 
         private OnClickListener mStartListener = new OnClickListener() {

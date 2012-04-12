@@ -15,6 +15,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        
+        <activity android:name=".ui.LocalServiceActivities$Binding" android:launchMode="standard" android:screenOrientation="unspecified">
+        </activity>
+        
         <service android:name=".service.HMCService">
             <intent-filter>
                 <action android:name="com.hmc.project.hmc.service.HMCService"/>
@@ -22,5 +26,7 @@
         </service>
         <activity android:name=".ui.HMCSettings"></activity>
     </application>
+    
+    <uses-permission android:name="android.permission.INTERNET"/>
 
 </manifest>

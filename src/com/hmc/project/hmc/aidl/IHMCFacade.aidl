@@ -23,7 +23,7 @@ interface IHMCFacade {
     
     
     // connect to XMPP server using user's credentials entered by user
-    void connect(String fullJID, String password);
+    void connect(String fullJID, String password, int port);
     
     // register an XMPP account on the XMPP server using in-band-registration
     void registerXMPPAccount(String fullJID, String password);

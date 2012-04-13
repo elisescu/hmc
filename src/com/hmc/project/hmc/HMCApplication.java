@@ -19,15 +19,16 @@ public class HMCApplication extends Application {
     private SharedPreferences mSettings;
     private boolean mIsAccountConfigured;
     private boolean mIsConnected;
-
+    private String mUsername = "insert_something";
+    private String mPassword = "insert_something";
 
     @Override
     public void onCreate() {
         super.onCreate();
         mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        String login = mSettings.getString("hmc_username_key", "");
-        String password = mSettings.getString("hmc_pass_key", "");
-        mIsAccountConfigured = !("".equals(login) || "".equals(password));
+        mUsername = mSettings.getString("hmc_username_key", "");
+        mPassword = mSettings.getString("hmc_pass_key", "");
+        mIsAccountConfigured = !("".equals(mUsername) || "".equals(mPassword));
         mSettings.registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
@@ -48,7 +49,15 @@ public class HMCApplication extends Application {
     public boolean isAccountConfigured() {
         return mIsAccountConfigured;
     }
+    
+    public String getUsername() {
+        return mUsername;
+    }
 
+    public String getPassword() {
+        return mPassword;
+    }
+    
     private class HMCPreferenceListener implements SharedPreferences.OnSharedPreferenceChangeListener {
 
         public HMCPreferenceListener() {
@@ -57,10 +66,10 @@ public class HMCApplication extends Application {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences  sharedPreferences, String key) {
             if (key.equals("hmc_username_key") || key.equals("hmc_pass_key")) {
-                String login = mSettings.getString("hmc_username_key", "");
-                String password = mSettings.getString("hmc_pass_key", "");
-                mIsAccountConfigured = !("".equals(login) || "".equals(password));
-                //HMCUserNotifications.normalToast(HMCApplication.this, "Account configured:"+mIsAccountConfigured);
+                mUsername = mSettings.getString("hmc_username_key", "");
+                mPassword = mSettings.getString("hmc_pass_key", "");
+                mIsAccountConfigured = !("".equals(mUsername) || "".equals(mPassword));
+                HMCUserNotifications.normalToast(HMCApplication.this, "Account configured:"+mIsAccountConfigured);
             }
         }
     }

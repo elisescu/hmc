@@ -45,7 +45,11 @@ public class Login extends Activity {
     private IHMCFacade mHMCFacade;
     private ProgressDialog mLoginProgressDialog;
     HMCConnectionListener mConnectionListener = new HMCConnectionListener();
-    
+    private Button mStartButton;
+    private Button mStopButton;
+    private String mPassword;
+    private String mUsername;
+
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -58,28 +62,10 @@ public class Login extends Activity {
     public final boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.controler_list_menu_preferences:
-                startActivityForResult(new Intent(this, HMCSettings.class),23);
+                startActivity(new Intent(this, HMCSettings.class));
                 return true;
             default:
                 return false;
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("CheckStartActivity","onActivityResult and resultCode = "+resultCode);
-        // TODO Auto-generated method stub
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == 23) {
-            if (mHMCApplication.isAccountConfigured())
-                HMCUserNotifications.normalToast(this, "Account configured");
-            else {
-                HMCUserNotifications.normalToast(this, "You must configure the account");
-                startActivityForResult(new Intent(this, HMCSettings.class), 23);
-            }
-        }
-        else{
-            HMCUserNotifications.normalToast(this, "Returned from wrong activity: "+resultCode);
         }
     }
 
@@ -89,48 +75,100 @@ public class Login extends Activity {
 
         setContentView(R.layout.local_service_controller);
 
+        // initialize preferences listener and HMCApplication global state 
         mHMCApplication = (HMCApplication)getApplication();
+        
+        // if we are already connected, then go directly to main screen
+        if (mHMCApplication.isConnected()) {
+            startActivity(new Intent(Login.this, DeviceMainScreen.class));
+            finish();
+        }
 
+        mUsername = mHMCApplication.getUsername();
+        mPassword = mHMCApplication.getPassword();
         // Watch for button clicks.
-        Button button = (Button)findViewById(R.id.start);
-        button.setOnClickListener(mStartListener);
-        button = (Button)findViewById(R.id.stop);
-        button.setOnClickListener(mStopListener);
+        mStartButton = (Button)findViewById(R.id.start);
+        mStartButton.setOnClickListener(mStartListener);
 
-        mSettings = PreferenceManager.getDefaultSharedPreferences(this);
+        mStopButton = (Button)findViewById(R.id.stop);
+        mStopButton.setOnClickListener(mStopListener);
+        mStopButton.setEnabled(false);
     }
 
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mIsBound) {
+            doUnbindService();
+            mIsBound = false;
+        }
+    }
+    
     private OnClickListener mStartListener = new OnClickListener() {
         public void onClick(View v) {
 
             // start HMCService
-            startService(new Intent(Login.this,
-                    HMCService.class));
+            if (!mServiceStarted) {
+                startService(new Intent(Login.this,
+                        HMCService.class));
+                mServiceStarted = true;
+            }
 
             // bind to HMCService so that we get the HMCFacade
-            doBindService();
+            if (!mIsBound) {
+                doBindService();
+                mIsBound = true;
+            }
             
-            mIsBound = true;
+            if (!mHMCApplication.isConnected() && mHMCApplication.isAccountConfigured()) {
+
+                mUsername = mHMCApplication.getUsername();
+                mPassword = mHMCApplication.getPassword();
+                
+                mLoginProgressDialog = ProgressDialog.show(Login.this, "Login", "wait please", true, 
+                        false);
+                
+                if (mHMCFacade != null) {
+                    try {
+                        mHMCFacade.connectAsync(mUsername, mPassword, 5222);
+                    } catch (RemoteException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     };
-
-    private OnClickListener mStopListener = new OnClickListener() {
-        public void onClick(View v) {
-
-            // disconnect from XMPP server
+    
+    private void disconnectAndStopService() {
+        // disconnect from XMPP server\
+        if (mHMCApplication.isConnected() && mHMCFacade != null) {
             try {
                 mHMCFacade.disconnect();
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+        }
 
-            // unbind from HMCService
+        // unbind from HMCService
+        if (mIsBound){
             doUnbindService();
+            mIsBound = false;
+        }
 
-            //stop HMCService
+        //stop HMCService
+        if (mServiceStarted) {
             stopService(new Intent(Login.this,
                     HMCService.class));
+            mServiceStarted = false;
+        }        
+    }
+
+    private OnClickListener mStopListener = new OnClickListener() {
+        public void onClick(View v) {
+            disconnectAndStopService();
         }
     };
     
@@ -149,18 +187,15 @@ public class Login extends Activity {
     }
 
     private class HMCServiceConnection implements ServiceConnection {
-
         public void onServiceConnected(ComponentName className, IBinder service) {
             mHMCFacade = IHMCFacade.Stub.asInterface(service);
-
-            mLoginProgressDialog = ProgressDialog.show(Login.this, "Login", "wait please", true, 
-                    false);
-
-            try {
-                mHMCFacade.registerConnectionListener(mConnectionListener);
-                mHMCFacade.connectAsync("elisescu_1@jabber.org", "Cucurigu1",  5222);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+            if (mHMCApplication.isAccountConfigured())  {
+                try {
+                    mHMCFacade.registerConnectionListener(mConnectionListener);
+                    mHMCFacade.connectAsync(mUsername, mPassword,  5222);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
 
             Log.d(TAG,"Successfully binded the service");
@@ -181,19 +216,20 @@ public class Login extends Activity {
         @Override
         public void connectionClosedOnError(String arg0) throws RemoteException {
             // TODO Auto-generated method stub
-            
         }
 
         @Override
         public void connectionSuccessful(boolean success) throws RemoteException {
             Log.d(TAG, "Connection successful"+success);
             mLoginProgressDialog.dismiss();
+            mHMCApplication.setConnected(success);
             if (success) {
                 HMCUserNotifications.normalToast(Login.this, "Login successful");
+                startActivity(new Intent(Login.this, DeviceMainScreen.class));
+                finish();
             } else {
                 HMCUserNotifications.normalToast(Login.this, "Login failed :(");
             }
         }
     }
-
 }

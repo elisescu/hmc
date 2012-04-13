@@ -36,6 +36,7 @@ import org.jivesoftware.smackx.pubsub.provider.ItemsProvider;
 import org.jivesoftware.smackx.pubsub.provider.PubSubProvider;
 
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -77,46 +78,41 @@ public class HMCFacade extends IHMCFacade.Stub {
         mRemoteConnectionListener = conListener;
     }
 
-    // connect and login to XMPP server. this is a blocking call so it should not be 
-    // called in UI thread
-    @Override
-    public void connect(String fullJID, String password, int port) throws RemoteException {
+    private void connect_l(String fullJID, String password, int port) throws XMPPException {
         String lXMPPServer = StringUtils.parseServer(fullJID);
         
         if (mXMPPConnection == null) {
             mXMPPConnection = createXMPPConnection(lXMPPServer, port);
         }
-
-        Log.d(TAG, "created connection to =<"+lXMPPServer+":"+port+"> server");
-
-        try {
+        if (mXMPPConnection != null) {
             mXMPPConnection.connect();
             mXMPPConnection.login(fullJID, password);
+
+            Presence presence = new Presence(Presence.Type.available);
+            presence.setStatus("Online");
+            mXMPPConnection.sendPacket(presence);
+            Log.d(TAG,"Connected. Secure="+mXMPPConnection.isSecureConnection());
+        } else {
+            throw new XMPPException();
+        }
+    }
+    // connect and login to XMPP server. this is a blocking call so it should not be 
+    // called in UI thread
+    @Override
+    public void connect(String fullJID, String password, int port) throws RemoteException {
+        try {
+            connect_l(fullJID, password, port);
         } catch (XMPPException e) {
-            Log.e(TAG, "Error when connecting to XMPP Server");
+            // TODO Auto-generated catch block
             e.printStackTrace();
             throw new RemoteException();
         }
-
-        
-        Presence presence = new Presence(Presence.Type.available);
-        presence.setStatus("Online");
-        // Send the packet (assume we have a Connection instance called "con").
-        mXMPPConnection.sendPacket(presence);
-        
-        Log.d(TAG,"Connected. Secure="+mXMPPConnection.isSecureConnection());
     }
     
     
     @Override
     public void connectAsync(String fullJID, String password, int port) throws RemoteException {
-        String lXMPPServer = StringUtils.parseServer(fullJID);
-        
-        if (mXMPPConnection == null) {
-            mXMPPConnection = createXMPPConnection(lXMPPServer, port);
-        }
-        
-        new LoginAsyncTask().execute(mXMPPConnection, fullJID, password);
+        new LoginAsyncTask().execute(fullJID, password, port);
     }
 
     // create the XMPPConnection to be used for login, for getting the chatmanager, etc
@@ -278,24 +274,19 @@ public class HMCFacade extends IHMCFacade.Stub {
             private RemoteException mRemoteException = null;
             @Override
             protected Boolean doInBackground(Object... param) {
-                XMPPConnection conn = (XMPPConnection)param[0];
-                String username = (String)param[1];
-                String password = (String)param[2];
-                //Integer port = (Integer)param[3];
+                String username = (String)param[0];
+                String password = (String)param[1];
+                Integer port = (Integer)param[2];
 
+                Looper.prepare();
                 Boolean success = new Boolean(true);
-                //connect(username, password, port.intValue());
                 try {
-                    conn.connect();
-                    conn.login(username, password);
+                    connect_l(username, password, port.intValue());
                 } catch (XMPPException e) {
                     mRemoteException = new RemoteException();
                     e.printStackTrace();
                     success = new Boolean(false);
                 }
-                
-                Log.d(TAG,"Logged in");
-                
                 return success;
             }
             

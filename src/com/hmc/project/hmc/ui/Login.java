@@ -131,6 +131,7 @@ public class Login extends Activity {
                 
                 if (mHMCFacade != null) {
                     try {
+                        mHMCFacade.registerConnectionListener(mConnectionListener);
                         mHMCFacade.connectAsync(mUsername, mPassword, 5222);
                     } catch (RemoteException e) {
                         // TODO Auto-generated catch block

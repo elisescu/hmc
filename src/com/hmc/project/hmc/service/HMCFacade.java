@@ -100,13 +100,25 @@ public class HMCFacade extends IHMCFacade.Stub {
 
         
         Presence presence = new Presence(Presence.Type.available);
-        presence.setStatus("Baaaaaaa");
+        presence.setStatus("Online");
         // Send the packet (assume we have a Connection instance called "con").
         mXMPPConnection.sendPacket(presence);
         
         Log.d(TAG,"Connected. Secure="+mXMPPConnection.isSecureConnection());
     }
     
+    
+    @Override
+    public void connectAsync(String fullJID, String password, int port) throws RemoteException {
+        String lXMPPServer = StringUtils.parseServer(fullJID);
+        
+        if (mXMPPConnection == null) {
+            mXMPPConnection = createXMPPConnection(lXMPPServer, port);
+        }
+        
+        new LoginAsyncTask().execute(mXMPPConnection, fullJID, password);
+    }
+
     // create the XMPPConnection to be used for login, for getting the chatmanager, etc
     public Connection createXMPPConnection(String xmppServer, int port) {
         ConnectionConfiguration lConnConfig = null;
@@ -128,7 +140,7 @@ public class HMCFacade extends IHMCFacade.Stub {
     @Override
     public void unregisterConnectionListener(IConnectionListener conListener)
             throws RemoteException {
-        // TODO Auto-generated method stub
+        mRemoteConnectionListener = null;
     }
     
     @Override
@@ -144,13 +156,6 @@ public class HMCFacade extends IHMCFacade.Stub {
         public void connectionClosed() {
             // notify remote listener
             Log.e(TAG," connectionClosed() event received ");
-            try {
-                if (mRemoteConnectionListener != null)
-                    mRemoteConnectionListener.connectionClosed();
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
         }
 
         @Override
@@ -170,39 +175,18 @@ public class HMCFacade extends IHMCFacade.Stub {
         public void reconnectingIn(int arg0) {
             // notify remote listener
             Log.e(TAG,"reconnectingIn event received: "+arg0);
-            try {
-                if (mRemoteConnectionListener != null)
-                    mRemoteConnectionListener.reconnectingIn(arg0);
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
         }
 
         @Override
         public void reconnectionFailed(Exception arg0) {
             // notify remote listener
             Log.e(TAG,"reconnectionFailed event received: "+arg0);
-            try {
-                if (mRemoteConnectionListener != null)
-                    mRemoteConnectionListener.reconnectionFailed(arg0.toString());
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
+         }
 
         @Override
         public void reconnectionSuccessful() {
             // notify remote listener
             Log.e(TAG,"reconnectionSuccessful event received: ");
-            try {
-                if (mRemoteConnectionListener != null)
-                    mRemoteConnectionListener.reconnectionSuccessful();
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
         }
 
     }
@@ -289,23 +273,44 @@ public class HMCFacade extends IHMCFacade.Stub {
 
 
 
-    //    private class LoginAsyncTask extends AsyncTask<XMPPConnection, Void, RemoteException> {
-    //        private RemoteException mRemoteException = null;
-    //        @Override
-    //        protected RemoteException doInBackground(XMPPConnection... conn) {
-    //            try {
-    //                conn[0].connect();
-    //            } catch (XMPPException e) {
-    //                mRemoteException = new RemoteException();
-    //                e.printStackTrace();
-    //            }
-    //            return null;
-    //        }
-    //        
-    //        @Override
-    //        protected void onPostExecute (RemoteException result) {
-    //            mConnectionRemoteException = result;
-    //        }
-    //    }
+
+        private class LoginAsyncTask extends AsyncTask<Object, Void, Boolean> {
+            private RemoteException mRemoteException = null;
+            @Override
+            protected Boolean doInBackground(Object... param) {
+                XMPPConnection conn = (XMPPConnection)param[0];
+                String username = (String)param[1];
+                String password = (String)param[2];
+                //Integer port = (Integer)param[3];
+
+                Boolean success = new Boolean(true);
+                //connect(username, password, port.intValue());
+                try {
+                    conn.connect();
+                    conn.login(username, password);
+                } catch (XMPPException e) {
+                    mRemoteException = new RemoteException();
+                    e.printStackTrace();
+                    success = new Boolean(false);
+                }
+                
+                Log.d(TAG,"Logged in");
+                
+                return success;
+            }
+            
+            @Override
+            protected void onPostExecute(Boolean result) {
+                //mConnectionRemoteException = result;
+                Log.d(TAG,"Connection and login finished:"+result.booleanValue());
+                if (mRemoteConnectionListener != null) {
+                    try {
+                        mRemoteConnectionListener.connectionSuccessful(result.booleanValue());
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
 
 }

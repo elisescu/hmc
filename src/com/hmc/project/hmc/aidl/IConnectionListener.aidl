@@ -8,9 +8,10 @@
 package com.hmc.project.hmc.aidl;
 
 interface IConnectionListener {
-    void connectionClosed();
+   // void connectionClosed();
     void connectionClosedOnError(String arg0);
-    void reconnectingIn(int arg0);
-    void reconnectionFailed(String arg0);
-    void reconnectionSuccessful();
+    //void reconnectingIn(int arg0);
+    //void reconnectionFailed(String arg0);
+    //void reconnectionSuccessful();
+    void connectionSuccessful(boolean success);
 }

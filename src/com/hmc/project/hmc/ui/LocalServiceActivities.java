@@ -181,7 +181,7 @@ public class LocalServiceActivities {
                 mHMCFacade = IHMCFacade.Stub.asInterface(service);
                 
                 try {
-                    mHMCFacade.connect("elisescu_1@jabber.org", "Cucurigu1");
+                    mHMCFacade.connect("elisescu_1@jabber.org", "Cucurigu1", 5222);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

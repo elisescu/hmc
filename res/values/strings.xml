@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="hmc_server_default_screen_stop_hmc">Log out</string>    
+    
 
     <string name="app_name">HMC-android</string>    
 

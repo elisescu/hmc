@@ -1,0 +1,6 @@
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/hmc_server_default_screen_stop_hmc"
+		android:visible="true"
+		android:title="@string/hmc_server_default_screen_stop_hmc"/>
+</menu>

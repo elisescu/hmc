@@ -162,8 +162,6 @@ public class LocalServiceActivities {
 
 
         private boolean mIsBound;
-
-
         private HMCService mBoundService;
 
         private ServiceConnection mConnection = new ServiceConnection() {

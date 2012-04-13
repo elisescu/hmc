@@ -62,15 +62,13 @@ public class HMCFacade extends IHMCFacade.Stub {
     //private SSLContext mSslContext;
 
     public HMCFacade(HMCService hmcService) {
-        mHMCManager = new HMCManager();
         mHMCService = hmcService;
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     public IHMCManager getHMCManager() throws RemoteException {
         // TODO Auto-generated method stub
-        return null;
+        return mHMCManager;
     }
 
     @Override
@@ -92,9 +90,14 @@ public class HMCFacade extends IHMCFacade.Stub {
             presence.setStatus("Online");
             mXMPPConnection.sendPacket(presence);
             Log.d(TAG,"Connected. Secure="+mXMPPConnection.isSecureConnection());
+            
+            if (mXMPPConnection.isAuthenticated()) {
+                mHMCManager = new HMCManager(mXMPPConnection);
+            }
         } else {
             throw new XMPPException();
         }
+
     }
     // connect and login to XMPP server. this is a blocking call so it should not be 
     // called in UI thread

@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
+import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.packet.Message;
 
@@ -31,10 +32,12 @@ implements ChatManagerListener, MessageListener, HMCFingerprintsVerifier {
     HashMap<String, HMCDeviceProxy> mLocalDevices;
     HMCServerProxy mLocalServer;
     HashMap<String, HashMap<String, HMCDeviceProxy>> mExternalHMCs;
+    Connection mXMMPConnection;
 
-    public HMCManager() {
+    public HMCManager(Connection xmppConnection) {
         mExternalHMCs = new HashMap<String, HashMap<String,HMCDeviceProxy>>();
         mLocalDevices = new HashMap<String, HMCDeviceProxy>();
+        mXMMPConnection = xmppConnection;
     }
     
     

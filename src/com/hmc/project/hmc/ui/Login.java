@@ -215,7 +215,8 @@ public class Login extends Activity {
     private class HMCConnectionListener extends IConnectionListener.Stub {
         @Override
         public void connectionClosedOnError(String arg0) throws RemoteException {
-            // TODO Auto-generated method stub
+            mHMCApplication.setConnected(false);
+            Log.e(TAG, "XMPP connection was closed with the error:" + arg0);
         }
 
         @Override

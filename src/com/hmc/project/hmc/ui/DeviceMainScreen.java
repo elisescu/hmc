@@ -11,8 +11,6 @@ import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IHMCFacade;
 import com.hmc.project.hmc.service.HMCService;
-import com.hmc.project.hmc.ui.LocalServiceActivities.Binding;
-import com.hmc.project.hmc.ui.LocalServiceActivities.Controller;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -26,9 +24,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.Toast;
 
 /**

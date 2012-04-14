@@ -7,13 +7,6 @@
 
 package com.hmc.project.hmc.ui;
 
-import com.hmc.project.hmc.HMCApplication;
-import com.hmc.project.hmc.R;
-import com.hmc.project.hmc.aidl.IConnectionListener;
-import com.hmc.project.hmc.aidl.IHMCFacade;
-import com.hmc.project.hmc.service.HMCService;
-import com.hmc.project.hmc.utils.HMCUserNotifications;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -24,7 +17,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,14 +26,21 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.hmc.project.hmc.HMCApplication;
+import com.hmc.project.hmc.R;
+import com.hmc.project.hmc.aidl.IConnectionListener;
+import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.service.HMCService;
+import com.hmc.project.hmc.utils.HMCUserNotifications;
+
 public class Login extends Activity {
     protected static final String TAG = "LoginActivity";
     private SharedPreferences mSettings;
     private HMCService mBoundService;
     private HMCApplication mHMCApplication;
     private ServiceConnection mConnection = new HMCServiceConnection();
-    private boolean mIsBound;
-    private boolean mServiceStarted;
+    private boolean mServiceIsBound;
+    private boolean mServiceIsStarted;
     private IHMCFacade mHMCFacade;
     private ProgressDialog mLoginProgressDialog;
     HMCConnectionListener mConnectionListener = new HMCConnectionListener();
@@ -99,9 +98,9 @@ public class Login extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mIsBound) {
+        if (mServiceIsBound) {
             doUnbindService();
-            mIsBound = false;
+            mServiceIsBound = false;
         }
     }
     
@@ -109,16 +108,15 @@ public class Login extends Activity {
         public void onClick(View v) {
 
             // start HMCService
-            if (!mServiceStarted) {
+            if (!mServiceIsStarted) {
                 startService(new Intent(Login.this,
                         HMCService.class));
-                mServiceStarted = true;
+                mServiceIsStarted = true;
             }
 
             // bind to HMCService so that we get the HMCFacade
-            if (!mIsBound) {
+            if (!mServiceIsBound) {
                 doBindService();
-                mIsBound = true;
             }
             
             if (!mHMCApplication.isConnected() && mHMCApplication.isAccountConfigured()) {
@@ -154,17 +152,17 @@ public class Login extends Activity {
         }
 
         // unbind from HMCService
-        if (mIsBound){
+        if (mServiceIsBound){
             doUnbindService();
-            mIsBound = false;
+            mServiceIsBound = false;
         }
 
         //stop HMCService
-        if (mServiceStarted) {
+        if (mServiceIsStarted) {
             stopService(new Intent(Login.this,
                     HMCService.class));
-            mServiceStarted = false;
-        }        
+            mServiceIsStarted = false;
+        }
     }
 
     private OnClickListener mStopListener = new OnClickListener() {
@@ -172,18 +170,19 @@ public class Login extends Activity {
             disconnectAndStopService();
         }
     };
-    
+
+
     void doBindService() {
         bindService(new Intent(Login.this, 
                 HMCService.class), mConnection, Context.BIND_AUTO_CREATE);
-        mIsBound = true;
+        mServiceIsBound = true;
     }
 
     void doUnbindService() {
-        if (mIsBound) {
+        if (mServiceIsBound) {
             // Detach our existing connection.
             unbindService(mConnection);
-            mIsBound = false;
+            mServiceIsBound = false;
         }
     }
 

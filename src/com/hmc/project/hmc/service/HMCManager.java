@@ -33,12 +33,17 @@ public class HMCManager extends IHMCManager.Stub
 implements ChatManagerListener, MessageListener, HMCFingerprintsVerifier {
     
     private static final String TAG = "HMCManager";
+
+    private static final int STATE_NOT_INITIALIZED = 0;
+    private static final int STATE_INITIALIZED = 1;
+
     HashMap<String, HMCDeviceProxy> mLocalDevices;
     HMCServerProxy mLocalServer;
     HashMap<String, HashMap<String, HMCDeviceProxy>> mExternalHMCs;
     Connection mXMPPConnection;
     private Roster mXMPPRoster;
     private ChatManager mXMPPChatManager;
+    private int mState;
 
 
     public HMCManager(Connection xmppConnection) {
@@ -48,8 +53,10 @@ implements ChatManagerListener, MessageListener, HMCFingerprintsVerifier {
         mXMPPChatManager = mXMPPConnection.getChatManager();
         mXMPPRoster = mXMPPConnection.getRoster();
 
+        Log.d(TAG, "Constructed the HMCManager for " + mXMPPConnection.getUser());
         // set the subscription mode to manually
         mXMPPRoster.setSubscriptionMode(Roster.SubscriptionMode.manual);
+        mState = STATE_NOT_INITIALIZED;
     }
 
     @Override
@@ -95,19 +102,31 @@ implements ChatManagerListener, MessageListener, HMCFingerprintsVerifier {
 
     @Override
     public void init() throws RemoteException {
-        Collection<RosterEntry> entries = mXMPPRoster.getEntries();
-        Log.d(TAG, "We have " + entries.size() + "devices we can connect with");
+        if (mState == STATE_NOT_INITIALIZED) {
+            Collection<RosterEntry> entries = mXMPPRoster.getEntries();
+            Log.d(TAG, "We have " + entries.size() + "devices we can connect with");
 
-        // TODO: change the way I initialize the list of devices. For now just
-        // trust the XMPP server, but later check with HMCServer to see if the
-        // list is consistent. However, here we trust the XMPP server only for
-        // getting the list of devices, but later on we anyway have to
-        // authenticate the device we communicate with, based on the fingerprint
-        // we get from it.
-        for (RosterEntry entry : entries) {
-            Log.d(TAG, "Device name " + entry.getName() + ", bareJID:" + entry.getUser());
-            HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager, entry.getUser(), this);
-            mLocalDevices.put(entry.getUser(), devProxy);
+            // TODO: change the way I initialize the list of devices. For now
+            // just
+            // trust the XMPP server, but later check with HMCServer to see if
+            // the
+            // list is consistent. However, here we trust the XMPP server only
+            // for
+            // getting the list of devices, but later on we anyway have to
+            // authenticate the device we communicate with, based on the
+            // fingerprint
+            // we get from it.
+            for (RosterEntry entry : entries) {
+                Log.d(TAG, "Device name " + entry.getName() + ", bareJID:" + entry.getUser());
+                HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager, entry.getUser(),
+                                        this);
+                mLocalDevices.put(entry.getUser(), devProxy);
+            }
+
+            mState = STATE_INITIALIZED;
+        } else {
+            Log.w(TAG, "Already initialized");
         }
+        Log.d(TAG, "Now we have " + mLocalDevices.size() + " deviceeeeeeessss");
     }
 }

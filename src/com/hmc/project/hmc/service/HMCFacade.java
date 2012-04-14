@@ -61,7 +61,11 @@ public class HMCFacade extends IHMCFacade.Stub {
 
     @Override
     public IHMCManager getHMCManager() throws RemoteException {
-        // TODO Auto-generated method stub
+        if (mHMCManager == null) {
+            if (mXMPPConnection.isAuthenticated()) {
+                mHMCManager = new HMCManager(mXMPPConnection);
+            }
+        }
         return mHMCManager;
     }
 
@@ -87,7 +91,6 @@ public class HMCFacade extends IHMCFacade.Stub {
             
             if (mXMPPConnection.isAuthenticated()) {
                 Log.d(TAG, "Connected. Secure=" + mXMPPConnection.isSecureConnection());
-                mHMCManager = new HMCManager(mXMPPConnection);
             }
         } else {
             throw new XMPPException();

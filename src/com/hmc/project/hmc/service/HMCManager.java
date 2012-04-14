@@ -52,6 +52,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         mAnonymysDevices = new HashMap<String, HMCDeviceProxy>();
         mXMPPConnection = xmppConnection;
         mXMPPChatManager = mXMPPConnection.getChatManager();
+        mXMPPChatManager.addChatListener(this);
         mXMPPRoster = mXMPPConnection.getRoster();
 
         Log.d(TAG, "Constructed the HMCManager for " + mXMPPConnection.getUser());

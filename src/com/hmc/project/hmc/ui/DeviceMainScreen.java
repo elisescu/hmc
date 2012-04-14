@@ -7,11 +7,6 @@
 
 package com.hmc.project.hmc.ui;
 
-import com.hmc.project.hmc.HMCApplication;
-import com.hmc.project.hmc.R;
-import com.hmc.project.hmc.aidl.IHMCFacade;
-import com.hmc.project.hmc.service.HMCService;
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,11 +15,15 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.hmc.project.hmc.HMCApplication;
+import com.hmc.project.hmc.R;
+import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.service.HMCService;
 
 /**
  * @author elisescu
@@ -41,6 +40,14 @@ public class DeviceMainScreen extends Activity {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
             mHMCFacade = IHMCFacade.Stub.asInterface(service);
+
+            if (mHMCFacade != null) {
+                try {
+                    mHMCFacade.getHMCManager().init();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -74,6 +81,13 @@ public class DeviceMainScreen extends Activity {
         super.onCreate(savedInstanceState);
         doBindService();
         mHMCApplication = (HMCApplication)getApplication();
+
+        // make sure we ended up in this activity with the app connected to XMPP
+        // server
+        if (!mHMCApplication.isConnected()) {
+            doUnbindService();
+            finish();
+        }
     }
     
     public final boolean onCreateOptionsMenu(Menu menu) {

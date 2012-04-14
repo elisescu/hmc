@@ -8,10 +8,23 @@
  */
 package com.hmc.project.hmc.devices.proxy;
 
+import org.jivesoftware.smack.ChatManager;
+
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
+import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 
 public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
-	@Override
+    /**
+     * @param chatManager
+     * @param jid
+     * @param ver
+     */
+    public HMCServerProxy(ChatManager chatManager, String jid, HMCFingerprintsVerifier ver) {
+        super(chatManager, jid, ver);
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
 	public void interconnectTo(String externalHMCServerAddress) {
 		// TODO Auto-generated method stub
 		

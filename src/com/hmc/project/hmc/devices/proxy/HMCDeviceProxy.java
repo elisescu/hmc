@@ -9,16 +9,26 @@
 package com.hmc.project.hmc.devices.proxy;
 
 
+import org.jivesoftware.smack.ChatManager;
+
 import android.os.Parcel;
+import android.util.Log;
+
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
+import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
+import com.hmc.project.hmc.security.SecureChat;
+import com.hmc.project.hmc.security.SecuredMessageListener;
 
-public class HMCDeviceProxy implements HMCDeviceItf {
+public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
-	//	private Contact mXMPPContact;
-	//	private Chat mXMPPChat;
+    private static final String TAG = "HMCDeviceProxy";
 	private String mName = "noname";
+    private SecureChat mSecureChat;
+    private ChatManager mXMPPChatManager;
 
-	public HMCDeviceProxy() {
+    public HMCDeviceProxy(ChatManager chatManager, String jid, HMCFingerprintsVerifier ver) {
+        mXMPPChatManager = chatManager;
+        mSecureChat = new SecureChat(chatManager, jid, ver, this);
 	}
 
 	public void sendCommand(int operationCode, Parcel params) {
@@ -33,5 +43,14 @@ public class HMCDeviceProxy implements HMCDeviceItf {
 	public String getName() {
 		return mName;
 	}
+
+    @Override
+    public void processMessage(SecureChat chat, String msg) {
+        // TODO Auto-generated method stub
+
+        // here we got the descrypted message from the remote device that we
+        // have the proxy for
+        Log.d(TAG, "Message from " + chat.getFrom() + ": " + msg);
+    }
 
 }

@@ -8,12 +8,26 @@
  */
 package com.hmc.project.hmc.devices.proxy;
 
+import org.jivesoftware.smack.ChatManager;
+
 import com.hmc.project.hmc.devices.interfaces.HMCMediaClientDeviceItf;
+import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 
 
 public class HMCMediaClientDeviceProxy extends HMCMediaDeviceProxy implements HMCMediaClientDeviceItf {
 
-	@Override
+    /**
+     * @param chatManager
+     * @param jid
+     * @param ver
+     */
+    public HMCMediaClientDeviceProxy(ChatManager chatManager, String jid,
+                            HMCFingerprintsVerifier ver) {
+        super(chatManager, jid, ver);
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
 	public void deviceRemovedNotification() {
 		// TODO Auto-generated method stub
 		

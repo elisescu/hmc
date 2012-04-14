@@ -8,20 +8,15 @@
 package com.hmc.project.hmc.service;
 
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 
 import javax.net.ssl.SSLContext;
 
-import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.ConnectionListener;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
-import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smack.provider.ProviderManager;
@@ -41,8 +36,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.hmc.project.hmc.aidl.IConnectionListener;
-import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.aidl.IHMCManager;
 
 import de.duenndns.ssl.MemorizingTrustManager;
 
@@ -53,13 +48,12 @@ import de.duenndns.ssl.MemorizingTrustManager;
 public class HMCFacade extends IHMCFacade.Stub {
 
     private static final String TAG = "XMPPFacade";
-    private HMCManager mHMCManager;
+    private HMCManager mHMCManager = null;
     private Connection mXMPPConnection = null;
-    private HMCService mHMCService;
+    private HMCService mHMCService = null;
     private ConnectionListener mConnectionListener = new HMCConnectionListener();
     private IConnectionListener mRemoteConnectionListener;
     private RemoteException mConnectionRemoteException;
-    //private SSLContext mSslContext;
 
     public HMCFacade(HMCService hmcService) {
         mHMCService = hmcService;
@@ -76,7 +70,7 @@ public class HMCFacade extends IHMCFacade.Stub {
         mRemoteConnectionListener = conListener;
     }
 
-    private void connect_l(String fullJID, String password, int port) throws XMPPException {
+    private void connectL(String fullJID, String password, int port) throws XMPPException {
         String lXMPPServer = StringUtils.parseServer(fullJID);
         
         if (mXMPPConnection == null) {
@@ -86,12 +80,13 @@ public class HMCFacade extends IHMCFacade.Stub {
             mXMPPConnection.connect();
             mXMPPConnection.login(fullJID, password);
 
+            mXMPPConnection.addConnectionListener(mConnectionListener);
             Presence presence = new Presence(Presence.Type.available);
             presence.setStatus("Online");
             mXMPPConnection.sendPacket(presence);
-            Log.d(TAG,"Connected. Secure="+mXMPPConnection.isSecureConnection());
             
             if (mXMPPConnection.isAuthenticated()) {
+                Log.d(TAG, "Connected. Secure=" + mXMPPConnection.isSecureConnection());
                 mHMCManager = new HMCManager(mXMPPConnection);
             }
         } else {
@@ -104,7 +99,7 @@ public class HMCFacade extends IHMCFacade.Stub {
     @Override
     public void connect(String fullJID, String password, int port) throws RemoteException {
         try {
-            connect_l(fullJID, password, port);
+            connectL(fullJID, password, port);
         } catch (XMPPException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -284,7 +279,7 @@ public class HMCFacade extends IHMCFacade.Stub {
                 Looper.prepare();
                 Boolean success = new Boolean(true);
                 try {
-                    connect_l(username, password, port.intValue());
+                connectL(username, password, port.intValue());
                 } catch (XMPPException e) {
                     mRemoteException = new RemoteException();
                     e.printStackTrace();

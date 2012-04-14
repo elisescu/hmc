@@ -7,11 +7,11 @@
 
 package com.hmc.project.hmc;
 
-import com.hmc.project.hmc.utils.HMCUserNotifications;
-
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 public class HMCApplication extends Application {
 
@@ -69,7 +69,8 @@ public class HMCApplication extends Application {
                 mUsername = mSettings.getString("hmc_username_key", "");
                 mPassword = mSettings.getString("hmc_pass_key", "");
                 mIsAccountConfigured = !("".equals(mUsername) || "".equals(mPassword));
-                HMCUserNotifications.normalToast(HMCApplication.this, "Account configured:"+mIsAccountConfigured);
+                HMCUserNotifications.normalToast(HMCApplication.this, "Account configured="
+                        + mIsAccountConfigured);
             }
         }
     }

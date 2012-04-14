@@ -229,7 +229,7 @@ public class Login extends Activity {
                 startActivity(new Intent(Login.this, DeviceMainScreen.class));
                 finish();
             } else {
-                HMCUserNotifications.normalToast(Login.this, "Login failed :(");
+                HMCUserNotifications.normalToast(Login.this, "Login failed");
             }
         }
     }

@@ -53,7 +53,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
         // here we got the descrypted message from the remote device that we
         // have the proxy for
-        Log.d(TAG, "Message from " + chat.getFrom() + ": " + msg);
+        Log.d(TAG, "Message from " + chat.getParticipant() + ": " + msg);
+        chat.sendMessage("Ia de aici inapoi:" + msg);
     }
 
 }

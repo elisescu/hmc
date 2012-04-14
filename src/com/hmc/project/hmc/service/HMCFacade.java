@@ -198,7 +198,7 @@ public class HMCFacade extends IHMCFacade.Stub {
         ConnectionConfiguration lConnectionConfiguration = new ConnectionConfiguration(xmppServer, port);
         
         // comment this out to disable debugging
-        lConnectionConfiguration.setDebuggerEnabled(true);
+        // lConnectionConfiguration.setDebuggerEnabled(true);
         
         lConnectionConfiguration.setSendPresence(false);
         

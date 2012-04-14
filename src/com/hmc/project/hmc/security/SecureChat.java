@@ -7,6 +7,10 @@
 
 package com.hmc.project.hmc.security;
 
+import net.java.otr4j.OtrException;
+import net.java.otr4j.session.SessionID;
+import net.java.otr4j.session.SessionStatus;
+
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.MessageListener;
@@ -25,47 +29,123 @@ public class SecureChat implements MessageListener {
     private Chat mXMPPChat;
     HMCFingerprintsVerifier mHMCFingerprintsVerifier;
     SecuredMessageListener mSecureMessageListener;
-    private String mJID;
+    private String mRemoteFullJID;
+    private SessionID mOtrSessionId = null;
+    private String mLocalFullJID;
+    private SessionStatus mOTRStatus = SessionStatus.PLAINTEXT;
 
     public SecureChat(ChatManager manager, String jid, HMCFingerprintsVerifier ver,
                             SecuredMessageListener listenter) {
 
         mXMPPChat = manager.createChat(jid, this);
-        mJID = jid;
+        mRemoteFullJID = jid;
+        mLocalFullJID = "elisescu_1@jabber.org";
         mHMCFingerprintsVerifier = ver;
         mSecureMessageListener = listenter;
+        Log.d(TAG, "Created a LOCAL secure chat with " + mRemoteFullJID);
     }
 
     public SecureChat(Chat chat, HMCFingerprintsVerifier ver, SecuredMessageListener listenter) {
         mXMPPChat = chat;
         chat.addMessageListener(this);
-        mJID = chat.getParticipant();
         mHMCFingerprintsVerifier = ver;
         mSecureMessageListener = listenter;
+        // TODO: make sure to fix this and get the correct fullJIDs
+        mRemoteFullJID = chat.getParticipant();
+        mLocalFullJID = "elisescu_1@jabber.org";
+        Log.d(TAG, "Created a non-LOCAL secure chat with " + mRemoteFullJID);
+    }
+
+    public void startOtrSession() {
+        if (mOtrSessionId == null) {
+            mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
+            HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
+        }
+
+        try {
+            HMCOTRManager.getInstance().getOtrEngine().startSession(mOtrSessionId);
+            mOTRStatus = SessionStatus.ENCRYPTED;
+        } catch (OtrException e) {
+            mOtrSessionId = null;
+            mOTRStatus = SessionStatus.PLAINTEXT;
+            e.printStackTrace();
+        }
+    }
+
+    private Message buildSendingMessage(String body) {
+        org.jivesoftware.smack.packet.Message message = new org.jivesoftware.smack.packet.Message();
+        message.setTo(mRemoteFullJID);
+        message.setBody(body);
+        message.setThread(mXMPPChat.getThreadID());
+        message.setType(org.jivesoftware.smack.packet.Message.Type.chat);
+        return message;
     }
 
     @Override
     public void processMessage(Chat chat, Message msg) {
         if (chat != mXMPPChat) {
             Log.e(TAG, "got a strange message from an unknown chat");
+            return;
         }
-        mSecureMessageListener.processMessage(this, msg.getBody());
+
+        if (msg.getType() == Message.Type.chat && msg.getBody() != null) {
+            if (mOTRStatus == SessionStatus.PLAINTEXT) {
+                startOtrSession();
+            } else if (mOTRStatus == SessionStatus.ENCRYPTED) {
+                String decryptedMsg = null;
+                try {
+                    decryptedMsg = HMCOTRManager.getInstance().getOtrEngine()
+                                            .transformReceiving(mOtrSessionId, msg.getBody());
+                } catch (OtrException e) {
+                    e.printStackTrace();
+                }
+                mSecureMessageListener.processMessage(this, decryptedMsg);
+            }
+        }
     }
 
-    /**
-     * @return
-     */
-    public String getFrom() {
-        return mJID;
+    public void sendMessage(String msg) {
+        if (mOTRStatus == SessionStatus.PLAINTEXT) {
+            startOtrSession();
+        } else if (mOTRStatus == SessionStatus.ENCRYPTED) {
+            String encryptedMessage = null;
+            try {
+                encryptedMessage = HMCOTRManager.getInstance().getOtrEngine()
+                                        .transformSending(mOtrSessionId, msg);
+            } catch (OtrException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            try {
+                mXMPPChat.sendMessage(buildSendingMessage(encryptedMessage));
+            } catch (XMPPException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getParticipant() {
+        return mRemoteFullJID;
     }
 
     public void injectMessage(String msg) {
+        // Log.d(TAG, "Sent encrypted message: " + msg);
         try {
-            mXMPPChat.sendMessage(new Message(msg));
-            Log.d(TAG, "Sent encrypted message: " + msg);
+            mXMPPChat.sendMessage(buildSendingMessage(msg));
         } catch (XMPPException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+    }
+
+    public void otrStatusChanged(SessionStatus sessionStatus) {
+        mOTRStatus = sessionStatus;
+
+        if (mOTRStatus == SessionStatus.FINISHED) {
+            Log.e(TAG, "For some reason, the OTR was stopped. Restarting it");
+
+            startOtrSession();
         }
     }
 

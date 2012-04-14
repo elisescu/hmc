@@ -152,7 +152,7 @@ public class HMCFacade extends IHMCFacade.Stub {
         @Override
         public void connectionClosed() {
             // notify remote listener
-            Log.e(TAG," connectionClosed() event received ");
+            Log.w(TAG, " connectionClosed() event received ");
         }
 
         @Override
@@ -171,7 +171,7 @@ public class HMCFacade extends IHMCFacade.Stub {
         @Override
         public void reconnectingIn(int arg0) {
             // notify remote listener
-            Log.e(TAG,"reconnectingIn event received: "+arg0);
+            Log.w(TAG, "reconnectingIn event received: " + arg0);
         }
 
         @Override
@@ -183,7 +183,7 @@ public class HMCFacade extends IHMCFacade.Stub {
         @Override
         public void reconnectionSuccessful() {
             // notify remote listener
-            Log.e(TAG,"reconnectionSuccessful event received: ");
+            Log.i(TAG, "reconnectionSuccessful event received: ");
         }
 
     }

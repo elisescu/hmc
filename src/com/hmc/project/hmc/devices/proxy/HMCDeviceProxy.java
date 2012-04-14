@@ -9,6 +9,7 @@
 package com.hmc.project.hmc.devices.proxy;
 
 
+import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 
 import android.os.Parcel;
@@ -24,12 +25,14 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     private static final String TAG = "HMCDeviceProxy";
 	private String mName = "noname";
     private SecureChat mSecureChat;
-    private ChatManager mXMPPChatManager;
 
     public HMCDeviceProxy(ChatManager chatManager, String jid, HMCFingerprintsVerifier ver) {
-        mXMPPChatManager = chatManager;
         mSecureChat = new SecureChat(chatManager, jid, ver, this);
 	}
+
+    public HMCDeviceProxy(Chat chat, HMCFingerprintsVerifier ver) {
+        mSecureChat = new SecureChat(chat, ver, this);
+    }
 
 	public void sendCommand(int operationCode, Parcel params) {
 	}

@@ -14,10 +14,8 @@ import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.Connection;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.packet.Message;
 
 import android.os.RemoteException;
 import android.util.Log;
@@ -29,8 +27,8 @@ import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.HMCSecurityPolicy;
 
-public class HMCManager extends IHMCManager.Stub 
-implements ChatManagerListener, MessageListener, HMCFingerprintsVerifier {
+public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
+                        HMCFingerprintsVerifier {
     
     private static final String TAG = "HMCManager";
 
@@ -38,6 +36,8 @@ implements ChatManagerListener, MessageListener, HMCFingerprintsVerifier {
     private static final int STATE_INITIALIZED = 1;
 
     HashMap<String, HMCDeviceProxy> mLocalDevices;
+    HashMap<String, HMCDeviceProxy> mAnonymysDevices;
+
     HMCServerProxy mLocalServer;
     HashMap<String, HashMap<String, HMCDeviceProxy>> mExternalHMCs;
     Connection mXMPPConnection;
@@ -49,6 +49,7 @@ implements ChatManagerListener, MessageListener, HMCFingerprintsVerifier {
     public HMCManager(Connection xmppConnection) {
         mExternalHMCs = new HashMap<String, HashMap<String,HMCDeviceProxy>>();
         mLocalDevices = new HashMap<String, HMCDeviceProxy>();
+        mAnonymysDevices = new HashMap<String, HMCDeviceProxy>();
         mXMPPConnection = xmppConnection;
         mXMPPChatManager = mXMPPConnection.getChatManager();
         mXMPPRoster = mXMPPConnection.getRoster();
@@ -67,14 +68,11 @@ implements ChatManagerListener, MessageListener, HMCFingerprintsVerifier {
     }
 
     @Override
-    public void processMessage(Chat arg0, Message arg1) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public void chatCreated(Chat chat, boolean createdLocally) {
-        if (!createdLocally)
-            chat.addMessageListener(this);
+        if (!createdLocally) {
+            HMCDeviceProxy devProxy = new HMCDeviceProxy(chat, this);
+            mAnonymysDevices.put(chat.getParticipant(), devProxy);
+        }
     }
 
     @Override

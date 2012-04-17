@@ -18,6 +18,9 @@ import android.os.RemoteException;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.hmc.project.hmc.HMCApplication;
@@ -29,12 +32,25 @@ import com.hmc.project.hmc.service.HMCService;
  * @author elisescu
  *
  */
-public class DeviceMainScreen extends Activity {
+public class HMCServerMainScreen extends Activity {
     protected static final String TAG = "DeviceMainScreen";
     private boolean mIsBound;
     private HMCService mBoundService;
     private IHMCFacade mHMCFacade;
     private HMCApplication mHMCApplication;
+
+    private OnClickListener mTestMethodListener = new OnClickListener() {
+        public void onClick(View v) {
+            if (mHMCFacade != null) {
+                // test RPC communication
+                try {
+                    mHMCFacade.getHMCManager().testRPC("elisescu_2@jabber.org", 3);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };;
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -52,13 +68,13 @@ public class DeviceMainScreen extends Activity {
 
         public void onServiceDisconnected(ComponentName className) {
             mBoundService = null;
-            Toast.makeText(DeviceMainScreen.this, R.string.local_service_disconnected,
+            Toast.makeText(HMCServerMainScreen.this, R.string.local_service_disconnected,
                     Toast.LENGTH_SHORT).show();
         }
     };
 
     void doBindService() {
-        bindService(new Intent(DeviceMainScreen.this, 
+        bindService(new Intent(HMCServerMainScreen.this, 
                 HMCService.class), mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
@@ -81,6 +97,12 @@ public class DeviceMainScreen extends Activity {
         super.onCreate(savedInstanceState);
         doBindService();
         mHMCApplication = (HMCApplication)getApplication();
+
+        setContentView(R.layout.hmc_server_main_screen);
+
+        // Watch for button clicks.
+        Button button = (Button) findViewById(R.id.test_method);
+        button.setOnClickListener(mTestMethodListener);
 
         // make sure we ended up in this activity with the app connected to XMPP
         // server
@@ -119,7 +141,7 @@ public class DeviceMainScreen extends Activity {
             }
         }
         doUnbindService();
-        stopService(new Intent(DeviceMainScreen.this,HMCService.class));
+        stopService(new Intent(HMCServerMainScreen.this,HMCService.class));
         finish();
     }
 }

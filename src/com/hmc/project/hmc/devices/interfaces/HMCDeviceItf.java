@@ -16,5 +16,11 @@ public interface HMCDeviceItf {
 		HMC_SERVER, HMC_MEDIA_RENDER, HMC_MEDIA_PLAYER, HMC_MEDIA_SERVER
 	}
 
-	void testMethod();
+    static final int HMC_DEVICE_INITIAL_COMMAND = 1;
+
+    static final int COMMAND_REMOTE_INCREMENT = 2;
+
+    static final int HMC_DEVICE_LAST_COMMAND = COMMAND_REMOTE_INCREMENT;
+	
+    int remoteIncrement(int val);
 }

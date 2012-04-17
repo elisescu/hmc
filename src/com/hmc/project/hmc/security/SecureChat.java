@@ -42,6 +42,7 @@ public class SecureChat implements MessageListener {
         mLocalFullJID = "elisescu_1@jabber.org";
         mHMCFingerprintsVerifier = ver;
         mSecureMessageListener = listenter;
+        mOTRStatus = SessionStatus.PLAINTEXT;
         Log.d(TAG, "Created a LOCAL secure chat with " + mRemoteFullJID);
     }
 
@@ -53,6 +54,7 @@ public class SecureChat implements MessageListener {
         // TODO: make sure to fix this and get the correct fullJIDs
         mRemoteFullJID = chat.getParticipant();
         mLocalFullJID = "elisescu_1@jabber.org";
+        mOTRStatus = SessionStatus.PLAINTEXT;
         Log.d(TAG, "Created a non-LOCAL secure chat with " + mRemoteFullJID);
     }
 
@@ -64,10 +66,8 @@ public class SecureChat implements MessageListener {
 
         try {
             HMCOTRManager.getInstance().getOtrEngine().startSession(mOtrSessionId);
-            mOTRStatus = SessionStatus.ENCRYPTED;
-        } catch (OtrException e) {
+            } catch (OtrException e) {
             mOtrSessionId = null;
-            mOTRStatus = SessionStatus.PLAINTEXT;
             e.printStackTrace();
         }
     }
@@ -89,7 +89,8 @@ public class SecureChat implements MessageListener {
         }
 
         if (msg.getType() == Message.Type.chat && msg.getBody() != null) {
-            if (mOTRStatus == SessionStatus.PLAINTEXT) {
+            if (mOTRStatus != SessionStatus.ENCRYPTED) {
+                Log.d(TAG, "otr status: " + mOTRStatus + "received message:" + msg.getBody());
                 startOtrSession();
             } else if (mOTRStatus == SessionStatus.ENCRYPTED) {
                 String decryptedMsg = null;
@@ -105,9 +106,13 @@ public class SecureChat implements MessageListener {
     }
 
     public void sendMessage(String msg) {
-        if (mOTRStatus == SessionStatus.PLAINTEXT) {
+        if (mOTRStatus != SessionStatus.ENCRYPTED) {
             startOtrSession();
-        } else if (mOTRStatus == SessionStatus.ENCRYPTED) {
+            // TODO: wait until the OTR was finished and only then send the
+            // messages
+        }
+
+        if (mOTRStatus == SessionStatus.ENCRYPTED) {
             String encryptedMessage = null;
             try {
                 encryptedMessage = HMCOTRManager.getInstance().getOtrEngine()
@@ -130,7 +135,7 @@ public class SecureChat implements MessageListener {
     }
 
     public void injectMessage(String msg) {
-        // Log.d(TAG, "Sent encrypted message: " + msg);
+        Log.d(TAG, "Sent encrypted message: " + msg);
         try {
             mXMPPChat.sendMessage(buildSendingMessage(msg));
         } catch (XMPPException e) {
@@ -141,12 +146,21 @@ public class SecureChat implements MessageListener {
 
     public void otrStatusChanged(SessionStatus sessionStatus) {
         mOTRStatus = sessionStatus;
-
+        Log.e(TAG, "Otr status changed to: " + mOTRStatus);
         if (mOTRStatus == SessionStatus.FINISHED) {
             Log.e(TAG, "For some reason, the OTR was stopped. Restarting it");
 
             startOtrSession();
         }
+
+        if (mOTRStatus == SessionStatus.ENCRYPTED) {
+            Log.e(TAG, "We need to authenticate now and verify the fingerprints");
+
+            //String locFin = HMCOTRManager.getInstance().getOtrEngine().
+                                    
+            mHMCFingerprintsVerifier.verifyFingerprints("bla bla", "bla bla", mRemoteFullJID);
+        }
+
     }
 
 }

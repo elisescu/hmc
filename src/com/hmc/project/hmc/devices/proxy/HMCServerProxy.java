@@ -33,7 +33,7 @@ public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
 	@Override
 	public void interconnectionRequest(String requesterName) {
 		// TODO Auto-generated method stub
-		sendCommand(2, null);
+		sendCommandSync(2, null);
 	}
 
 	@Override

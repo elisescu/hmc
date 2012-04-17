@@ -106,15 +106,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             Log.d(TAG, "We have " + entries.size() + "devices we can connect with");
 
             // TODO: change the way I initialize the list of devices. For now
-            // just
             // trust the XMPP server, but later check with HMCServer to see if
-            // the
-            // list is consistent. However, here we trust the XMPP server only
-            // for
-            // getting the list of devices, but later on we anyway have to
-            // authenticate the device we communicate with, based on the
-            // fingerprint
-            // we get from it.
+            // the list is consistent. However, here we trust the XMPP server
+            // only for getting the list of devices, but later on we anyway have
+            // to authenticate the device we communicate with, based on the
+            // fingerprint we get from it.
             for (RosterEntry entry : entries) {
                 Log.d(TAG, "Device name " + entry.getName() + ", bareJID:" + entry.getUser());
                 HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager, entry.getUser(),
@@ -127,5 +123,18 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             Log.w(TAG, "Already initialized");
         }
         Log.d(TAG, "Now we have " + mLocalDevices.size() + " deviceeeeeeessss");
+    }
+
+    @Override
+    public int testRPC(String JID, int val) throws RemoteException {
+        if (mState == STATE_INITIALIZED) {
+            HMCDeviceProxy dev = mLocalDevices.get(JID);
+            if (dev != null) {
+                dev.remoteIncrement(val);
+            } else {
+                Log.e(TAG, "Device " + JID + "is not in our list of devices");
+            }
+        }
+        return 0;
     }
 }

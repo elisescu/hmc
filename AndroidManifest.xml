@@ -21,7 +21,7 @@
             android:launchMode="standard">
         </activity>
         
-        <activity android:name=".ui.DeviceMainScreen" 
+        <activity android:name=".ui.HMCServerMainScreen" 
             android:launchMode="standard">
         </activity>
         

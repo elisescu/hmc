@@ -79,7 +79,7 @@ public class Login extends Activity {
         
         // if we are already connected, then go directly to main screen
         if (mHMCApplication.isConnected()) {
-            startActivity(new Intent(Login.this, DeviceMainScreen.class));
+            startActivity(new Intent(Login.this, HMCServerMainScreen.class));
             finish();
         }
 
@@ -226,7 +226,7 @@ public class Login extends Activity {
             mHMCApplication.setConnected(success);
             if (success) {
                 HMCUserNotifications.normalToast(Login.this, "Login successful");
-                startActivity(new Intent(Login.this, DeviceMainScreen.class));
+                startActivity(new Intent(Login.this, HMCServerMainScreen.class));
                 finish();
             } else {
                 HMCUserNotifications.normalToast(Login.this, "Login failed");

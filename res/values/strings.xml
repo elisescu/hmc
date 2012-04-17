@@ -27,7 +27,19 @@
 	<!-- Controller activity !! -->
 		<string name="controler_list_menu_preferences">Configure device</string>
 		<string name="controler_list_menu_login">Login</string>
-	
+
+
+
+
+	<!-- =======================HMC Server main screen=========================== -->
+		<string name="test_method_button_name">Test RPC</string>
+		<string name="test_method_description">Press the button and increment remotely 
+		    the value send as parameter</string>
+
+
+
+
+
 	<!-- SSL unknown certif related !! -->	
 		<string name="mtm_accept_cert">Accept certificate</string>
 		<string name="mtm_decision_always">Always</string>

@@ -89,19 +89,27 @@ public class SecureChat implements MessageListener {
         }
 
         if (msg.getType() == Message.Type.chat && msg.getBody() != null) {
-            if (mOTRStatus != SessionStatus.ENCRYPTED) {
-                Log.d(TAG, "otr status: " + mOTRStatus + "received message:" + msg.getBody());
-                startOtrSession();
-            } else if (mOTRStatus == SessionStatus.ENCRYPTED) {
-                String decryptedMsg = null;
-                try {
-                    decryptedMsg = HMCOTRManager.getInstance().getOtrEngine()
-                                            .transformReceiving(mOtrSessionId, msg.getBody());
-                } catch (OtrException e) {
-                    e.printStackTrace();
-                }
-                mSecureMessageListener.processMessage(this, decryptedMsg);
+            // if (mOTRStatus != SessionStatus.ENCRYPTED) {
+            // Log.d(TAG, "otr status: " + mOTRStatus + "received message:" +
+            // msg.getBody());
+            // startOtrSession();
+            // }
+
+            String decryptedMsg = null;
+            try {
+                decryptedMsg = HMCOTRManager.getInstance().getOtrEngine()
+                        .transformReceiving(mOtrSessionId, msg.getBody());
+            } catch (OtrException e) {
+                Log.e(TAG, "Cannont initialize the OTR session");
+                e.printStackTrace();
             }
+
+            if (mOTRStatus == SessionStatus.ENCRYPTED) {
+                mSecureMessageListener.processMessage(this, decryptedMsg);
+            } else {
+                Log.d(TAG, "Received unecrypted message: " + msg.getBody());
+            }
+
         }
     }
 
@@ -135,7 +143,7 @@ public class SecureChat implements MessageListener {
     }
 
     public void injectMessage(String msg) {
-        Log.d(TAG, "Sent encrypted message: " + msg);
+        Log.d(TAG, "Inject OTR message: " + msg);
         try {
             mXMPPChat.sendMessage(buildSendingMessage(msg));
         } catch (XMPPException e) {

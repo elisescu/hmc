@@ -83,7 +83,8 @@ public class Login extends Activity {
             finish();
         }
 
-        mUsername = mHMCApplication.getUsername();
+        // TODO: change the way of setting the resource
+        mUsername = mHMCApplication.getUsername() + "/HMCDevice";
         mPassword = mHMCApplication.getPassword();
         // Watch for button clicks.
         mStartButton = (Button)findViewById(R.id.start);

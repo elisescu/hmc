@@ -76,17 +76,20 @@ public class HMCFacade extends IHMCFacade.Stub {
 
     private void connectL(String fullJID, String password, int port) throws XMPPException {
         String lXMPPServer = StringUtils.parseServer(fullJID);
+        String lBareJid = StringUtils.parseBareAddress(fullJID);
+        String lResource = StringUtils.parseResource(fullJID);
         
         if (mXMPPConnection == null) {
             mXMPPConnection = createXMPPConnection(lXMPPServer, port);
         }
         if (mXMPPConnection != null) {
             mXMPPConnection.connect();
-            mXMPPConnection.login(fullJID, password);
+            mXMPPConnection.login(lBareJid, password, lResource);
 
             mXMPPConnection.addConnectionListener(mConnectionListener);
             Presence presence = new Presence(Presence.Type.available);
             presence.setStatus("Online");
+            presence.setFrom(fullJID);
             mXMPPConnection.sendPacket(presence);
             
             if (mXMPPConnection.isAuthenticated()) {

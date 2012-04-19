@@ -40,8 +40,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     private HashMap<String, String> mRepliesValues;
     private String mName = "no_name";
 
-    public HMCDeviceProxy(ChatManager chatManager, String jid, HMCFingerprintsVerifier ver) {
-        mSecureChat = new SecureChat(chatManager, jid, ver, this);
+    public HMCDeviceProxy(ChatManager chatManager, String fullJid, HMCFingerprintsVerifier ver) {
+        mSecureChat = new SecureChat(chatManager, fullJid, ver, this);
 
         mRepliesLocks = new HashMap<String, Object>();
         mRepliesValues = new HashMap<String, String>();

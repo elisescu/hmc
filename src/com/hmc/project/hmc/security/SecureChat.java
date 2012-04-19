@@ -35,11 +35,11 @@ public class SecureChat implements MessageListener {
     private String mLocalFullJID;
     private SessionStatus mOTRStatus = SessionStatus.PLAINTEXT;
 
-    public SecureChat(ChatManager manager, String jid, HMCFingerprintsVerifier ver,
+    public SecureChat(ChatManager manager, String fullJid, HMCFingerprintsVerifier ver,
                             SecuredMessageListener listenter) {
 
-        mXMPPChat = manager.createChat(jid, this);
-        mRemoteFullJID = jid;
+        mXMPPChat = manager.createChat(fullJid, this);
+        mRemoteFullJID = fullJid;
         mLocalFullJID = "elisescu_1@jabber.org";
         mHMCFingerprintsVerifier = ver;
         mSecureMessageListener = listenter;

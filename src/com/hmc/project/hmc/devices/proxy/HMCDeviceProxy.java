@@ -116,6 +116,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
             Log.e(TAG, "Didnt'get get any reply from remote");
         }
 
+        mRepliesLocks.remove(commandUniqueIdentifier);
+
         return returnVal;
 	}
 
@@ -201,7 +203,6 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
             synchronized (lLock) {
                 lLock.notify();
             }
-            mRepliesLocks.remove(code);
         } else {
             Log.e(TAG, "Unknown reply: no operation waiting for this reply");
         }

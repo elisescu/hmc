@@ -8,6 +8,7 @@
 package com.hmc.project.hmc.security;
 
 import net.java.otr4j.OtrException;
+import net.java.otr4j.session.Session;
 import net.java.otr4j.session.SessionID;
 import net.java.otr4j.session.SessionStatus;
 
@@ -44,6 +45,8 @@ public class SecureChat implements MessageListener {
         mSecureMessageListener = listenter;
         mOTRStatus = SessionStatus.PLAINTEXT;
         Log.d(TAG, "Created a LOCAL secure chat with " + mRemoteFullJID);
+        mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
+        HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }
 
     public SecureChat(Chat chat, HMCFingerprintsVerifier ver, SecuredMessageListener listenter) {
@@ -56,12 +59,14 @@ public class SecureChat implements MessageListener {
         mLocalFullJID = "elisescu_1@jabber.org";
         mOTRStatus = SessionStatus.PLAINTEXT;
         Log.d(TAG, "Created a non-LOCAL secure chat with " + mRemoteFullJID);
+        mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
+        HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }
 
     public void startOtrSession() {
         if (mOtrSessionId == null) {
-            mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
-            HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
+            Log.e(TAG, "The otr SessionID was not initialized ");
+            return;
         }
 
         try {
@@ -83,19 +88,13 @@ public class SecureChat implements MessageListener {
 
     @Override
     public void processMessage(Chat chat, Message msg) {
+        String decryptedMsg = null;
         if (chat != mXMPPChat) {
             Log.e(TAG, "got a strange message from an unknown chat");
             return;
         }
 
-        if (msg.getType() == Message.Type.chat && msg.getBody() != null) {
-            // if (mOTRStatus != SessionStatus.ENCRYPTED) {
-            // Log.d(TAG, "otr status: " + mOTRStatus + "received message:" +
-            // msg.getBody());
-            // startOtrSession();
-            // }
-
-            String decryptedMsg = null;
+        if (mOtrSessionId != null) {
             try {
                 decryptedMsg = HMCOTRManager.getInstance().getOtrEngine()
                         .transformReceiving(mOtrSessionId, msg.getBody());
@@ -103,25 +102,38 @@ public class SecureChat implements MessageListener {
                 Log.e(TAG, "Cannont initialize the OTR session");
                 e.printStackTrace();
             }
-
-            if (mOTRStatus == SessionStatus.ENCRYPTED) {
-                mSecureMessageListener.processMessage(this, decryptedMsg);
-            } else {
-                Log.d(TAG, "Received unecrypted message: " + msg.getBody());
-            }
-
         }
+
+        if (decryptedMsg != null && mOTRStatus == SessionStatus.ENCRYPTED) {
+            mSecureMessageListener.processMessage(this, decryptedMsg);
+        } else {
+            Log.d(TAG, "Received unecrypted or null message: " + msg.getBody());
+        }
+
     }
 
     public void sendMessage(String msg) {
+        String encryptedMessage = null;
         if (mOTRStatus != SessionStatus.ENCRYPTED) {
             startOtrSession();
-            // TODO: wait until the OTR was finished and only then send the
-            // messages
+            // wait now for the OTR negotiation to take place
+            synchronized (mOtrSessionId) {
+                try {
+                    mOtrSessionId.wait(15000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                if (mOTRStatus != SessionStatus.ENCRYPTED) {
+                    Log.e(TAG, "Could not start an ecrypted OTR session");
+                }
+
+            }
         }
 
-        if (mOTRStatus == SessionStatus.ENCRYPTED) {
-            String encryptedMessage = null;
+        if (mOTRStatus == SessionStatus.ENCRYPTED)
+        {
             try {
                 encryptedMessage = HMCOTRManager.getInstance().getOtrEngine()
                                         .transformSending(mOtrSessionId, msg);
@@ -162,6 +174,10 @@ public class SecureChat implements MessageListener {
         }
 
         if (mOTRStatus == SessionStatus.ENCRYPTED) {
+            // let know that we negotiated the OTR session
+            synchronized (mOtrSessionId) {
+                mOtrSessionId.notify();
+            }
             Log.e(TAG, "We need to authenticate now and verify the fingerprints");
 
             //String locFin = HMCOTRManager.getInstance().getOtrEngine().
@@ -170,5 +186,17 @@ public class SecureChat implements MessageListener {
         }
 
     }
-
+    
+//    public enum SecureChatState {
+//        PLAINTEXT,
+//        ENCRYPTED,
+//        AUTHENTICATED,
+//        NEGOTIATING
+//    }
+//
+//    SecureChatState toChatState(SessionStatus sessSt) {
+//
+//        if (sessSt == SessionStatus.PLAINTEXT)
+//            return SecureChatState.PLAINTEXT;
+//    }
 }

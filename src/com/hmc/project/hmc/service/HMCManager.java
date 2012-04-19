@@ -25,6 +25,9 @@ import android.util.Log;
 
 import com.hmc.project.hmc.aidl.IHMCDeviceDescriptor;
 import com.hmc.project.hmc.aidl.IHMCManager;
+import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementationItf;
+import com.hmc.project.hmc.devices.implementations.HMCServerImplementation;
+import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
@@ -49,9 +52,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private int mState;
     private RosterListener mRosterListener = new HMCRosterListener();
 
+    private HMCDeviceImplementationItf mLocalImplementation;
+
 
     public HMCManager(Connection xmppConnection) {
-        mExternalHMCs = new HashMap<String, HashMap<String,HMCDeviceProxy>>();
+        mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
         mLocalDevices = new HashMap<String, HMCDeviceProxy>();
         mAnonymysDevices = new HashMap<String, HMCDeviceProxy>();
         mXMPPConnection = xmppConnection;
@@ -105,8 +110,26 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     }
 
     @Override
-    public void init() throws RemoteException {
+    public void init(int locImplementation) throws RemoteException {
         if (mState == STATE_NOT_INITIALIZED) {
+            // initialize the implementation for local device
+            switch (locImplementation) {
+                case HMCDeviceItf.TYPE.HMC_SERVER:
+                    mLocalImplementation = new HMCServerImplementation();
+                    break;
+                case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
+                    mLocalImplementation = null;
+                    // TODO: add implementation for this case
+                    break;
+                case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
+                    mLocalImplementation = null;
+                    // TODO: add implementation for this case
+                    break;
+                default:
+                    mLocalImplementation = null;
+                    break;
+            }
+
             Collection<RosterEntry> entries = mXMPPRoster.getEntries();
             Log.d(TAG, "We have " + entries.size() + "devices we can connect with");
 

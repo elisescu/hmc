@@ -12,6 +12,18 @@ package com.hmc.project.hmc.devices.interfaces;
  * HMCServer class Models the HMCServer device operations
  */
 public interface HMCServerItf {
+
+    static final int HMC_SERVER_INITIAL_COMMAND = HMCDeviceItf.HMC_DEVICE_LAST_COMMAND;
+
+    static final int CMD_ADD_ME_TO_HMC = HMC_SERVER_INITIAL_COMMAND + 1;
+
+    static final int HMC_DEVICE_LAST_COMMAND = CMD_ADD_ME_TO_HMC;
+
+    /**
+     * Used by a device that wants to be added to HMC by this HCMServer. 
+     */
+    void addMeToHMC();
+
   /**
    * Request received from a local admin device in order to interconnect to an external HMC. 
    * The external HMC system is identified using the XMPP address of its HMCServer. 
@@ -30,8 +42,6 @@ public interface HMCServerItf {
    */
   void interconnectionRequest(String requesterName) ;
 
-  void addMeToHMC() ;
-
   /**
    * retrieves the list of HMC devices XMPP JIDs and their public keys from HMC
    */
@@ -46,22 +56,5 @@ public interface HMCServerItf {
   void getListOfNewHMCDevices(String hashOfMyListOfDevices) ;
 
   void removeHMCDevice() ;
-
-  /**
-   * corresponding to interconnectTo command
-   */
-  static final int CMD_INTERCONNECT_TO = 1;
-
-  static final int CMD_INTERCONNECTION_REQUEST = 2;
-
-  static final int CMD_ADD_ME_TO_HMC = 3;
-
-  static final int CMD_GET_LIST_OF_HMC_DEVICES = 4;
-
-  static final int CMD_GET_LIST_OF_NEW_HMC_DEVICES = 5;
-
-  static final int CMD_REMOVE_HMC_DEVICE = 6;
-  
-  static final int CMD_TEST_METHOD = 7;
 
 }

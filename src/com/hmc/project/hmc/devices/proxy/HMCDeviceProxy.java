@@ -126,13 +126,12 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat.sendMessage(messageToBeSent);
     }
 
-    @Override
     public int remoteIncrement(int val) {
 	    int returnVal;
 	    String returnedString;
 	    
         Log.d(TAG, "Call sendCommandSync with: " + val);
-        returnedString = sendCommandSync(COMMAND_REMOTE_INCREMENT, Integer.toString(val));
+        returnedString = sendCommandSync(CMD_REMOTE_INCREMENT, Integer.toString(val));
         try {
             // TODO: replace the simple conversion of params to string with
             // encoding XML
@@ -227,10 +226,10 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     // this should be overridden by subclasses and call the specific method of
     // the implementation, based on opCode value
-    private String executeLocalSyncCommand(int opCode, String params) {
+    protected String executeLocalSyncCommand(int opCode, String params) {
         String returnVal = "";
         switch (opCode) {
-            case COMMAND_REMOTE_INCREMENT:
+            case CMD_REMOTE_INCREMENT:
                 returnVal = "141186";
                 break;
             default:

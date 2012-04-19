@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 
 /**
@@ -59,7 +60,7 @@ public class HMCServerMainScreen extends Activity {
 
             if (mHMCFacade != null) {
                 try {
-                    mHMCFacade.getHMCManager().init();
+                    mHMCFacade.getHMCManager().init(HMCDeviceItf.TYPE.HMC_SERVER);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

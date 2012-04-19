@@ -10,7 +10,7 @@ import com.hmc.project.hmc.aidl.IHMCDeviceDescriptor;
 
 interface IHMCManager {
 	IHMCDeviceDescriptor getDeviceDescriptor(String devJID);
-	void init();
+	void init(int localImplem);
 	
 	int testRPC(String JID, int val);
 }

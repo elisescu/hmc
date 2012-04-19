@@ -12,15 +12,22 @@ package com.hmc.project.hmc.devices.interfaces;
  * HMCDevice class models the generic HMC device (either HMCServer or the rest of MediaDevices).
  */
 public interface HMCDeviceItf {
-	public enum TYPE {
-		HMC_SERVER, HMC_MEDIA_RENDER, HMC_MEDIA_PLAYER, HMC_MEDIA_SERVER
+    public class TYPE {
+        // HMC Server
+        public static final int HMC_SERVER = 1;
+
+        // HMC Client Device
+        public static final int HMC_CLIENT_DEVICE = 2;
+
+        // HMC Service Device
+        public static final int HMC_SERVICE_DEVICE = 3;
 	}
 
     static final int HMC_DEVICE_INITIAL_COMMAND = 1;
 
-    static final int COMMAND_REMOTE_INCREMENT = 2;
+    static final int CMD_REMOTE_INCREMENT = 2;
 
-    static final int HMC_DEVICE_LAST_COMMAND = COMMAND_REMOTE_INCREMENT;
+    static final int HMC_DEVICE_LAST_COMMAND = CMD_REMOTE_INCREMENT;
 	
     int remoteIncrement(int val);
 }

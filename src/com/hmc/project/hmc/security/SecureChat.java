@@ -17,6 +17,8 @@ import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.Presence.Mode;
 
 import android.util.Log;
 
@@ -34,6 +36,7 @@ public class SecureChat implements MessageListener {
     private SessionID mOtrSessionId = null;
     private String mLocalFullJID;
     private SessionStatus mOTRStatus = SessionStatus.PLAINTEXT;
+    private Presence.Type mPresenceType;
 
     public SecureChat(ChatManager manager, String fullJid, HMCFingerprintsVerifier ver,
                             SecuredMessageListener listenter) {
@@ -72,7 +75,19 @@ public class SecureChat implements MessageListener {
         try {
             HMCOTRManager.getInstance().getOtrEngine().startSession(mOtrSessionId);
             } catch (OtrException e) {
-            mOtrSessionId = null;
+            e.printStackTrace();
+        }
+    }
+
+    public void stopOtrSession() {
+        if (mOtrSessionId == null) {
+            Log.e(TAG, "The otr SessionID was not initialized ");
+            return;
+        }
+
+        try {
+            HMCOTRManager.getInstance().getOtrEngine().endSession(mOtrSessionId);
+        } catch (OtrException e) {
             e.printStackTrace();
         }
     }
@@ -183,6 +198,17 @@ public class SecureChat implements MessageListener {
             //String locFin = HMCOTRManager.getInstance().getOtrEngine().
                                     
             mHMCFingerprintsVerifier.verifyFingerprints("bla bla", "bla bla", mRemoteFullJID);
+        }
+
+    }
+
+    public void presenceChanged(Presence pres) {
+        mPresenceType = pres.getType();
+
+        Log.d(TAG, "Received presence from " + pres.getFrom() + " : " + pres.getType());
+        if (pres.getType() == Presence.Type.unavailable && mOTRStatus == SessionStatus.ENCRYPTED) {
+            Log.d(TAG, "Stopping the OTR session here ");
+            stopOtrSession();
         }
 
     }

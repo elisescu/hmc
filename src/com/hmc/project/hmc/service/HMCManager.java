@@ -16,6 +16,9 @@ import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.util.StringUtils;
 
 import android.os.RemoteException;
 import android.util.Log;
@@ -44,6 +47,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private Roster mXMPPRoster;
     private ChatManager mXMPPChatManager;
     private int mState;
+    private RosterListener mRosterListener = new HMCRosterListener();
 
 
     public HMCManager(Connection xmppConnection) {
@@ -58,6 +62,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         Log.d(TAG, "Constructed the HMCManager for " + mXMPPConnection.getUser());
         // set the subscription mode to manually
         mXMPPRoster.setSubscriptionMode(Roster.SubscriptionMode.manual);
+        mXMPPRoster.addRosterListener(mRosterListener);
         mState = STATE_NOT_INITIALIZED;
     }
 
@@ -137,4 +142,42 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         }
         return 0;
     }
+
+    class HMCRosterListener implements RosterListener {
+        @Override
+        public void entriesAdded(Collection<String> arg0) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void entriesDeleted(Collection<String> arg0) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void entriesUpdated(Collection<String> arg0) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void presenceChanged(Presence pres) {
+            // let the corresponding device proxy know that the remote device is
+            // offline or back online
+
+            // TODO: change this to send the presence to specific device, using
+            // the resource as well (i.e. parsing the bare JID)
+            HMCDeviceProxy dev = mLocalDevices.get(StringUtils.parseBareAddress(pres.getFrom()));
+            if (dev != null) {
+                dev.presenceChanged(pres);
+            } else {
+                Log.e(TAG, "Received presence information from unknown device: " + pres.getFrom());
+            }
+
+        }
+
+    }
+
 }

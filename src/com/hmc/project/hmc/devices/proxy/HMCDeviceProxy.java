@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
+import org.jivesoftware.smack.packet.Presence;
 
 import android.util.Log;
 
@@ -236,6 +237,10 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
                 break;
         }
         return returnVal;
+    }
+
+    public void presenceChanged(Presence pres) {
+        mSecureChat.presenceChanged(pres);
     }
 
 }

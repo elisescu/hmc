@@ -102,6 +102,10 @@ public class Login extends Activity {
             doUnbindService();
             mServiceIsBound = false;
         }
+
+        if (!mHMCApplication.isConnected()) {
+            stopService(new Intent(Login.this, HMCService.class));
+        }
     }
     
     private OnClickListener mStartListener = new OnClickListener() {

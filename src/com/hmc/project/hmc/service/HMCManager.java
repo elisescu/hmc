@@ -26,6 +26,7 @@ import android.util.Log;
 import com.hmc.project.hmc.aidl.IHMCDeviceDescriptor;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementationItf;
+import com.hmc.project.hmc.devices.implementations.HMCMediaClientDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCServerImplementation;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
@@ -114,36 +115,33 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         if (mState == STATE_NOT_INITIALIZED) {
             // initialize the implementation for local device
             switch (locImplementation) {
-                case HMCDeviceItf.TYPE.HMC_SERVER:
-                    mLocalImplementation = new HMCServerImplementation();
-                    break;
-                case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
-                    mLocalImplementation = null;
-                    // TODO: add implementation for this case
-                    break;
-                case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
-                    mLocalImplementation = null;
-                    // TODO: add implementation for this case
-                    break;
-                default:
-                    mLocalImplementation = null;
-                    break;
+            case HMCDeviceItf.TYPE.HMC_SERVER:
+                mLocalImplementation = new HMCServerImplementation();
+                break;
+            case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
+                mLocalImplementation = new HMCMediaClientDeviceImplementation();
+                // TODO: add implementation for this case
+                break;
+            case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
+                mLocalImplementation = null;
+                // TODO: add implementation for this case
+                break;
+            default:
+                mLocalImplementation = null;
+                break;
             }
 
             Collection<RosterEntry> entries = mXMPPRoster.getEntries();
             Log.d(TAG, "We have " + entries.size() + "devices we can connect with");
 
-            // TODO: change the way I initialize the list of devices. For now
-            // trust the XMPP server, but later check with HMCServer to see if
-            // the list is consistent. However, here we trust the XMPP server
-            // only for getting the list of devices, but later on we anyway have
-            // to authenticate the device we communicate with, based on the
-            // fingerprint we get from it.
+            // TODO: change the way I initialize the list of devices. Get the
+            // list of devices from HMCServer
             for (RosterEntry entry : entries) {
                 Log.d(TAG, "Device name " + entry.getName() + ", bareJID:" + entry.getUser());
                 HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager, entry.getUser(),
                                         this);
                 mLocalDevices.put(entry.getUser(), devProxy);
+                devProxy.setLocalImplementation(mLocalImplementation);
             }
 
             mState = STATE_INITIALIZED;

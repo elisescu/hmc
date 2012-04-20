@@ -12,12 +12,6 @@ import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplementationItf {
 
     @Override
-    public void addMeToHMC() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void interconnectTo(String externalHMCServerAddress) {
         // TODO Auto-generated method stub
 
@@ -30,7 +24,7 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
     }
 
     @Override
-    public void getListOfHMCDevices() {
+    public void getListOfLocalHMCDevices() {
         // TODO Auto-generated method stub
 
     }

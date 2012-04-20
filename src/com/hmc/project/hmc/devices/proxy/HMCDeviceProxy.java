@@ -17,6 +17,7 @@ import org.jivesoftware.smack.packet.Presence;
 
 import android.util.Log;
 
+import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementationItf;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.SecureChat;
@@ -40,6 +41,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     private HashMap<String, Object> mRepliesLocks;
     private HashMap<String, String> mRepliesValues;
     private String mName = "no_name";
+    protected HMCDeviceImplementationItf mLocalImplementation;
 
     public HMCDeviceProxy(ChatManager chatManager, String fullJid, HMCFingerprintsVerifier ver) {
         mSecureChat = new SecureChat(chatManager, fullJid, ver, this);
@@ -240,6 +242,10 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     public void presenceChanged(Presence pres) {
         mSecureChat.presenceChanged(pres);
+    }
+
+    public void setLocalImplementation(HMCDeviceImplementationItf locImpl) {
+        mLocalImplementation = locImpl;
     }
 
 }

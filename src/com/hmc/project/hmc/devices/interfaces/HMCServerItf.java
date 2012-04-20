@@ -15,14 +15,9 @@ public interface HMCServerItf {
 
     static final int HMC_SERVER_INITIAL_COMMAND = HMCDeviceItf.HMC_DEVICE_LAST_COMMAND;
 
-    static final int CMD_ADD_ME_TO_HMC = HMC_SERVER_INITIAL_COMMAND + 1;
+    static final int CMD_GET_LIST_OF_LOCAL_HMC_DEVICES = HMC_SERVER_INITIAL_COMMAND + 1;
 
-    static final int HMC_DEVICE_LAST_COMMAND = CMD_ADD_ME_TO_HMC;
-
-    /**
-     * Used by a device that wants to be added to HMC by this HCMServer. 
-     */
-    void addMeToHMC();
+    static final int HMC_DEVICE_LAST_COMMAND = CMD_GET_LIST_OF_LOCAL_HMC_DEVICES;
 
   /**
    * Request received from a local admin device in order to interconnect to an external HMC. 
@@ -45,7 +40,7 @@ public interface HMCServerItf {
   /**
    * retrieves the list of HMC devices XMPP JIDs and their public keys from HMC
    */
-  void getListOfHMCDevices() ;
+  void getListOfLocalHMCDevices() ;
 
   /**
    * Get the new devices that were added to HMC while local device was offline. 

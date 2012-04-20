@@ -17,9 +17,8 @@ import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementationItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 
-public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf, HMCDeviceProxyItf {
+public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
     private static final String TAG = "HMCServerProxy";
-    private HMCDeviceImplementationItf mLocalImplementation;
     private String mLocalFullJid;
     private String mRemoteFullJid;
 
@@ -42,19 +41,12 @@ public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf, HMCD
     }
 
     @Override
-    public void addMeToHMC() {
+    public void getListOfLocalHMCDevices() {
         String returnedString;
 
         Log.d(TAG, "Call addMeToHMC()");
-        returnedString = sendCommandSync(CMD_ADD_ME_TO_HMC, "void-param");
+        returnedString = sendCommandSync(CMD_GET_LIST_OF_LOCAL_HMC_DEVICES, "void-param");
         Log.d(TAG, "Returned value is: " + returnedString);
-        return;
-		
-	}
-
-	@Override
-	public void getListOfHMCDevices() {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -77,11 +69,6 @@ public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf, HMCD
         } else {
             return "not-having-local-implementation";
         }
-    }
-
-    @Override
-    public void setLocalImplementation(HMCDeviceImplementationItf locImpl) {
-        mLocalImplementation = locImpl;
     }
 
 }

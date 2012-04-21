@@ -43,21 +43,22 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     private String mName = "no_name";
     protected HMCDeviceImplementationItf mLocalImplementation;
 
-    public HMCDeviceProxy(ChatManager chatManager, String fullJid, HMCFingerprintsVerifier ver) {
-        mSecureChat = new SecureChat(chatManager, fullJid, ver, this);
+    public HMCDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
+                            HMCFingerprintsVerifier ver) {
+        mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid, ver, this);
 
         mRepliesLocks = new HashMap<String, Object>();
         mRepliesValues = new HashMap<String, String>();
 	}
 
-    public HMCDeviceProxy(Chat chat, HMCFingerprintsVerifier ver) {
-        mSecureChat = new SecureChat(chat, ver, this);
+    public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
+        mSecureChat = new SecureChat(chat, localFullJID, ver, this);
 
         mRepliesLocks = new HashMap<String, Object>();
         mRepliesValues = new HashMap<String, String>();
     }
 
-    public String sendCommandSync(int opCode, String params) {
+    protected String sendCommandSync(int opCode, String params) {
         String returnVal = "";
         String messageToBeSent = "";
         String commandId;

@@ -35,32 +35,37 @@ public class SecureChat implements MessageListener {
     private String mRemoteFullJID;
     private SessionID mOtrSessionId = null;
     private String mLocalFullJID;
-    private SessionStatus mOTRStatus = SessionStatus.PLAINTEXT;
+    private SecureChatState mOTRStatus = SecureChatState.PLAINTEXT;
     private Presence.Type mPresenceType;
 
-    public SecureChat(ChatManager manager, String fullJid, HMCFingerprintsVerifier ver,
+    enum SecureChatState {
+        PLAINTEXT, ENCRYPTED, AUTHENTICATED, NEGOTIATING
+    }
+
+    public SecureChat(ChatManager manager, String localFullJID, String remoteFullJid, HMCFingerprintsVerifier ver,
                             SecuredMessageListener listenter) {
 
-        mXMPPChat = manager.createChat(fullJid, this);
-        mRemoteFullJID = fullJid;
-        mLocalFullJID = "elisescu_1@jabber.org";
+        mXMPPChat = manager.createChat(remoteFullJid, this);
+        mRemoteFullJID = remoteFullJid;
+        mLocalFullJID = localFullJID;
         mHMCFingerprintsVerifier = ver;
         mSecureMessageListener = listenter;
-        mOTRStatus = SessionStatus.PLAINTEXT;
+        mOTRStatus = SecureChatState.PLAINTEXT;
         Log.d(TAG, "Created a LOCAL secure chat with " + mRemoteFullJID);
         mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
         HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }
 
-    public SecureChat(Chat chat, HMCFingerprintsVerifier ver, SecuredMessageListener listenter) {
+    public SecureChat(Chat chat, String localFullJID, HMCFingerprintsVerifier ver,
+                            SecuredMessageListener listenter) {
         mXMPPChat = chat;
         chat.addMessageListener(this);
         mHMCFingerprintsVerifier = ver;
         mSecureMessageListener = listenter;
         // TODO: make sure to fix this and get the correct fullJIDs
         mRemoteFullJID = chat.getParticipant();
-        mLocalFullJID = "elisescu_1@jabber.org";
-        mOTRStatus = SessionStatus.PLAINTEXT;
+        mLocalFullJID = localFullJID;
+        mOTRStatus = SecureChatState.PLAINTEXT;
         Log.d(TAG, "Created a non-LOCAL secure chat with " + mRemoteFullJID);
         mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
         HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
@@ -119,7 +124,7 @@ public class SecureChat implements MessageListener {
             }
         }
 
-        if (decryptedMsg != null && mOTRStatus == SessionStatus.ENCRYPTED) {
+        if (decryptedMsg != null && mOTRStatus == SecureChatState.ENCRYPTED) {
             mSecureMessageListener.processMessage(this, decryptedMsg);
         } else {
             Log.d(TAG, "Received unecrypted or null message: " + msg.getBody());
@@ -129,7 +134,7 @@ public class SecureChat implements MessageListener {
 
     public void sendMessage(String msg) {
         String encryptedMessage = null;
-        if (mOTRStatus != SessionStatus.ENCRYPTED) {
+        if (mOTRStatus == SecureChatState.PLAINTEXT) {
             startOtrSession();
             // wait now for the OTR negotiation to take place
             synchronized (mOtrSessionId) {
@@ -140,14 +145,14 @@ public class SecureChat implements MessageListener {
                     e.printStackTrace();
                 }
 
-                if (mOTRStatus != SessionStatus.ENCRYPTED) {
+                if (mOTRStatus == SecureChatState.PLAINTEXT) {
                     Log.e(TAG, "Could not start an ecrypted OTR session");
                 }
 
             }
         }
 
-        if (mOTRStatus == SessionStatus.ENCRYPTED)
+        if (mOTRStatus == SecureChatState.ENCRYPTED)
         {
             try {
                 encryptedMessage = HMCOTRManager.getInstance().getOtrEngine()
@@ -180,49 +185,49 @@ public class SecureChat implements MessageListener {
     }
 
     public void otrStatusChanged(SessionStatus sessionStatus) {
-        mOTRStatus = sessionStatus;
+        mOTRStatus = toChatState(sessionStatus);
         Log.e(TAG, "Otr status changed to: " + mOTRStatus);
-        if (mOTRStatus == SessionStatus.FINISHED) {
+        if (sessionStatus == SessionStatus.FINISHED) {
             Log.e(TAG, "For some reason, the OTR was stopped. Restarting it");
 
             startOtrSession();
         }
 
-        if (mOTRStatus == SessionStatus.ENCRYPTED) {
+        if (mOTRStatus == SecureChatState.ENCRYPTED) {
             // let know that we negotiated the OTR session
             synchronized (mOtrSessionId) {
                 mOtrSessionId.notify();
             }
             Log.e(TAG, "We need to authenticate now and verify the fingerprints");
-
-            //String locFin = HMCOTRManager.getInstance().getOtrEngine().
                                     
             mHMCFingerprintsVerifier.verifyFingerprints("bla bla", "bla bla", mRemoteFullJID);
         }
-
     }
 
     public void presenceChanged(Presence pres) {
         mPresenceType = pres.getType();
 
         Log.d(TAG, "Received presence from " + pres.getFrom() + " : " + pres.getType());
-        if (pres.getType() == Presence.Type.unavailable && mOTRStatus == SessionStatus.ENCRYPTED) {
+        if (pres.getType() == Presence.Type.unavailable && mOTRStatus == SecureChatState.ENCRYPTED) {
             Log.d(TAG, "Stopping the OTR session here ");
             stopOtrSession();
         }
 
     }
     
-//    public enum SecureChatState {
-//        PLAINTEXT,
-//        ENCRYPTED,
-//        AUTHENTICATED,
-//        NEGOTIATING
-//    }
-//
-//    SecureChatState toChatState(SessionStatus sessSt) {
-//
-//        if (sessSt == SessionStatus.PLAINTEXT)
-//            return SecureChatState.PLAINTEXT;
-//    }
+    SecureChatState toChatState(SessionStatus sessSt) {
+        SecureChatState retVal = SecureChatState.PLAINTEXT;
+        switch (sessSt) {
+            case PLAINTEXT:
+            case FINISHED:
+                retVal = SecureChatState.PLAINTEXT;
+                break;
+            case ENCRYPTED:
+                retVal = SecureChatState.ENCRYPTED;
+                break;
+            default:
+                break;
+        }
+        return retVal;
+    }
 }

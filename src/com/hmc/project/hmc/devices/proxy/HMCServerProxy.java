@@ -9,25 +9,17 @@
 package com.hmc.project.hmc.devices.proxy;
 
 import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ChatManager;
 
 import android.util.Log;
 
-import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementationItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 
 public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
     private static final String TAG = "HMCServerProxy";
-    private String mLocalFullJid;
-    private String mRemoteFullJid;
 
-    public HMCServerProxy(ChatManager chatManager, String fullJid, HMCFingerprintsVerifier ver) {
-        super(chatManager, fullJid, ver);
-    }
-
-    public HMCServerProxy(Chat chat, HMCFingerprintsVerifier ver) {
-        super(chat, ver);
+    public HMCServerProxy(Chat chat, String localFUllJID, HMCFingerprintsVerifier ver) {
+        super(chat, localFUllJID, ver);
     }
 
     @Override

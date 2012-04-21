@@ -18,12 +18,13 @@ public class HMCMediaClientDeviceProxy extends HMCMediaDeviceProxy implements HM
 
     /**
      * @param chatManager
-     * @param jid
+     * @param remoteFullJid
      * @param ver
      */
-    public HMCMediaClientDeviceProxy(ChatManager chatManager, String jid,
+    public HMCMediaClientDeviceProxy(ChatManager chatManager, String localFUllJID,
+                            String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
-        super(chatManager, jid, ver);
+        super(chatManager, localFUllJID, remoteFullJid, ver);
         // TODO Auto-generated constructor stub
     }
 

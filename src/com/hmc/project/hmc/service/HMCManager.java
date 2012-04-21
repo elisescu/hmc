@@ -82,7 +82,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     @Override
     public void chatCreated(Chat chat, boolean createdLocally) {
         if (!createdLocally) {
-            HMCDeviceProxy devProxy = new HMCDeviceProxy(chat, this);
+            HMCDeviceProxy devProxy = new HMCDeviceProxy(chat, mXMPPConnection.getUser(), this);
             mAnonymysDevices.put(chat.getParticipant(), devProxy);
         }
     }
@@ -138,8 +138,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             // list of devices from HMCServer
             for (RosterEntry entry : entries) {
                 Log.d(TAG, "Device name " + entry.getName() + ", bareJID:" + entry.getUser());
-                HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager, entry.getUser(),
-                                        this);
+                HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager,
+                                        mXMPPConnection.getUser(), entry.getUser(), this);
                 mLocalDevices.put(entry.getUser(), devProxy);
                 devProxy.setLocalImplementation(mLocalImplementation);
             }

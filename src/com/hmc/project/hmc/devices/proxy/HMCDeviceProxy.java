@@ -112,7 +112,6 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         // now we got back the result, so return the result
         returnVal = mRepliesValues.get(commandUniqueIdentifier);
 
-        Log.d(TAG, "have been notified and also got a result back: " + returnVal);
         if (returnVal != null) {
             mRepliesValues.remove(commandUniqueIdentifier);
             Log.d(TAG, "Returned value:" + returnVal);

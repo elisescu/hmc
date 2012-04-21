@@ -29,6 +29,7 @@ import android.util.Log;
 public class SecureChat implements MessageListener {
 
     private static final String TAG = "SecureChat";
+    private static final long MAX_OTR_TIMEOUT = 15000;
     private Chat mXMPPChat;
     HMCFingerprintsVerifier mHMCFingerprintsVerifier;
     SecuredMessageListener mSecureMessageListener;
@@ -139,7 +140,7 @@ public class SecureChat implements MessageListener {
             // wait now for the OTR negotiation to take place
             synchronized (mOtrSessionId) {
                 try {
-                    mOtrSessionId.wait(15000);
+                    mOtrSessionId.wait(MAX_OTR_TIMEOUT);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

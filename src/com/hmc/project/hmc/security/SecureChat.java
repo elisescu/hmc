@@ -188,11 +188,6 @@ public class SecureChat implements MessageListener {
     public void otrStatusChanged(SessionStatus sessionStatus) {
         mOTRStatus = toChatState(sessionStatus);
         Log.e(TAG, "Otr status changed to: " + mOTRStatus);
-        if (sessionStatus == SessionStatus.FINISHED) {
-            Log.e(TAG, "For some reason, the OTR was stopped. Restarting it");
-
-            startOtrSession();
-        }
 
         if (mOTRStatus == SecureChatState.ENCRYPTED) {
             // let know that we negotiated the OTR session

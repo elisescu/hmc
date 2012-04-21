@@ -45,7 +45,7 @@ public class HMCServerMainScreen extends Activity {
             if (mHMCFacade != null) {
                 // test RPC communication
                 try {
-                    mHMCFacade.getHMCManager().testRPC("elisescu_2@jabber.org", 3);
+                    mHMCFacade.getHMCManager().testRPC("elisescu_2@jabber.org/emulator", 3);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

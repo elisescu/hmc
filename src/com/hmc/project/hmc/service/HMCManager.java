@@ -138,27 +138,28 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             // list of devices from HMCServer
             for (RosterEntry entry : entries) {
                 Log.d(TAG, "Device name " + entry.getName() + ", bareJID:" + entry.getUser());
-                HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager,
-                                        mXMPPConnection.getUser(), entry.getUser(), this);
-                mLocalDevices.put(entry.getUser(), devProxy);
-                devProxy.setLocalImplementation(mLocalImplementation);
             }
-
             mState = STATE_INITIALIZED;
         } else {
             Log.w(TAG, "Already initialized");
         }
-        Log.d(TAG, "Now we have " + mLocalDevices.size() + " deviceeeeeeessss");
+        Log.d(TAG, "Have " + mLocalDevices.size() + " devices connected");
     }
 
     @Override
-    public int testRPC(String JID, int val) throws RemoteException {
+    public int testRPC(String fullJID, int val) throws RemoteException {
         if (mState == STATE_INITIALIZED) {
-            HMCDeviceProxy dev = mLocalDevices.get(JID);
+            HMCDeviceProxy dev = mLocalDevices.get(fullJID);
             if (dev != null) {
                 dev.remoteIncrement(val);
             } else {
-                Log.e(TAG, "Device " + JID + "is not in our list of devices");
+                // build a HMC proxy for this fullJID
+                Log.e(TAG, "Device " + fullJID + "is not in our list of devices. Building proxy...");
+                HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager,
+                                        mXMPPConnection.getUser(), fullJID, this);
+                mLocalDevices.put(fullJID, devProxy);
+                devProxy.setLocalImplementation(mLocalImplementation);
+                devProxy.remoteIncrement(val);
             }
         }
         return 0;
@@ -190,7 +191,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
             // TODO: change this to send the presence to specific device, using
             // the resource as well (i.e. parsing the bare JID)
-            HMCDeviceProxy dev = mLocalDevices.get(StringUtils.parseBareAddress(pres.getFrom()));
+            HMCDeviceProxy dev = mLocalDevices.get(pres.getFrom());
             if (dev != null) {
                 dev.presenceChanged(pres);
             } else {

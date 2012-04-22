@@ -38,6 +38,7 @@ import android.util.Log;
 import com.hmc.project.hmc.aidl.IConnectionListener;
 import com.hmc.project.hmc.aidl.IHMCFacade;
 import com.hmc.project.hmc.aidl.IHMCManager;
+import com.hmc.project.hmc.aidl.IUserRequestsListener;
 
 import de.duenndns.ssl.MemorizingTrustManager;
 
@@ -307,5 +308,4 @@ public class HMCFacade extends IHMCFacade.Stub {
                 }
             }
         }
-
 }

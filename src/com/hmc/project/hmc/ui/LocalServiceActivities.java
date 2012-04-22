@@ -91,7 +91,7 @@ public class LocalServiceActivities {
             // TODO Auto-generated method stub
             super.onActivityResult(requestCode, resultCode, data);
             if (resultCode == 23) {
-                if (mHMCApplication.isAccountConfigured())
+                if (mHMCApplication.isConfigured())
                     HMCUserNotifications.normalToast(this, "Account configured");
                 else {
                     HMCUserNotifications.normalToast(this, "You must configure the account");

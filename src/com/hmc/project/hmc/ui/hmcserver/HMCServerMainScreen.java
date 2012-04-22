@@ -5,7 +5,7 @@
  * without prior written consent of the author.
 **/
 
-package com.hmc.project.hmc.ui;
+package com.hmc.project.hmc.ui.hmcserver;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -60,7 +60,7 @@ public class HMCServerMainScreen extends Activity {
 
             if (mHMCFacade != null) {
                 try {
-                    mHMCFacade.getHMCManager().init(HMCDeviceItf.TYPE.HMC_SERVER);
+                    mHMCFacade.getHMCManager().init();
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

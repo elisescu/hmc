@@ -37,7 +37,16 @@
 		    the value send as parameter</string>
 
 
-
+	<!-- =======================HMC media client main screen=========================== -->
+		<string name="mediaclient_default_screen_description">
+		    HMC Devices
+		</string>
+		<string name="mediaclient_no_hmc">
+		    This device is not part of an HMC network. Ask an administrator to add you.
+		</string>
+		<string name="test_method_button_media_client">Test button</string>
+		
+		
 
 
 	<!-- SSL unknown certif related !! -->	

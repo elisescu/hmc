@@ -7,10 +7,16 @@
 package com.hmc.project.hmc.aidl;
 
 import com.hmc.project.hmc.aidl.IHMCDeviceDescriptor;
+import com.hmc.project.hmc.aidl.IHMCServerHndl;
+import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
+import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
 
 interface IHMCManager {
 	IHMCDeviceDescriptor getDeviceDescriptor(String devJID);
-	void init(int localImplem);
+	void init();
+	IHMCServerHndl implHMCServer();
+	IHMCMediaClientHndl implHMCMediaClient();
+	IHMCMediaServiceHndl implHMCMediaService();
 	
 	int testRPC(String JID, int val);
 }

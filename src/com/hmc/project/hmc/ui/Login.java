@@ -30,7 +30,10 @@ import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IConnectionListener;
 import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
+import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
+import com.hmc.project.hmc.ui.mediaclient.HMCMediaClientDeviceMainScreen;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 public class Login extends Activity {
@@ -48,6 +51,7 @@ public class Login extends Activity {
     private Button mStopButton;
     private String mPassword;
     private String mUsername;
+    private int mDeviceType;
 
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
@@ -83,9 +87,6 @@ public class Login extends Activity {
             finish();
         }
 
-        // TODO: change the way of setting the resource
-        mUsername = mHMCApplication.getUsername() + "/HMCDevice";
-        mPassword = mHMCApplication.getPassword();
         // Watch for button clicks.
         mStartButton = (Button)findViewById(R.id.start);
         mStartButton.setOnClickListener(mStartListener);
@@ -124,10 +125,11 @@ public class Login extends Activity {
                 doBindService();
             }
             
-            if (!mHMCApplication.isConnected() && mHMCApplication.isAccountConfigured()) {
+            if (!mHMCApplication.isConnected() && mHMCApplication.isConfigured()) {
 
                 mUsername = mHMCApplication.getUsername();
                 mPassword = mHMCApplication.getPassword();
+                mDeviceType = mHMCApplication.getDeviceType();
                 
                 mLoginProgressDialog = ProgressDialog.show(Login.this, "Login", "wait please", true, 
                         false);
@@ -150,6 +152,7 @@ public class Login extends Activity {
         if (mHMCApplication.isConnected() && mHMCFacade != null) {
             try {
                 mHMCFacade.disconnect();
+                mHMCApplication.setConnected(false);
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -194,7 +197,7 @@ public class Login extends Activity {
     private class HMCServiceConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mHMCFacade = IHMCFacade.Stub.asInterface(service);
-            if (mHMCApplication.isAccountConfigured())  {
+            if (mHMCApplication.isConfigured())  {
                 try {
                     mHMCFacade.registerConnectionListener(mConnectionListener);
                     mHMCFacade.connectAsync(mUsername, mPassword,  5222);
@@ -231,7 +234,19 @@ public class Login extends Activity {
             mHMCApplication.setConnected(success);
             if (success) {
                 HMCUserNotifications.normalToast(Login.this, "Login successful");
-                startActivity(new Intent(Login.this, HMCServerMainScreen.class));
+
+                switch (mDeviceType) {
+                    case HMCDeviceItf.TYPE.HMC_SERVER:
+                        startActivity(new Intent(Login.this, HMCServerMainScreen.class));
+                        break;
+                    case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
+                        startActivity(new Intent(Login.this, HMCMediaClientDeviceMainScreen.class));
+                        break;
+                    default:
+                        Log.e(TAG, "Very baad error: we don't know what type of device we are");
+                        disconnectAndStopService();
+                        break;
+                }
                 finish();
             } else {
                 HMCUserNotifications.normalToast(Login.this, "Login failed");

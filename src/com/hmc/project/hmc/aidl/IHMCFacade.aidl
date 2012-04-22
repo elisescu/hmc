@@ -20,7 +20,7 @@ interface IHMCFacade {
     
     // register a connection listener for getting the connection status
     void unregisterConnectionListener(IConnectionListener conListener);
-    
+
     // connect to XMPP server using user's credentials entered by user
     // the call is blocking
     void connect(String fullJID, String password, int port);

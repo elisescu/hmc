@@ -7,9 +7,15 @@
 
 package com.hmc.project.hmc.devices.implementations;
 
+import android.util.Log;
+
+import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 
 public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplementationItf {
+
+    private static final String TAG = "HMCServerImplementation";
+    private IUserRequestsListener mUserRequestsListener;
 
     @Override
     public void interconnectTo(String externalHMCServerAddress) {
@@ -45,6 +51,18 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
     public String localExecute(int opCode, String params) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public void registerUserRequestsListener(IUserRequestsListener usrReqListener) {
+        mUserRequestsListener = usrReqListener;
+    }
+
+    public void unregisterUserRequestsListener(IUserRequestsListener userReqListener) {
+        if (mUserRequestsListener == userReqListener) {
+            mUserRequestsListener = null;
+        } else {
+            Log.e(TAG, "Unknown listerner for de-registration");
+        }
     }
 
 }

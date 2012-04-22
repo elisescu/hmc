@@ -8,9 +8,9 @@
     </string-array>
 
     <string-array name="hmc_dev_type_list_entryvalues">
-        <item>HMCServer</item>
-        <item>HMCMediaClientDevice</item>
-        <item>HMCMediaServiceDevice</item>  
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>  
     </string-array>
     
 </resources>

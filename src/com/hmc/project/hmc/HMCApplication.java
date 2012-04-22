@@ -10,6 +10,7 @@ package com.hmc.project.hmc;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
@@ -17,10 +18,11 @@ public class HMCApplication extends Application {
 
     private final HMCPreferenceListener mPreferenceListener = new HMCPreferenceListener();
     private SharedPreferences mSettings;
-    private boolean mIsAccountConfigured;
+    private boolean mIsConfigured = false;
     private boolean mIsConnected;
     private String mUsername = "insert_something";
     private String mPassword = "insert_something";
+    private int mDeviceType = -1;
 
     @Override
     public void onCreate() {
@@ -28,7 +30,14 @@ public class HMCApplication extends Application {
         mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         mUsername = mSettings.getString("hmc_username_key", "");
         mPassword = mSettings.getString("hmc_pass_key", "");
-        mIsAccountConfigured = !("".equals(mUsername) || "".equals(mPassword));
+
+        try {
+            mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
+        } catch (NumberFormatException e) {
+            mDeviceType = -1;
+        }
+
+        mIsConfigured = !("".equals(mUsername) || "".equals(mPassword) || mDeviceType == -1);
         mSettings.registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
@@ -46,8 +55,8 @@ public class HMCApplication extends Application {
         mIsConnected = isConnected;
     }
 
-    public boolean isAccountConfigured() {
-        return mIsAccountConfigured;
+    public boolean isConfigured() {
+        return mIsConfigured;
     }
     
     public String getUsername() {
@@ -57,9 +66,12 @@ public class HMCApplication extends Application {
     public String getPassword() {
         return mPassword;
     }
+
+    public int getDeviceType() {
+        return mDeviceType;
+    }
     
     private class HMCPreferenceListener implements SharedPreferences.OnSharedPreferenceChangeListener {
-
         public HMCPreferenceListener() {
         }
 
@@ -68,11 +80,16 @@ public class HMCApplication extends Application {
             if (key.equals("hmc_username_key") || key.equals("hmc_pass_key")) {
                 mUsername = mSettings.getString("hmc_username_key", "");
                 mPassword = mSettings.getString("hmc_pass_key", "");
-                mIsAccountConfigured = !("".equals(mUsername) || "".equals(mPassword));
+                try {
+                    mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
+                } catch (NumberFormatException e) {
+                    mDeviceType = -1;
+                }
+                Log.e("EEEEEEEEEEE", "devicetype = " + mDeviceType);
+                mIsConfigured = !("".equals(mUsername) || "".equals(mPassword) || mDeviceType == -1);
                 HMCUserNotifications.normalToast(HMCApplication.this, "Account configured="
-                        + mIsAccountConfigured);
+                        + mIsConfigured);
             }
         }
     }
-
 }

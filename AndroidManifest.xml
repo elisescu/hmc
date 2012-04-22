@@ -21,10 +21,13 @@
             android:launchMode="standard">
         </activity>
         
-        <activity android:name=".ui.HMCServerMainScreen" 
+        <activity android:name=".ui.hmcserver.HMCServerMainScreen" 
             android:launchMode="standard">
         </activity>
         
+        <activity android:name=".ui.mediaclient.HMCMediaClientDeviceMainScreen" 
+            android:launchMode="standard">
+        </activity>
         
         <service android:name=".service.HMCService">
             <intent-filter>

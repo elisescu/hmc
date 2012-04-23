@@ -134,25 +134,6 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     }
 
     @Override
-    public int testRPC(String fullJID, int val) throws RemoteException {
-        if (mState == STATE_INITIALIZED) {
-            HMCDeviceProxy dev = mLocalDevices.get(fullJID);
-            if (dev != null) {
-                dev.remoteIncrement(val);
-            } else {
-                // build a HMC proxy for this fullJID
-                Log.e(TAG, "Device " + fullJID + "is not in our list of devices. Building proxy...");
-                HMCDeviceProxy devProxy = new HMCDeviceProxy(mXMPPChatManager,
-                                        mXMPPConnection.getUser(), fullJID, this);
-                mLocalDevices.put(fullJID, devProxy);
-                devProxy.setLocalImplementation(mLocalImplementation);
-                devProxy.remoteIncrement(val);
-            }
-        }
-        return 0;
-    }
-
-    @Override
     public IHMCServerHndl implHMCServer() throws RemoteException {
         HMCServerHandler retVal = null;
         if (mLocalImplementation == null) {

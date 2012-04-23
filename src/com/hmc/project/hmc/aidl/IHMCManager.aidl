@@ -17,6 +17,4 @@ interface IHMCManager {
 	IHMCServerHndl implHMCServer();
 	IHMCMediaClientHndl implHMCMediaClient();
 	IHMCMediaServiceHndl implHMCMediaService();
-	
-	int testRPC(String JID, int val);
 }

@@ -43,12 +43,7 @@ public class HMCServerMainScreen extends Activity {
     private OnClickListener mTestMethodListener = new OnClickListener() {
         public void onClick(View v) {
             if (mHMCFacade != null) {
-                // test RPC communication
-                try {
-                    mHMCFacade.getHMCManager().testRPC("elisescu_2@jabber.org/emulator", 3);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+                // do your stuff
             }
         }
     };;

@@ -152,44 +152,6 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         return 0;
     }
 
-    class HMCRosterListener implements RosterListener {
-        @Override
-        public void entriesAdded(Collection<String> arg0) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void entriesDeleted(Collection<String> arg0) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void entriesUpdated(Collection<String> arg0) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void presenceChanged(Presence pres) {
-            // let the corresponding device proxy know that the remote device is
-            // offline or back online
-
-            // TODO: change this to send the presence to specific device, using
-            // the resource as well (i.e. parsing the bare JID)
-            HMCDeviceProxy dev = mLocalDevices.get(pres.getFrom());
-            if (dev != null) {
-                dev.presenceChanged(pres);
-            } else {
-                Log.e(TAG, "Received presence information from unknown device: " + pres.getFrom());
-            }
-
-        }
-
-    }
-
-
     @Override
     public IHMCServerHndl implHMCServer() throws RemoteException {
         HMCServerHandler retVal = null;
@@ -206,7 +168,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         if (mLocalImplementation == null) {
             mLocalImplementation = new HMCMediaClientDeviceImplementation();
             retVal = new HMCMediaClientHandler(
-                                    (HMCMediaClientDeviceImplementation) mLocalImplementation);
+                    (HMCMediaClientDeviceImplementation) mLocalImplementation);
         }
         return retVal;
     }
@@ -215,6 +177,39 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     public IHMCMediaServiceHndl implHMCMediaService() throws RemoteException {
         // TODO implement this. leaving it null for now
         return null;
+    }
+
+    class HMCRosterListener implements RosterListener {
+        @Override
+        public void entriesAdded(Collection<String> arg0) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void entriesDeleted(Collection<String> arg0) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void entriesUpdated(Collection<String> arg0) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void presenceChanged(Presence pres) {
+            // let the corresponding device proxy know that the remote device is
+            // offline or back online
+
+            // TODO: change this to send the presence to specific device, using
+            // the resource as well (i.e. parsing the bare JID)
+            HMCDeviceProxy dev = mLocalDevices.get(pres.getFrom());
+            if (dev != null) {
+                dev.presenceChanged(pres);
+            } else {
+                Log.e(TAG, "Received presence information from unknown device: " + pres.getFrom());
+            }
+        }
+
     }
 
 }

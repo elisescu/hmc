@@ -77,19 +77,18 @@ public class HMCApplication extends Application {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences  sharedPreferences, String key) {
-            if (key.equals("hmc_username_key") || key.equals("hmc_pass_key")) {
-                mUsername = mSettings.getString("hmc_username_key", "");
-                mPassword = mSettings.getString("hmc_pass_key", "");
-                try {
-                    mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
-                } catch (NumberFormatException e) {
-                    mDeviceType = -1;
-                }
-                Log.e("EEEEEEEEEEE", "devicetype = " + mDeviceType);
-                mIsConfigured = !("".equals(mUsername) || "".equals(mPassword) || mDeviceType == -1);
-                HMCUserNotifications.normalToast(HMCApplication.this, "Account configured="
-                        + mIsConfigured);
+            mUsername = mSettings.getString("hmc_username_key", "");
+            mPassword = mSettings.getString("hmc_pass_key", "");
+            try {
+                mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
+            } catch (NumberFormatException e) {
+                mDeviceType = -1;
             }
+            mIsConfigured = !("".equals(mUsername) || "".equals(mPassword) || mDeviceType == -1);
+            HMCUserNotifications.normalToast(HMCApplication.this, "Account configured="
+                    + mIsConfigured);
+            Log.e("EEEEEEEEEEE", "devicetype = " + mDeviceType);
+
         }
     }
 }

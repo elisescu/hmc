@@ -52,6 +52,7 @@ public class Login extends Activity {
     private String mPassword;
     private String mUsername;
     private int mDeviceType;
+    private final HMCPreferenceListener mPreferenceListener = new HMCPreferenceListener();
 
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
@@ -81,9 +82,24 @@ public class Login extends Activity {
         // initialize preferences listener and HMCApplication global state 
         mHMCApplication = (HMCApplication)getApplication();
         
+        mUsername = mHMCApplication.getUsername();
+        mPassword = mHMCApplication.getPassword();
+        mDeviceType = mHMCApplication.getDeviceType();
+
         // if we are already connected, then go directly to main screen
         if (mHMCApplication.isConnected()) {
-            startActivity(new Intent(Login.this, HMCServerMainScreen.class));
+            switch (mDeviceType) {
+            case HMCDeviceItf.TYPE.HMC_SERVER:
+                startActivity(new Intent(Login.this, HMCServerMainScreen.class));
+                break;
+            case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
+                startActivity(new Intent(Login.this, HMCMediaClientDeviceMainScreen.class));
+                break;
+            default:
+                Log.e(TAG, "Very baad error: we don't know what type of device we are");
+                disconnectAndStopService();
+                break;
+            }
             finish();
         }
 
@@ -126,11 +142,6 @@ public class Login extends Activity {
             }
             
             if (!mHMCApplication.isConnected() && mHMCApplication.isConfigured()) {
-
-                mUsername = mHMCApplication.getUsername();
-                mPassword = mHMCApplication.getPassword();
-                mDeviceType = mHMCApplication.getDeviceType();
-                
                 mLoginProgressDialog = ProgressDialog.show(Login.this, "Login", "wait please", true, 
                         false);
                 
@@ -253,4 +264,23 @@ public class Login extends Activity {
             }
         }
     }
+
+    private class HMCPreferenceListener implements
+            SharedPreferences.OnSharedPreferenceChangeListener {
+        public HMCPreferenceListener() {
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            mUsername = mSettings.getString("hmc_username_key", "");
+            mPassword = mSettings.getString("hmc_pass_key", "");
+            try {
+                mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
+            } catch (NumberFormatException e) {
+                mDeviceType = -1;
+            }
+            Log.e("EEEEEEEEEEE", "devicetype = " + mDeviceType);
+        }
+    }
+
 }

@@ -21,9 +21,8 @@ public class HMCServerHandler extends IHMCServerHndl.Stub {
     }
 
     @Override
-    public void addNewDevice(String JID) throws RemoteException {
-        // TODO Auto-generated method stub
-        
+    public void addNewDevice(String fullJID) throws RemoteException {
+        mLocalImplementation.addNewDevice(fullJID);
     }
 
     @Override

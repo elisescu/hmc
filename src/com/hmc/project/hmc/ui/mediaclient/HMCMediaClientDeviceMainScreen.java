@@ -131,14 +131,14 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.hmc_server_default_screen, menu);
+        inflater.inflate(R.menu.hmc_mediaclient_default_screen, menu);
         return true;
     }
 
     @Override
     public final boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.hmc_server_default_screen_stop_hmc:
+            case R.id.hmc_mediaclient_default_screen_stop_hmc:
                 logOutAndExit();
                 return true;
             default:

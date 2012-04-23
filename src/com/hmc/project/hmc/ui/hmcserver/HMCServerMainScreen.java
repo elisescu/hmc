@@ -28,6 +28,7 @@ import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IHMCFacade;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
+import com.hmc.project.hmc.ui.HMCSettings;
 
 /**
  * @author elisescu
@@ -120,6 +121,9 @@ public class HMCServerMainScreen extends Activity {
         switch (item.getItemId()) {
             case R.id.hmc_server_default_screen_stop_hmc:
                 logOutAndExit();
+                return true;
+            case R.id.hmc_server_default_screen_add_new_device:
+                startActivity(new Intent(this, AddNewDeviceWizzard.class));
                 return true;
             default:
                 return false;

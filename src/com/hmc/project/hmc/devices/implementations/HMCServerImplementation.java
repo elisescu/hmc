@@ -16,11 +16,11 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
 
     private static final String TAG = "HMCServerImplementation";
     private IUserRequestsListener mUserRequestsListener;
+    private DeviceDescriptor mDeviceDescriptor;
 
     @Override
     public void interconnectTo(String externalHMCServerAddress) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -63,6 +63,11 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
         } else {
             Log.e(TAG, "Unknown listerner for de-registration");
         }
+    }
+
+    public void addNewDevice(String fullJID) {
+        Log.d(TAG, "Have to add new device: !!" + fullJID);
+        DeviceDescriptor devD = mDeviceDescriptor;
     }
 
 }

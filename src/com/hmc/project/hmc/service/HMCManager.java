@@ -60,6 +60,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
     private HMCDeviceImplementationItf mLocalImplementation;
 
+    private Object mLocalImplHandler;
 
     public HMCManager(Connection xmppConnection) {
         mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
@@ -118,6 +119,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     @Override
     public void init() throws RemoteException {
         if (mState == STATE_NOT_INITIALIZED) {
+            // TODO: get my fingerprint from somewhere..or generate it now and
+            // store it
             Collection<RosterEntry> entries = mXMPPRoster.getEntries();
             Log.d(TAG, "We have " + entries.size() + "devices we can connect with");
 
@@ -135,23 +138,25 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
     @Override
     public IHMCServerHndl implHMCServer() throws RemoteException {
-        HMCServerHandler retVal = null;
-        if (mLocalImplementation == null) {
-            mLocalImplementation = new HMCServerImplementation();
-            retVal = new HMCServerHandler((HMCServerImplementation) mLocalImplementation);
+        if (mLocalImplHandler == null) {
+            if (mLocalImplementation == null) {
+                mLocalImplementation = new HMCServerImplementation();
+            }
+            mLocalImplHandler = new HMCServerHandler((HMCServerImplementation) mLocalImplementation);
         }
-        return retVal;
+        return (IHMCServerHndl) mLocalImplHandler;
     }
 
     @Override
     public IHMCMediaClientHndl implHMCMediaClient() throws RemoteException {
-        HMCMediaClientHandler retVal = null;
-        if (mLocalImplementation == null) {
-            mLocalImplementation = new HMCMediaClientDeviceImplementation();
-            retVal = new HMCMediaClientHandler(
-                    (HMCMediaClientDeviceImplementation) mLocalImplementation);
+        if (mLocalImplHandler == null) {
+            if (mLocalImplementation == null) {
+                mLocalImplementation = new HMCMediaClientDeviceImplementation();
+            }
+            mLocalImplHandler = new HMCMediaClientHandler(
+                                    (HMCMediaClientDeviceImplementation) mLocalImplementation);
         }
-        return retVal;
+        return (IHMCMediaClientHndl) mLocalImplHandler;
     }
 
     @Override

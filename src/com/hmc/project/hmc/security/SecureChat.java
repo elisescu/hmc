@@ -43,26 +43,23 @@ public class SecureChat implements MessageListener {
         PLAINTEXT, ENCRYPTED, AUTHENTICATED, NEGOTIATING
     }
 
-    public SecureChat(ChatManager manager, String localFullJID, String remoteFullJid, HMCFingerprintsVerifier ver,
-                            SecuredMessageListener listenter) {
+    public SecureChat(ChatManager manager, String localFullJID, String remoteFullJid,
+            HMCFingerprintsVerifier ver) {
 
         mXMPPChat = manager.createChat(remoteFullJid, this);
         mRemoteFullJID = remoteFullJid;
         mLocalFullJID = localFullJID;
         mHMCFingerprintsVerifier = ver;
-        mSecureMessageListener = listenter;
         mOTRStatus = SecureChatState.PLAINTEXT;
         Log.d(TAG, "Created a LOCAL secure chat with " + mRemoteFullJID);
         mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
         HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }
 
-    public SecureChat(Chat chat, String localFullJID, HMCFingerprintsVerifier ver,
-                            SecuredMessageListener listenter) {
+    public SecureChat(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
         mXMPPChat = chat;
         chat.addMessageListener(this);
         mHMCFingerprintsVerifier = ver;
-        mSecureMessageListener = listenter;
         // TODO: make sure to fix this and get the correct fullJIDs
         mRemoteFullJID = chat.getParticipant();
         mLocalFullJID = localFullJID;
@@ -225,5 +222,9 @@ public class SecureChat implements MessageListener {
                 break;
         }
         return retVal;
+    }
+
+    public void addMessageListener(SecuredMessageListener msgListener) {
+        mSecureMessageListener = msgListener;
     }
 }

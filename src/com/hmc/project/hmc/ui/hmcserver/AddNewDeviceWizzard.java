@@ -253,14 +253,16 @@ public class AddNewDeviceWizzard extends Activity {
         protected Boolean doInBackground(Object... param) {
             IHMCServerHndl hmcServerHmdl = (IHMCServerHndl) param[0];
             String fullJID = (String) param[1];
+            boolean addSuccess = true;
             try {
-                hmcServerHmdl.addNewDevice(fullJID);
+                addSuccess = hmcServerHmdl.addNewDevice(fullJID);
             } catch (RemoteException e) {
                 Log.e(TAG,
                         "Problem calling remote method in HMCService: addNewDevice on HMCServerHandler");
                 e.printStackTrace();
+                addSuccess = false;
             }
-            return new Boolean(true);
+            return new Boolean(addSuccess);
         }
 
         @Override
@@ -271,6 +273,14 @@ public class AddNewDeviceWizzard extends Activity {
             if (result == true) {
                 doUnbindService();
                 finish();
+            } else {
+                // show user notification
+                AddNewDeviceWizzard.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        HMCUserNotifications.normalToast(AddNewDeviceWizzard.this,
+                                "The new device was not added");
+                    }
+                });
             }
         }
     }

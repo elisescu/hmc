@@ -77,8 +77,9 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
         }
     }
 
-    public void addNewDevice(String fullJID) {
+    public boolean addNewDevice(String fullJID) {
         Log.d(TAG, "Have to add new device: !!" + fullJID);
+        boolean addingSuccess = true;
         boolean userConfirmation = false;
         DeviceDescriptor remoteDevDesc = null;
         HMCAnonymousDeviceProxy newDevProxy = mHMCManager.createAnonymousProxy(fullJID);
@@ -87,6 +88,7 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
         // send a hello message to remote anonymous device to negotiate OTR and
         // get information about device which will be approved by the user
         remoteDevDesc = newDevProxy.hello(mDeviceDescriptor);
+        newDevProxy.setDeviceDescriptor(remoteDevDesc);
 
         try {
             Thread.sleep(2000);
@@ -107,13 +109,16 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
         }
         Log.d(TAG, "The user replied with :" + userConfirmation);
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        if (!userConfirmation) {
+            // the user didn't confirm the addition of the device
+            return false;
         }
 
+        addingSuccess = newDevProxy.joinHMC(mHMCManager.getHMCName());
+
+        mHMCManager.promoteAnonymousProxy(newDevProxy);
+
+        return addingSuccess;
     }
 
     public void addUserRequestsListener(IUserRequestsListener userRequests) {

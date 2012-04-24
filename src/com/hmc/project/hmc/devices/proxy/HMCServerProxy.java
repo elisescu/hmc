@@ -14,12 +14,17 @@ import android.util.Log;
 
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
+import com.hmc.project.hmc.security.SecureChat;
 
 public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
     private static final String TAG = "HMCServerProxy";
 
     public HMCServerProxy(Chat chat, String localFUllJID, HMCFingerprintsVerifier ver) {
         super(chat, localFUllJID, ver);
+    }
+
+    public HMCServerProxy(SecureChat secureChat) {
+        super(secureChat);
     }
 
     @Override

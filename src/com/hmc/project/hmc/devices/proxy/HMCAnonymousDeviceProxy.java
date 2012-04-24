@@ -50,4 +50,23 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
             return "not-having-local-implementation";
         }
     }
+
+    public boolean joinHMC(String hmcName) {
+        boolean accepted = false;
+        String retVal;
+        retVal = "true";
+        // retVal = sendCommandSync(CMD_JOIN_HMC, hmcName);
+
+        accepted = Boolean.parseBoolean(retVal);
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        return accepted;
+    }
+
 }

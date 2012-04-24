@@ -52,7 +52,9 @@ public class Login extends Activity {
     private String mPassword;
     private String mUsername;
     private int mDeviceType;
-    private final HMCPreferenceListener mPreferenceListener = new HMCPreferenceListener();
+
+    // private final HMCPreferenceListener mPreferenceListener = new
+    // HMCPreferenceListener();
 
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
@@ -144,7 +146,11 @@ public class Login extends Activity {
             if (!mHMCApplication.isConnected() && mHMCApplication.isConfigured()) {
                 mLoginProgressDialog = ProgressDialog.show(Login.this, "Login", "wait please", true, 
                         false);
-                
+
+                mUsername = mHMCApplication.getUsername();
+                mPassword = mHMCApplication.getPassword();
+                mDeviceType = mHMCApplication.getDeviceType();
+
                 if (mHMCFacade != null) {
                     try {
                         mHMCFacade.registerConnectionListener(mConnectionListener);
@@ -265,22 +271,22 @@ public class Login extends Activity {
         }
     }
 
-    private class HMCPreferenceListener implements
-            SharedPreferences.OnSharedPreferenceChangeListener {
-        public HMCPreferenceListener() {
-        }
-
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            mUsername = mSettings.getString("hmc_username_key", "");
-            mPassword = mSettings.getString("hmc_pass_key", "");
-            try {
-                mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
-            } catch (NumberFormatException e) {
-                mDeviceType = -1;
-            }
-            Log.e("EEEEEEEEEEE", "devicetype = " + mDeviceType);
-        }
-    }
+//    private class HMCPreferenceListener implements
+//            SharedPreferences.OnSharedPreferenceChangeListener {
+//        public HMCPreferenceListener() {
+//        }
+//
+//        @Override
+//        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+//            mUsername = mSettings.getString("hmc_username_key", "");
+//            mPassword = mSettings.getString("hmc_pass_key", "");
+//            try {
+//                mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
+//            } catch (NumberFormatException e) {
+//                mDeviceType = -1;
+//            }
+//            Log.e("EEEEEEEEEEE", "devicetype = " + mDeviceType);
+//        }
+//    }
 
 }

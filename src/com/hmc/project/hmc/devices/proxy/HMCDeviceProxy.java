@@ -17,6 +17,7 @@ import org.jivesoftware.smack.packet.Presence;
 
 import android.util.Log;
 
+import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementationItf;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
@@ -42,20 +43,58 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     private HashMap<String, String> mRepliesValues;
     private String mName = "no_name";
     protected HMCDeviceImplementationItf mLocalImplementation;
+    protected DeviceDescriptor mDeviceDescriptor = null;
 
     public HMCDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
-        mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid, ver, this);
+        mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid, ver);
 
+        mSecureChat.addMessageListener(this);
         mRepliesLocks = new HashMap<String, Object>();
         mRepliesValues = new HashMap<String, String>();
 	}
 
     public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
-        mSecureChat = new SecureChat(chat, localFullJID, ver, this);
-
+        mSecureChat = new SecureChat(chat, localFullJID, ver);
+        mSecureChat.addMessageListener(this);
         mRepliesLocks = new HashMap<String, Object>();
         mRepliesValues = new HashMap<String, String>();
+    }
+
+    public HMCDeviceProxy(SecureChat secureChat) {
+        mSecureChat = secureChat;
+        mSecureChat.addMessageListener(this);
+        mRepliesLocks = new HashMap<String, Object>();
+        mRepliesValues = new HashMap<String, String>();
+    }
+
+    public void setDeviceDescriptor(DeviceDescriptor desc) {
+        mDeviceDescriptor = desc;
+    }
+
+    public HMCDeviceProxy promoteToSpecificProxy() {
+        HMCDeviceProxy retVal = null;
+
+        switch (mDeviceDescriptor.getDeviceType()) {
+        case HMCDeviceItf.TYPE.HMC_SERVER:
+            retVal = new HMCServerProxy(mSecureChat);
+            retVal.setLocalImplementation(mLocalImplementation);
+            retVal.setDeviceDescriptor(mDeviceDescriptor);
+            break;
+        case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
+            retVal = new HMCMediaClientDeviceProxy(mSecureChat);
+            retVal.setLocalImplementation(mLocalImplementation);
+            retVal.setDeviceDescriptor(mDeviceDescriptor);
+            break;
+        default:
+            Log.e(TAG, "Promote to unknown device type proxy");
+            break;
+        }
+        return retVal;
+    }
+
+    public DeviceDescriptor getDeviceDescriptor() {
+        return mDeviceDescriptor;
     }
 
     protected String sendCommandSync(int opCode, String params) {

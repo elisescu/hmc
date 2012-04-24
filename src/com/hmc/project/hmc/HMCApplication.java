@@ -16,6 +16,7 @@ import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 public class HMCApplication extends Application {
 
+    private static final String TAG = "HMCApplication";
     private final HMCPreferenceListener mPreferenceListener = new HMCPreferenceListener();
     private SharedPreferences mSettings;
     private boolean mIsConfigured = false;
@@ -85,9 +86,15 @@ public class HMCApplication extends Application {
                 mDeviceType = -1;
             }
             mIsConfigured = !("".equals(mUsername) || "".equals(mPassword) || mDeviceType == -1);
-            HMCUserNotifications.normalToast(HMCApplication.this, "Account configured="
-                    + mIsConfigured);
-            Log.e("EEEEEEEEEEE", "devicetype = " + mDeviceType);
+
+            if (mIsConfigured) {
+                HMCUserNotifications.normalToast(HMCApplication.this,
+                        "Application was correctly configured");
+            } else {
+                HMCUserNotifications.normalToast(HMCApplication.this,
+                        "Application was correctly configured");
+            }
+            Log.e(TAG, "devicetype = " + mDeviceType);
 
         }
     }

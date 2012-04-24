@@ -59,11 +59,10 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private ChatManager mXMPPChatManager;
     private int mState;
     private RosterListener mRosterListener = new HMCRosterListener();
-
     private HMCDeviceImplementationItf mLocalImplementation;
-
     private Object mLocalImplHandler;
     private DeviceDescriptor mThisDeviceDescriptor;
+    private String mHMCName;
 
     public HMCManager(Connection xmppConnection) {
         mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
@@ -127,6 +126,9 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             mThisDeviceDescriptor.setDeviceName(deviceName);
             mThisDeviceDescriptor.setUserName(userName);
             mThisDeviceDescriptor.setFullJID(mXMPPConnection.getUser());
+            // TODO: add a way to set the name nice only if the device is
+            // HMCServer
+            mHMCName = "Popescus HMC";
             // TODO: get my fingerprint from somewhere..or generate it now and
             // store it
             mThisDeviceDescriptor.setFingerprint("no-fingerprint-yet");
@@ -209,4 +211,23 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         return retVal;
     }
 
+    public String getHMCName() {
+        return mHMCName;
+    }
+
+    public void setHMCName(String name) {
+        mHMCName = name;
+    }
+
+    public void promoteAnonymousProxy(HMCAnonymousDeviceProxy newDevProxy) {
+        // create a specific proxy for the newly added device and add it to the
+        // devices list
+        HMCDeviceProxy knownDevice = null;
+        knownDevice = newDevProxy.promoteToSpecificProxy();
+        if (knownDevice != null ) {
+            mLocalDevices.put(newDevProxy.getDeviceDescriptor().getFullJID(), knownDevice);
+        } else {
+            Log.e(TAG, "Couldn't promote the anonimous device");
+        }
+    }
 }

@@ -22,8 +22,8 @@ public class HMCServerHandler extends IHMCServerHndl.Stub {
     }
 
     @Override
-    public void addNewDevice(String fullJID) throws RemoteException {
-        mLocalImplementation.addNewDevice(fullJID);
+    public boolean addNewDevice(String fullJID) throws RemoteException {
+        return mLocalImplementation.addNewDevice(fullJID);
     }
 
     @Override

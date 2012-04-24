@@ -10,7 +10,7 @@ import com.hmc.project.hmc.aidl.IAddDeviceListener;
 
 interface IHMCServerHndl {
 
-    void addNewDevice(String JID);
+    boolean addNewDevice(String JID);
     
     void registerUserRequestsListener(IUserRequestsListener usrReqListener);
     

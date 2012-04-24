@@ -12,6 +12,7 @@ import org.jivesoftware.smack.ChatManager;
 
 import com.hmc.project.hmc.devices.interfaces.HMCMediaClientDeviceItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
+import com.hmc.project.hmc.security.SecureChat;
 
 
 public class HMCMediaClientDeviceProxy extends HMCMediaDeviceProxy implements HMCMediaClientDeviceItf {
@@ -26,6 +27,10 @@ public class HMCMediaClientDeviceProxy extends HMCMediaDeviceProxy implements HM
                             HMCFingerprintsVerifier ver) {
         super(chatManager, localFUllJID, remoteFullJid, ver);
         // TODO Auto-generated constructor stub
+    }
+
+    public HMCMediaClientDeviceProxy(SecureChat secureChat) {
+        super(secureChat);
     }
 
     @Override

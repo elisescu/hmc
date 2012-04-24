@@ -7,7 +7,10 @@
 
 package com.hmc.project.hmc.ui.hmcserver;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -15,36 +18,43 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
+import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 import com.hmc.project.hmc.aidl.IHMCFacade;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
+import com.hmc.project.hmc.ui.DevicesListAdapter;
 import com.hmc.project.hmc.ui.HMCSettings;
 
-/**
- * @author elisescu
- *
- */
+import com.hmc.project.hmc.aidl.IHMCDevicesListener;
+
 public class HMCServerMainScreen extends Activity {
     protected static final String TAG = "DeviceMainScreen";
     private boolean mIsBound;
     private HMCService mBoundService;
     private IHMCFacade mHMCFacade;
     private HMCApplication mHMCApplication;
+    private ArrayList<String> mDevicesNames;
+    private ListView mDevicesListView;
+    private DevicesListAdapter mDeviceNamesAdapter;
+    HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
+    ArrayList<IDeviceDescriptor> mLocalDevDescriptors;
 
     private OnClickListener mTestMethodListener = new OnClickListener() {
         public void onClick(View v) {
             if (mHMCFacade != null) {
-                // do your stuff
+                mDeviceNamesAdapter.add("New device");
             }
         }
     };;
@@ -58,6 +68,13 @@ public class HMCServerMainScreen extends Activity {
                 try {
                     mHMCFacade.getHMCManager()
                             .init("nume de HMCServer", "HMCServer deci fara user");
+                    mHMCFacade.getHMCManager().registerDevicesListener(mHMCDevicesListener);
+
+                    mLocalDevDescriptors = (ArrayList<IDeviceDescriptor>) mHMCFacade.getHMCManager()
+                                            .getListOfLocalDevices();
+
+                    updateListOfLocalDevicesUIThread();
+
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -70,6 +87,22 @@ public class HMCServerMainScreen extends Activity {
                     Toast.LENGTH_SHORT).show();
         }
     };
+
+    private void updateListOfLocalDevicesUIThread() {
+        HMCServerMainScreen.this.runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    for (int i = 0; i < mLocalDevDescriptors.size(); i++) {
+                        mDeviceNamesAdapter.add(mLocalDevDescriptors.get(i).getDeviceName());
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot retrieve the details about modified device");
+                    e.printStackTrace();
+                }
+            }
+        });
+
+    }
 
     void doBindService() {
         bindService(new Intent(HMCServerMainScreen.this, 
@@ -102,6 +135,13 @@ public class HMCServerMainScreen extends Activity {
         Button button = (Button) findViewById(R.id.test_method);
         button.setOnClickListener(mTestMethodListener);
 
+        mDevicesListView = (ListView) findViewById(R.id.hmc_devices_list);
+        mDevicesNames = new ArrayList<String>();
+        mDeviceNamesAdapter = new DevicesListAdapter(this, mDevicesNames);
+        mDevicesListView.setAdapter(mDeviceNamesAdapter);
+
+        mLocalDevDescriptors = new ArrayList<IDeviceDescriptor>();
+
         // make sure we ended up in this activity with the app connected to XMPP
         // server
         if (!mHMCApplication.isConnected()) {
@@ -113,7 +153,7 @@ public class HMCServerMainScreen extends Activity {
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.hmc_server_default_screen, menu);
+        inflater.inflate(R.menu.hmc_server_main_screen, menu);
         return true;
     }
 
@@ -144,6 +184,30 @@ public class HMCServerMainScreen extends Activity {
         doUnbindService();
         stopService(new Intent(HMCServerMainScreen.this,HMCService.class));
         finish();
+    }
+
+    private class HMCDevicesListener extends IHMCDevicesListener.Stub {
+        IDeviceDescriptor modifDeviceDescriptor = null;
+        @Override
+        public void onDevicesListChanged(String whatChanged, IDeviceDescriptor devDesc)
+                                throws RemoteException {
+            modifDeviceDescriptor = devDesc;
+            if (whatChanged.equals("added")) {
+                // add the device in the list, inside ui thread
+                HMCServerMainScreen.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        try {
+                            mDeviceNamesAdapter.add(modifDeviceDescriptor.getDeviceName());
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot retrieve the details about modified device");
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            }
+        }
+
     }
 }
 

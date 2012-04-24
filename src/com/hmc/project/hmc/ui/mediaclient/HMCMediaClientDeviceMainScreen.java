@@ -38,6 +38,7 @@ import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IHMCFacade;
 import com.hmc.project.hmc.service.HMCService;
+import com.hmc.project.hmc.ui.DevicesListAdapter;
 import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
 
 /**
@@ -132,7 +133,7 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.hmc_mediaclient_default_screen, menu);
+        inflater.inflate(R.menu.hmc_mediaclient_main_screen, menu);
         return true;
     }
 

@@ -7,8 +7,11 @@
 
 package com.hmc.project.hmc.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
@@ -24,6 +27,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.hmc.project.hmc.aidl.IDeviceDescriptor;
+import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
 import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
@@ -63,6 +67,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private Object mLocalImplHandler;
     private DeviceDescriptor mThisDeviceDescriptor;
     private String mHMCName;
+    private IHMCDevicesListener mHMCDevicesListener = null;
 
     public HMCManager(Connection xmppConnection) {
         mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
@@ -229,5 +234,45 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         } else {
             Log.e(TAG, "Couldn't promote the anonimous device");
         }
+        Log.d(TAG, knownDevice.getDeviceDescriptor().getDeviceName()
+                                + " was added to our list of devices");
+        // TODO: replace operation strings with constants defined somewhere
+        onLocalDevicesListChanged("added", newDevProxy);
+    }
+
+    private void onLocalDevicesListChanged(String string, HMCAnonymousDeviceProxy newDevProxy) {
+        if (mHMCDevicesListener != null) {
+            try {
+                mHMCDevicesListener.onDevicesListChanged(string, newDevProxy.getDeviceDescriptor());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error when notifying listener about devices list modification: "
+                                        + string);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void registerDevicesListener(IHMCDevicesListener listener) throws RemoteException {
+        mHMCDevicesListener = listener;
+    }
+
+    @Override
+    public void unregisterDevicesListener(IHMCDevicesListener listener) throws RemoteException {
+        // TODO: if we support multiple listeners, fix this
+        mHMCDevicesListener = null;
+    }
+
+
+    @Override
+    public List<IDeviceDescriptor> getListOfLocalDevices() throws RemoteException {
+        ArrayList<IDeviceDescriptor> retVal = new ArrayList<IDeviceDescriptor>();
+
+        Iterator<HMCDeviceProxy> iter = mLocalDevices.values().iterator();
+        while (iter.hasNext()) {
+            retVal.add(iter.next().getDeviceDescriptor());
+        }
+
+        return (List<IDeviceDescriptor>) retVal;
     }
 }

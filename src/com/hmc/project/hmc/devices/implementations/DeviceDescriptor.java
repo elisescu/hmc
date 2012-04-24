@@ -30,10 +30,12 @@ import org.xml.sax.SAXException;
 
 import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
-public class DeviceDescriptor extends IDeviceDescriptor.Stub {
+public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelable {
     private static final String TAG = null;
     // this order should be maintained in the XML representation
     public static final String TAG_DEVICE_NAME = "dd_dvn";
@@ -191,5 +193,23 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub {
 
     public void setFingerprint(String fingerprint) {
         mFingerprint = fingerprint;
+    }
+
+    /* (non-Javadoc)
+     * @see android.os.Parcelable#describeContents()
+     */
+    @Override
+    public int describeContents() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see android.os.Parcelable#writeToParcel(android.os.Parcel, int)
+     */
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -10,10 +10,14 @@ import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 import com.hmc.project.hmc.aidl.IHMCServerHndl;
 import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
 import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
+import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 
 interface IHMCManager {
 	void init(String deviceName, String userName);
 	IHMCServerHndl implHMCServer();
 	IHMCMediaClientHndl implHMCMediaClient();
 	IHMCMediaServiceHndl implHMCMediaService();
+	void registerDevicesListener(IHMCDevicesListener listener);
+	void unregisterDevicesListener(IHMCDevicesListener listener);
+	List<IDeviceDescriptor> getListOfLocalDevices();
 }

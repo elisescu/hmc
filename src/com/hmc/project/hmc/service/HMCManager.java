@@ -23,17 +23,19 @@ import org.jivesoftware.smack.util.StringUtils;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.hmc.project.hmc.aidl.IHMCDeviceDescriptor;
+import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
 import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
 import com.hmc.project.hmc.aidl.IHMCServerHndl;
 import com.hmc.project.hmc.devices.handlers.HMCMediaClientHandler;
 import com.hmc.project.hmc.devices.handlers.HMCServerHandler;
+import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementationItf;
 import com.hmc.project.hmc.devices.implementations.HMCMediaClientDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCServerImplementation;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
+import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
@@ -61,6 +63,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private HMCDeviceImplementationItf mLocalImplementation;
 
     private Object mLocalImplHandler;
+    private DeviceDescriptor mThisDeviceDescriptor;
 
     public HMCManager(Connection xmppConnection) {
         mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
@@ -76,13 +79,6 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         mXMPPRoster.setSubscriptionMode(Roster.SubscriptionMode.manual);
         mXMPPRoster.addRosterListener(mRosterListener);
         mState = STATE_NOT_INITIALIZED;
-    }
-
-    @Override
-    public IHMCDeviceDescriptor getDeviceDescriptor(String devJID) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
-        
     }
 
     @Override
@@ -117,10 +113,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     }
 
     @Override
-    public void init() throws RemoteException {
+    public void init(String deviceName, String userName) throws RemoteException {
         if (mState == STATE_NOT_INITIALIZED) {
-            // TODO: get my fingerprint from somewhere..or generate it now and
-            // store it
             Collection<RosterEntry> entries = mXMPPRoster.getEntries();
             Log.d(TAG, "We have " + entries.size() + "devices we can connect with");
 
@@ -129,6 +123,14 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             for (RosterEntry entry : entries) {
                 Log.d(TAG, "Device name " + entry.getName() + ", bareJID:" + entry.getUser());
             }
+            mThisDeviceDescriptor = new DeviceDescriptor();
+            mThisDeviceDescriptor.setDeviceName(deviceName);
+            mThisDeviceDescriptor.setUserName(userName);
+            mThisDeviceDescriptor.setFullJID(mXMPPConnection.getUser());
+            // TODO: get my fingerprint from somewhere..or generate it now and
+            // store it
+            mThisDeviceDescriptor.setFingerprint("no-fingerprint-yet");
+
             mState = STATE_INITIALIZED;
         } else {
             Log.w(TAG, "Already initialized");
@@ -140,7 +142,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     public IHMCServerHndl implHMCServer() throws RemoteException {
         if (mLocalImplHandler == null) {
             if (mLocalImplementation == null) {
-                mLocalImplementation = new HMCServerImplementation();
+                mThisDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_SERVER);
+                mLocalImplementation = new HMCServerImplementation(this, mThisDeviceDescriptor);
             }
             mLocalImplHandler = new HMCServerHandler((HMCServerImplementation) mLocalImplementation);
         }
@@ -151,7 +154,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     public IHMCMediaClientHndl implHMCMediaClient() throws RemoteException {
         if (mLocalImplHandler == null) {
             if (mLocalImplementation == null) {
-                mLocalImplementation = new HMCMediaClientDeviceImplementation();
+                mThisDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE);
+                mLocalImplementation = new HMCMediaClientDeviceImplementation(this);
             }
             mLocalImplHandler = new HMCMediaClientHandler(
                                     (HMCMediaClientDeviceImplementation) mLocalImplementation);
@@ -196,6 +200,13 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             }
         }
 
+    }
+
+    public HMCAnonymousDeviceProxy createAnonymousProxy(String fullJID) {
+        HMCAnonymousDeviceProxy retVal = null;
+        retVal = new HMCAnonymousDeviceProxy(mXMPPChatManager, mXMPPConnection.getUser(), fullJID,
+                this);
+        return retVal;
     }
 
 }

@@ -32,22 +32,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="0.46" >
 
-        <Button
-            android:id="@+id/add_new_dev_butt_done"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:text="Done" />
-        
-            <Button
-                android:id="@+id/add_new_dev_butt_cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:text="Cancel" />
-
         <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"

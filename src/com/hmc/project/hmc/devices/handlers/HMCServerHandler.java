@@ -8,6 +8,7 @@ package com.hmc.project.hmc.devices.handlers;
 
 import android.os.RemoteException;
 
+import com.hmc.project.hmc.aidl.IAddDeviceListener;
 import com.hmc.project.hmc.aidl.IHMCServerHndl;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.implementations.HMCServerImplementation;
@@ -36,6 +37,11 @@ public class HMCServerHandler extends IHMCServerHndl.Stub {
     public void unregisterUserRequestsListener(IUserRequestsListener userReqListener)
                             throws RemoteException {
         mLocalImplementation.unregisterUserRequestsListener(userReqListener);
+    }
+
+    @Override
+    public void addUserRequestsListener(IUserRequestsListener addListener) throws RemoteException {
+        mLocalImplementation.addUserRequestsListener(addListener);
     }
 
 }

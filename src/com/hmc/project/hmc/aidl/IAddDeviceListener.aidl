@@ -8,9 +8,8 @@
 package com.hmc.project.hmc.aidl;
 
 import com.hmc.project.hmc.aidl.IDeviceDescriptor;
-interface IUserRequestsListener {
 
-    boolean confirmDeviceAddition(IDeviceDescriptor newDevice); 
-    boolean verifyFingerprint(String localFingerprint, String remoteFingerprint, String deviceName);
-
+interface IAddDeviceListener {
+    void remoteDevDescReceived(IDeviceDescriptor remDev);
+    void remoteDevAdded(boolean success);	
 }

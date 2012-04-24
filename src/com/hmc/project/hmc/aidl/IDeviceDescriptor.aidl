@@ -6,6 +6,7 @@
 **/
 package com.hmc.project.hmc.aidl;
 
-interface IHMCDeviceDescriptor {
-    String getName();
+interface IDeviceDescriptor {
+    String getDeviceName();
+    String getFingerprint();
 }

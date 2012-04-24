@@ -70,7 +70,8 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
 
             if (mHMCFacade != null) {
                 try {
-                    mHMCFacade.getHMCManager().init();
+                    mHMCFacade.getHMCManager().init("nume de client device",
+                            "user de client device");
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

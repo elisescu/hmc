@@ -56,7 +56,8 @@ public class HMCServerMainScreen extends Activity {
 
             if (mHMCFacade != null) {
                 try {
-                    mHMCFacade.getHMCManager().init();
+                    mHMCFacade.getHMCManager()
+                            .init("nume de HMCServer", "HMCServer deci fara user");
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

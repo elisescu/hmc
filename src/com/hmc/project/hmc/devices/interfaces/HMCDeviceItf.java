@@ -25,7 +25,10 @@ public interface HMCDeviceItf {
 
     static final int HMC_DEVICE_INITIAL_COMMAND = 1;
 
-    static final int CMD_REMOTE_INCREMENT = 2;
+    static final int CMD_HELLO = 2;
+    static final int CMD_JOIN_HMC = 3;
+
+    static final int CMD_REMOTE_INCREMENT = 4;
 
     static final int HMC_DEVICE_LAST_COMMAND = CMD_REMOTE_INCREMENT;
 	

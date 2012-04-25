@@ -8,6 +8,8 @@
  */
 package com.hmc.project.hmc.devices.interfaces;
 
+import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
+
 /**
  * HMCServer class Models the HMCServer device operations
  */
@@ -17,30 +19,21 @@ public interface HMCServerItf {
 
     static final int CMD_GET_LIST_OF_LOCAL_HMC_DEVICES = HMC_SERVER_INITIAL_COMMAND + 1;
 
-    static final int HMC_DEVICE_LAST_COMMAND = CMD_GET_LIST_OF_LOCAL_HMC_DEVICES;
+    static final int HMC_SERVER_LAST_COMMAND = CMD_GET_LIST_OF_LOCAL_HMC_DEVICES;
 
-  /**
-   * Request received from a local admin device in order to interconnect to an external HMC. 
-   * The external HMC system is identified using the XMPP address of its HMCServer. 
-   * Inside this function the OTR session is negotiated and once we got the remote 
-   * public key (of the external HMCServer) the admin's device will be contacted to
-   *  verify this remote public key (its fingerprint) against the one displayed on the
-   *  admin's device of the external HMC. See the sequece diagram for more details.
-   */
-  void interconnectTo(String externalHMCServerAddress) ;
+    /**
+     * Interconnects with an external HMC. The request is sent by an external
+     * HMCServer that we are going to interconnect to. Once the admin approves
+     * and verifies the fingerprint of the remote HMCServer, we can send a
+     * request to get the list of the external devices.
+     */
+    void interconnectionRequest(String requesterName);
 
-  /**
-   * Interconnects with an external HMC. The request is sent by an external HMCServer
-   *  that we are going to interconnect to. Once the admin approves and verifies the
-   *  fingerprint of the remote HMCServer, we can send a request to get the list of the 
-   * external devices.
-   */
-  void interconnectionRequest(String requesterName) ;
-
-  /**
-   * retrieves the list of HMC devices XMPP JIDs and their public keys from HMC
-   */
-  void getListOfLocalHMCDevices() ;
+    /**
+     * retrieves the list of HMC devices XMPP JIDs and their public keys from
+     * HMC
+     */
+    HMCDevicesList getListOfLocalHMCDevices();
 
   /**
    * Get the new devices that were added to HMC while local device was offline. 

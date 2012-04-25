@@ -57,15 +57,33 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
     }
     
     public static DeviceDescriptor fromXMLString(String input) {
+
+        if (input == null) {
+            Log.e(TAG, "received null string to parse");
+            return null;
+        }
+        
         DeviceDescriptor retDevDesc = new DeviceDescriptor();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();
             Document doc = db.parse(new InputSource(new StringReader(input)));
-            doc.getDocumentElement().normalize();
+            Element rootElement = doc.getDocumentElement();
+
+            // TODO: improve the way of handling errors
+            if (rootElement == null)
+                return null;
+
+            rootElement.normalize();
 
             NodeList nList = doc.getElementsByTagName(DeviceDescriptor.TAG_DEVICE_ELEMENT);
+
+            // TODO: improve the way of handling errors
+            if (nList == null) {
+                return null;
+            }
+
             if (nList.getLength() > 1) {
                 Log.e(TAG, "Received more than a single inside xml string device");
             }

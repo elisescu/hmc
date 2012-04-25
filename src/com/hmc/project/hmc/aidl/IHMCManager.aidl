@@ -13,7 +13,7 @@ import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
 import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 
 interface IHMCManager {
-	void init(String deviceName, String userName);
+	void init(String deviceName, String userName, int devType);
 	IHMCServerHndl implHMCServer();
 	IHMCMediaClientHndl implHMCMediaClient();
 	IHMCMediaServiceHndl implHMCMediaService();

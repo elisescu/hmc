@@ -24,13 +24,16 @@ public class HMCApplication extends Application {
     private String mUsername = "insert_something";
     private String mPassword = "insert_something";
     private int mDeviceType = -1;
+    private String mDeviceName = "no name";
 
     @Override
     public void onCreate() {
         super.onCreate();
         mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        mUsername = mSettings.getString("hmc_username_key", "");
+
+        mUsername = mSettings.getString("hmc_jid_key", "");
         mPassword = mSettings.getString("hmc_pass_key", "");
+        mDeviceName = mSettings.getString("hmc_devname_key", "");
 
         try {
             mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
@@ -39,6 +42,9 @@ public class HMCApplication extends Application {
         }
 
         mIsConfigured = !("".equals(mUsername) || "".equals(mPassword) || mDeviceType == -1);
+        Log.d(TAG, "------------Configuration: " + mUsername + " " + mPassword.length() + " "
+                                + mDeviceName
+                                + " " + mDeviceType);
         mSettings.registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
@@ -72,14 +78,20 @@ public class HMCApplication extends Application {
         return mDeviceType;
     }
     
+    public String getDeviceName() {
+        return mDeviceName;
+    }
+
     private class HMCPreferenceListener implements SharedPreferences.OnSharedPreferenceChangeListener {
         public HMCPreferenceListener() {
         }
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences  sharedPreferences, String key) {
-            mUsername = mSettings.getString("hmc_username_key", "");
+            mUsername = mSettings.getString("hmc_jid_key", "");
             mPassword = mSettings.getString("hmc_pass_key", "");
+            mDeviceName = mSettings.getString("hmc_device_name", "");
+
             try {
                 mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
             } catch (NumberFormatException e) {
@@ -92,9 +104,12 @@ public class HMCApplication extends Application {
                         "Application was correctly configured");
             } else {
                 HMCUserNotifications.normalToast(HMCApplication.this,
-                        "Application was correctly configured");
+                                        "Application was not configured:" + mUsername
+                                                                + mPassword.length() + mDeviceName
+                                                                + mDeviceType);
             }
-            Log.e(TAG, "devicetype = " + mDeviceType);
+            Log.d(TAG, "------------Configuration: " + mUsername + " " + mPassword.length() + " "
+                                    + mDeviceName + " " + mDeviceType);
 
         }
     }

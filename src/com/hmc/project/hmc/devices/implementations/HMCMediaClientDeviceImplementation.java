@@ -4,23 +4,28 @@ import android.util.Log;
 
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaClientDeviceItf;
+import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.service.HMCManager;
 
-public class HMCMediaClientDeviceImplementation implements HMCMediaClientDeviceItf,
-        HMCDeviceImplementationItf {
+public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementation implements
+                        HMCMediaClientDeviceItf {
 
     private static final String TAG = "HMCMediaClientDeviceImplementation";
     private IUserRequestsListener mUserRequestListener;
-    private HMCManager mHMCManager;
 
-    public HMCMediaClientDeviceImplementation(HMCManager hmcManager) {
-        mHMCManager = hmcManager;
+    public HMCMediaClientDeviceImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
+        super(hmcManager, thisDeviceDesc);
     }
 
     @Override
     public String localExecute(int opCode, String params) {
-        // TODO Auto-generated method stub
-        return null;
+        String retVal = null;
+        switch (opCode) {
+            default:
+                retVal = super.localExecute(opCode, params);
+                break;
+        }
+        return retVal;
     }
 
     @Override

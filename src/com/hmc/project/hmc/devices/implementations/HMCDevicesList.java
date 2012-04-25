@@ -46,6 +46,13 @@ public class HMCDevicesList {
         mDevices = new HashMap<String, DeviceDescriptor>();
     }
 
+    public HMCDevicesList(String name, boolean localDevices,
+                            HashMap<String, DeviceDescriptor> devices) {
+        mName = name;
+        mIsLocal = localDevices;
+        mDevices = devices;
+    }
+
     public void addDevice(DeviceDescriptor dev) {
         mDevices.put(dev.getFullJID(), dev);
     }

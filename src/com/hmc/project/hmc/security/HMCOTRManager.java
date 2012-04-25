@@ -44,12 +44,15 @@ public class HMCOTRManager implements OtrEngineHost {
     }
 
     public void addChat(SessionID session, SecureChat chat) {
-        Log.d(TAG, "Added a new chat with " + chat.getParticipant() + "to session: " + session);
         mChats.put(session, chat);
+        Log.d(TAG, "Added a new chat with " + chat.getParticipant() + "to session: " + session
+                                + " Now have " + mChats.size() + " chats");
     }
 
     public void removeChat(SessionID session, SecureChat chat) {
         mChats.remove(session);
+        Log.d(TAG, "Removed chat with " + chat.getParticipant() + "to session: " + session
+                                + " Now have " + mChats.size() + " chats");
     }
 
     public static HMCOTRManager getInstance() {

@@ -12,6 +12,7 @@ import org.jivesoftware.smack.Chat;
 
 import android.util.Log;
 
+import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.SecureChat;
@@ -28,23 +29,17 @@ public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
     }
 
     @Override
-    public void interconnectTo(String externalHMCServerAddress) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public void interconnectionRequest(String requesterName) {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void getListOfLocalHMCDevices() {
+    public HMCDevicesList getListOfLocalHMCDevices() {
         String returnedString;
 
-        Log.d(TAG, "Call addMeToHMC()");
         returnedString = sendCommandSync(CMD_GET_LIST_OF_LOCAL_HMC_DEVICES, "void-param");
-        Log.d(TAG, "Returned value is: " + returnedString);
-		
+
+        return HMCDevicesList.fromXMLString(returnedString);
 	}
 
 	@Override
@@ -58,14 +53,5 @@ public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
 		// TODO Auto-generated method stub
 		
 	}
-
-    @Override
-    protected String executeLocalSyncCommand(int opCode, String params) {
-        if (mLocalImplementation != null) {
-            return mLocalImplementation.localExecute(opCode, params);
-        } else {
-            return "not-having-local-implementation";
-        }
-    }
 
 }

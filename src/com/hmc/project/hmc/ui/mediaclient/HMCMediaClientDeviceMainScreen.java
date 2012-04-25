@@ -37,6 +37,7 @@ import android.widget.Toast;
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListAdapter;
 import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
@@ -71,8 +72,8 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
 
             if (mHMCFacade != null) {
                 try {
-                    mHMCFacade.getHMCManager().init("nume de client device",
-                            "user de client device");
+                    mHMCFacade.getHMCManager().init(mHMCApplication.getDeviceName(), "",
+                                            HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

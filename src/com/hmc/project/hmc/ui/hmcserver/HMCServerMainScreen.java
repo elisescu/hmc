@@ -68,8 +68,8 @@ public class HMCServerMainScreen extends Activity {
 
             if (mHMCFacade != null) {
                 try {
-                    mHMCFacade.getHMCManager()
-                            .init("nume de HMCServer", "HMCServer deci fara user");
+                    mHMCFacade.getHMCManager().init(mHMCApplication.getDeviceName(), "",
+                                            HMCDeviceItf.TYPE.HMC_SERVER);
                     mHMCFacade.getHMCManager().registerDevicesListener(mHMCDevicesListener);
 
                     mLocalDevDescriptors = (HashMap<String, String>) mHMCFacade.getHMCManager()

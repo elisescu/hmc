@@ -18,7 +18,8 @@ import org.jivesoftware.smack.packet.Presence;
 import android.util.Log;
 
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
-import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementationItf;
+import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation;
+import com.hmc.project.hmc.devices.implementations.HMCMediaDeviceImplementation;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.SecureChat;
@@ -38,11 +39,11 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     // RPC header format:
     // |...type_of_message...|...operation_code...|...operation_id...|...other_data(params, reply value)...|
 
-    private SecureChat mSecureChat;
+    protected SecureChat mSecureChat;
     private HashMap<String, Object> mRepliesLocks;
     private HashMap<String, String> mRepliesValues;
     private String mName = "no_name";
-    protected HMCDeviceImplementationItf mLocalImplementation;
+    protected HMCDeviceImplementation mLocalImplementation;
     protected DeviceDescriptor mDeviceDescriptor = null;
     protected String mFullJID;
 
@@ -269,25 +270,23 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         sendMessage(msgToBeSent);
     }
 
-    // this should be overridden by subclasses and call the specific method of
-    // the implementation, based on opCode value
+    // this should NOT be overridden by subclasses. The implementation will take
+    // care of executing the local method and return back the proper value
     protected String executeLocalSyncCommand(int opCode, String params) {
-        String returnVal = "";
-        switch (opCode) {
-            case CMD_REMOTE_INCREMENT:
-                returnVal = "141186";
-                break;
-            default:
-                break;
+        if (mLocalImplementation != null) {
+            return mLocalImplementation.localExecute(opCode, params);
+        } else {
+            Log.e(TAG, "Don't have local implementation to execute request!");
+            return "not-having-local-implementation";
         }
-        return returnVal;
     }
 
     public void presenceChanged(Presence pres) {
         mSecureChat.presenceChanged(pres);
     }
 
-    public void setLocalImplementation(HMCDeviceImplementationItf locImpl) {
+    public void setLocalImplementation(HMCDeviceImplementation locImpl) {
+        Log.d(TAG, "Setting up the implementation: " + locImpl);
         mLocalImplementation = locImpl;
     }
 

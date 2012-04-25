@@ -12,8 +12,14 @@ package com.hmc.project.hmc.devices.interfaces;
  * 
  */
 public interface HMCMediaDeviceItf {
-  void deviceRemovedNotification() ;
 
-  void deviceAddedNotification() ;
+    static final int HMC_MEDIA_DEVICE_INITIAL_COMMAND = HMCServerItf.HMC_SERVER_LAST_COMMAND;
 
+    static final int CMD_HELLO = HMC_MEDIA_DEVICE_INITIAL_COMMAND + 1;
+
+    static final int CMD_JOIN_HMC = HMC_MEDIA_DEVICE_INITIAL_COMMAND + 2;
+
+    void deviceRemovedNotification();
+
+    void deviceAddedNotification();
 }

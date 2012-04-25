@@ -38,7 +38,6 @@ import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 public class Login extends Activity {
     protected static final String TAG = "LoginActivity";
-    private SharedPreferences mSettings;
     private HMCService mBoundService;
     private HMCApplication mHMCApplication;
     private ServiceConnection mConnection = new HMCServiceConnection();

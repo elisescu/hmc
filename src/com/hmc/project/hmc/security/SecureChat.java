@@ -56,6 +56,10 @@ public class SecureChat implements MessageListener {
         HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }
 
+    public void cleanOTRSession() {
+        HMCOTRManager.getInstance().removeChat(mOtrSessionId, this);
+    }
+
     public SecureChat(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
         mXMPPChat = chat;
         chat.addMessageListener(this);

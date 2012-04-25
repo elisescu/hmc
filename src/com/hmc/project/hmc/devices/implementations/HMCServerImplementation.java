@@ -7,6 +7,9 @@
 
 package com.hmc.project.hmc.devices.implementations;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -17,20 +20,16 @@ import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.service.HMCManager;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
-public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplementationItf {
+public class HMCServerImplementation extends HMCDeviceImplementation implements HMCServerItf {
 
     private static final String TAG = "HMCServerImplementation";
     private IUserRequestsListener mUserRequestsListener;
-    private DeviceDescriptor mDeviceDescriptor;
-    private HMCManager mHMCManager;
     private IUserRequestsListener mUserRequests;
 
     public HMCServerImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
-        mHMCManager = hmcManager;
-        mDeviceDescriptor = thisDeviceDesc;
+        super(hmcManager, thisDeviceDesc);
     }
 
-    @Override
     public void interconnectTo(String externalHMCServerAddress) {
         // TODO Auto-generated method stub
     }
@@ -42,9 +41,13 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
     }
 
     @Override
-    public void getListOfLocalHMCDevices() {
-        // TODO Auto-generated method stub
+    public HMCDevicesList getListOfLocalHMCDevices() {
+        HashMap<String, DeviceDescriptor> ourLocalDevices = mHMCManager
+                                .getListOfLocalDevicesDescriptors();
+        HMCDevicesList locDevsList = new HMCDevicesList(mHMCManager.getHMCName(), true,
+                                ourLocalDevices);
 
+        return locDevsList;
     }
 
     @Override
@@ -61,8 +64,23 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
 
     @Override
     public String localExecute(int opCode, String params) {
-        // TODO Auto-generated method stub
-        return null;
+        String retVal = null;
+        switch (opCode) {
+            case HMCServerItf.CMD_GET_LIST_OF_LOCAL_HMC_DEVICES:
+                retVal = _getListOfLocalHMCDevices();
+                break;
+            default:
+                retVal = super.localExecute(opCode, params);
+                break;
+        }
+        return retVal;
+    }
+
+    private String _getListOfLocalHMCDevices() {
+        String retVal = null;
+        HMCDevicesList list = getListOfLocalHMCDevices();
+        retVal = list.toXMLString();
+        return retVal;
     }
 
     public void registerUserRequestsListener(IUserRequestsListener usrReqListener) {
@@ -88,15 +106,13 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
         // send a hello message to remote anonymous device to negotiate OTR and
         // get information about device which will be approved by the user
         remoteDevDesc = newDevProxy.hello(mDeviceDescriptor);
+        // check the descriptor received
+        if (remoteDevDesc == null) {
+            newDevProxy.cleanOTRSession();
+            return false;
+        }
         newDevProxy.setDeviceDescriptor(remoteDevDesc);
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        
         // now the user should confirm or deny adding the device with
         // information present in remoteDevDesc data
         Log.d(TAG, "Got remote dev desc: " + remoteDevDesc.toString()
@@ -111,6 +127,7 @@ public class HMCServerImplementation implements HMCServerItf, HMCDeviceImplement
 
         if (!userConfirmation) {
             // the user didn't confirm the addition of the device
+            newDevProxy.cleanOTRSession();
             return false;
         }
 

@@ -14,10 +14,10 @@
             android:title="@string/hmc_account_settings" android:persistent="true">
 
         <EditTextPreference
-                android:key="hmc_username_key"
-                android:title="@string/hmc_username_title"
-                android:summary="@string/hmc_username_summary"
-                android:dialogTitle="@string/hmc_username_dialog_title" 
+                android:key="hmc_jid_key"
+                android:title="@string/hmc_jid_title"
+                android:summary="@string/hmc_jid_summary"
+                android:dialogTitle="@string/hmc_jid_dialog_title" 
                 android:inputType="textEmailAddress"
                 android:singleLine="true"/>
 
@@ -36,6 +36,13 @@
                 android:entries="@array/hmc_dev_type_list_entries"
                 android:entryValues="@array/hmc_dev_type_list_entryvalues"
                 android:dialogTitle="@string/hmc_dev_type_list_dialog_title" />
+        
+        <EditTextPreference
+                android:key="hmc_devname_key"
+                android:title="@string/hmc_devname_title"
+                android:summary="@string/hmc_devname_summary"
+                android:dialogTitle="@string/hmc_devname_dialog_title"
+                android:singleLine="true" />
 
     </PreferenceCategory>
 

@@ -7,18 +7,30 @@
     <!-- HMC Preferences !! -->
     <string name="hmc_account_settings">HMC account settings</string>
     	<!-- Username -->
-    	<string name="hmc_username_title">HMC user name</string>
-    	<string name="hmc_username_summary">Tap to enter username</string>
-    	<string name="hmc_username_dialog_title">Enter HMC username here</string>
+    	<string name="hmc_jid_title">HMC user name</string>
+    	<string name="hmc_jid_summary">Tap to enter username</string>
+    	<string name="hmc_jid_dialog_title">Enter HMC username here</string>
    		<!-- password -->
-    	<string name="hmc_pass_title">HMC password name</string>
+    	<string name="hmc_pass_title">HMC password</string>
     	<string name="hmc_pass_summary">Tap to enter password</string>
     	<string name="hmc_pass_dialog_title">Enter HMC password here</string>
     	<!-- Device type -->
     	<string name="hmc_dev_type_list_title">Choose device type</string>
 		<string name="hmc_dev_type_list_summary">Press to choose</string>
 		<string name="hmc_dev_type_list_dialog_title">Choose one</string>
-    
+    	<!-- Device name -->
+    	<string name="hmc_devname_title">HMC device name</string>
+    	<string name="hmc_devname_summary">Tap to enter name</string>
+    	<string name="hmc_devname_dialog_title">Enter device name here</string>
+    	<!-- User name != username -->
+    	<string name="hmc_usrname_title">Name of the user</string>
+    	<string name="hmc_usrname_summary">Tap to enter users name</string>
+    	<string name="hmc_usrname_dialog_title">Enter users name here</string>
+    				
+                
+                
+		
+		
     
 	<!-- Controller activity !! -->
 		<string name="controler_list_menu_preferences">Configure device</string>

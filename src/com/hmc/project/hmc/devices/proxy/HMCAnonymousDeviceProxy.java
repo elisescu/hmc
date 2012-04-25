@@ -35,7 +35,9 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
         // devDescStr = sendCommandSync(CMD_HELLO, myDev.toXMLString());
         // Log.d(TAG, "Sending device desc:" + myDev.toXMLString());
         devDescStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                + "<dd_dvel dd_dvn=\"nume primit de la remote\" dd_usn=\"user device remote\" dd_dvt=\"1\" dd_flj=\"elisescu_1@jabber.org/emulator\" dd_fgp=\"fingerprint remote\" />";
+                                + "<dd_dvel dd_dvn=\"nume primit de la remote\" dd_usn=\"user device remote\" dd_dvt=\"2\" dd_flj=\""
+                                + mFullJID
+                                + "\" dd_fgp=\"fingerprint remote\" />";
         retDevDesc = DeviceDescriptor.fromXMLString(devDescStr);
         // Log.d(TAG, "Received remote descriptor:" + retDevDesc.toString());
         return retDevDesc;

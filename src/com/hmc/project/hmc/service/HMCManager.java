@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
@@ -230,17 +231,19 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         HMCDeviceProxy knownDevice = null;
         knownDevice = newDevProxy.promoteToSpecificProxy();
         if (knownDevice != null ) {
-            mLocalDevices.put(newDevProxy.getDeviceDescriptor().getFullJID(), knownDevice);
+            mLocalDevices.put(knownDevice.getDeviceDescriptor().getFullJID(), knownDevice);
         } else {
             Log.e(TAG, "Couldn't promote the anonimous device");
         }
-        Log.d(TAG, knownDevice.getDeviceDescriptor().getDeviceName()
-                                + " was added to our list of devices");
+        Log.d(TAG, knownDevice.getDeviceDescriptor().getDeviceName() + "("
+                                + knownDevice.getDeviceDescriptor().getFullJID()
+                                + ") was promoted and added to our list of devices");
         // TODO: replace operation strings with constants defined somewhere
         onLocalDevicesListChanged("added", newDevProxy);
     }
 
     private void onLocalDevicesListChanged(String string, HMCAnonymousDeviceProxy newDevProxy) {
+        Log.d(TAG, "List of local devices has now " + mLocalDevices.size() + "entries");
         if (mHMCDevicesListener != null) {
             try {
                 mHMCDevicesListener.onDevicesListChanged(string, newDevProxy.getDeviceDescriptor());
@@ -265,14 +268,15 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
 
     @Override
-    public List<IDeviceDescriptor> getListOfLocalDevices() throws RemoteException {
-        ArrayList<IDeviceDescriptor> retVal = new ArrayList<IDeviceDescriptor>();
+    public Map getListOfLocalDevices() throws RemoteException {
+        HashMap<String, String> retVal = new HashMap<String, String>();
 
         Iterator<HMCDeviceProxy> iter = mLocalDevices.values().iterator();
         while (iter.hasNext()) {
-            retVal.add(iter.next().getDeviceDescriptor());
+            HMCDeviceProxy devPrx = iter.next();
+            retVal.put(devPrx.getDeviceDescriptor().getFullJID(), devPrx.getDeviceDescriptor()
+                                    .getDeviceName());
         }
-
-        return (List<IDeviceDescriptor>) retVal;
+        return (Map) retVal;
     }
 }

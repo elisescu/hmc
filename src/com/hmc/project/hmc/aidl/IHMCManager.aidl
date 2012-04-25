@@ -19,5 +19,5 @@ interface IHMCManager {
 	IHMCMediaServiceHndl implHMCMediaService();
 	void registerDevicesListener(IHMCDevicesListener listener);
 	void unregisterDevicesListener(IHMCDevicesListener listener);
-	List<IDeviceDescriptor> getListOfLocalDevices();
+	Map getListOfLocalDevices();
 }

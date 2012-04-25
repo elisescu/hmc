@@ -44,6 +44,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     private String mName = "no_name";
     protected HMCDeviceImplementationItf mLocalImplementation;
     protected DeviceDescriptor mDeviceDescriptor = null;
+    protected String mFullJID;
 
     public HMCDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
@@ -52,6 +53,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat.addMessageListener(this);
         mRepliesLocks = new HashMap<String, Object>();
         mRepliesValues = new HashMap<String, String>();
+        mFullJID = remoteFullJid;
 	}
 
     public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
@@ -59,6 +61,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat.addMessageListener(this);
         mRepliesLocks = new HashMap<String, Object>();
         mRepliesValues = new HashMap<String, String>();
+        mFullJID = chat.getParticipant();
     }
 
     public HMCDeviceProxy(SecureChat secureChat) {
@@ -66,6 +69,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat.addMessageListener(this);
         mRepliesLocks = new HashMap<String, Object>();
         mRepliesValues = new HashMap<String, String>();
+        mFullJID = secureChat.getParticipant();
     }
 
     public void setDeviceDescriptor(DeviceDescriptor desc) {

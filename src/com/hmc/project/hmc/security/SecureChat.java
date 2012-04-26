@@ -129,6 +129,10 @@ public class SecureChat implements MessageListener {
 
         if (decryptedMsg != null && mOTRStatus == SecureChatState.ENCRYPTED) {
             mSecureMessageListener.processMessage(this, decryptedMsg);
+        } else if (msg.getBody().startsWith("?OTR:")) {
+            // TODO: check and fix this work around
+            // refresh the OTR session:
+            Log.d(TAG, "Received unknown OTR message. Should we refresh the session??");
         } else {
             Log.d(TAG, "Received unecrypted or null message: " + msg.getBody());
         }

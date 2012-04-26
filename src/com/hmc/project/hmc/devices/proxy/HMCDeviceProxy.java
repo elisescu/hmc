@@ -11,10 +11,13 @@ package com.hmc.project.hmc.devices.proxy;
 
 import java.util.HashMap;
 
+import net.java.otr4j.session.SessionID;
+
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.packet.Presence;
 
+import android.media.audiofx.Equalizer;
 import android.util.Log;
 
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
@@ -40,8 +43,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     // |...type_of_message...|...operation_code...|...operation_id...|...other_data(params, reply value)...|
 
     protected SecureChat mSecureChat;
-    private HashMap<String, Object> mRepliesLocks;
-    private HashMap<String, String> mRepliesValues;
+    private HashMap<CommandUniqueIdentifier, Object> mRepliesLocks;
+    private HashMap<CommandUniqueIdentifier, String> mRepliesValues;
     private String mName = "no_name";
     protected HMCDeviceImplementation mLocalImplementation;
     protected DeviceDescriptor mDeviceDescriptor = null;
@@ -52,24 +55,24 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid, ver);
 
         mSecureChat.addMessageListener(this);
-        mRepliesLocks = new HashMap<String, Object>();
-        mRepliesValues = new HashMap<String, String>();
+        mRepliesLocks = new HashMap<CommandUniqueIdentifier, Object>();
+        mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
         mFullJID = remoteFullJid;
 	}
 
     public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
         mSecureChat = new SecureChat(chat, localFullJID, ver);
         mSecureChat.addMessageListener(this);
-        mRepliesLocks = new HashMap<String, Object>();
-        mRepliesValues = new HashMap<String, String>();
+        mRepliesLocks = new HashMap<CommandUniqueIdentifier, Object>();
+        mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
         mFullJID = chat.getParticipant();
     }
 
     public HMCDeviceProxy(SecureChat secureChat) {
         mSecureChat = secureChat;
         mSecureChat.addMessageListener(this);
-        mRepliesLocks = new HashMap<String, Object>();
-        mRepliesValues = new HashMap<String, String>();
+        mRepliesLocks = new HashMap<CommandUniqueIdentifier, Object>();
+        mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
         mFullJID = secureChat.getParticipant();
     }
 
@@ -107,7 +110,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         String messageToBeSent = "";
         String commandId;
         String commandCode;
-        String commandUniqueIdentifier;
+        CommandUniqueIdentifier commandUniqueIdentifier;
 
         // TODO: improve the way of building the request string
 
@@ -137,11 +140,14 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
         // optimize this. the number of pending operations can't be bigger than
         // 0xffffff so maybe don't need to put the opcode as well
-        commandUniqueIdentifier = commandCode + commandId;
+        commandUniqueIdentifier = new CommandUniqueIdentifier(commandCode, commandId);
         Log.d(TAG, "(send)commandUniqueIdentifier = " + commandUniqueIdentifier);
         Object lLock = new Object();
         // now wait for the remote reply.
-        mRepliesLocks.put(commandUniqueIdentifier, lLock);
+        synchronized (mRepliesLocks) {
+            mRepliesLocks.put(commandUniqueIdentifier, lLock);
+            Log.d(TAG, "We have waiting operations: " + mRepliesLocks.size());
+        }
 
         try {
             synchronized (lLock) {
@@ -163,7 +169,9 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
             Log.e(TAG, "Didnt'get get any reply from remote");
         }
 
-        mRepliesLocks.remove(commandUniqueIdentifier);
+        synchronized (mRepliesLocks) {
+            mRepliesLocks.remove(commandUniqueIdentifier);
+        }
 
         return returnVal;
 	}
@@ -235,14 +243,19 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     // this method should not be needed to be overridden by subclasses
     private void onReplyReceived(int opCode, int opId, String reply) {
         Log.d(TAG, "Reply from remote: " + reply + " for opcode= " + opCode + " and opId= " + opId);
-        String code;
-        code = Integer.toHexString(0x10000 | opCode).substring(1).toUpperCase()
-                + Integer.toHexString(0x1000000 | opId).substring(1).toUpperCase();
+        CommandUniqueIdentifier code;
+        code = new CommandUniqueIdentifier(Integer.toHexString(0x10000 | opCode).substring(1)
+                                .toUpperCase(), Integer.toHexString(0x1000000 | opId).substring(1)
+                                .toUpperCase());
         mRepliesValues.put(code, reply);
 
         Log.d(TAG, "(reply)commandUniqueIdentifier= " + code);
         // notify about the reply we got here
-        Object lLock = mRepliesLocks.get(code);
+        Object lLock = null;
+        synchronized (mRepliesLocks) {
+            lLock = mRepliesLocks.get(code);
+            Log.d(TAG, "We have waiting operations: " + mRepliesLocks.size());
+        }
 
         if (lLock != null) {
             Log.d(TAG, "Notifying the waiting thread (" + lLock.hashCode() + ")");
@@ -288,6 +301,38 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     public void setLocalImplementation(HMCDeviceImplementation locImpl) {
         Log.d(TAG, "Setting up the implementation: " + locImpl);
         mLocalImplementation = locImpl;
+    }
+
+    private class CommandUniqueIdentifier {
+        private String mOpCode;
+        private String mOpId;
+
+        public CommandUniqueIdentifier(String opCode, String opID) {
+            mOpCode = opCode;
+            mOpId = opID;
+        }
+
+        @Override
+        public String toString() {
+            return mOpCode + mOpId;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this)
+                return true;
+            if (obj == null || obj.getClass() != this.getClass())
+                return false;
+
+            CommandUniqueIdentifier comid = (CommandUniqueIdentifier) obj;
+
+            return this.toString().equals(comid.toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return this.toString().hashCode();
+        }
     }
 
 }

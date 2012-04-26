@@ -50,9 +50,10 @@ public class SecureChat implements MessageListener {
         mRemoteFullJID = remoteFullJid;
         mLocalFullJID = localFullJID;
         mHMCFingerprintsVerifier = ver;
-        mOTRStatus = SecureChatState.PLAINTEXT;
         Log.d(TAG, "Created a LOCAL secure chat with " + mRemoteFullJID);
         mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
+        mOTRStatus = toChatState(HMCOTRManager.getInstance().getOtrEngine()
+                                .getSessionStatus(mOtrSessionId));
         HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }
 

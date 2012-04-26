@@ -117,6 +117,8 @@ public class HMCFacade extends IHMCFacade.Stub {
     
     @Override
     public void connectAsync(String fullJID, String password, int port) throws RemoteException {
+        // TODO: change this to use normal java thread so that the HMC core will
+        // be portable
         new LoginAsyncTask().execute(fullJID, password, port);
     }
 

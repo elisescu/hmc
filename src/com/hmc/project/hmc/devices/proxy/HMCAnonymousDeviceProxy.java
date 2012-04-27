@@ -13,6 +13,7 @@ import org.jivesoftware.smack.ChatManager;
 import android.util.Log;
 
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
+import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 
@@ -38,15 +39,10 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
         DeviceDescriptor retDevDesc = null;
         String devDescStr;
         devDescStr = sendCommandSync(HMCMediaDeviceItf.CMD_HELLO, myDev.toXMLString());
-        // Log.d(TAG, "Sending device desc:" + myDev.toXMLString());
-
-//        devDescStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-//                                + "<dd_dvel dd_dvn=\"nume primit de la remote\" dd_usn=\"user device remote\" dd_dvt=\"2\" dd_flj=\""
-//                                + mFullJID
-//                                + "\" dd_fgp=\"fingerprint remote\" />";
         retDevDesc = DeviceDescriptor.fromXMLString(devDescStr);
+
         if (retDevDesc != null) {
-        Log.d(TAG, "Received remote descriptor:" + retDevDesc.toString());
+            Log.d(TAG, "Received remote descriptor:" + retDevDesc.toString());
         } else {
             Log.e(TAG, "returned null device descriptor from " + mFullJID);
         }
@@ -55,20 +51,8 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
 
     public boolean joinHMC(String hmcName) {
         boolean accepted = false;
-        String retVal;
-        retVal = "true";
-
-        // retVal = sendCommandSync(CMD_JOIN_HMC, hmcName);
-
+        String retVal = sendCommandSync(HMCMediaDeviceItf.CMD_JOIN_HMC, hmcName);
         accepted = Boolean.parseBoolean(retVal);
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-
         return accepted;
     }
 }

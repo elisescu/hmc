@@ -100,6 +100,12 @@ public class HMCOTRManager implements OtrEngineHost {
         return mOtrKeyManager.loadLocalKeyPair(sessionID);
     }
 
+    public String getLocalFingerprint(String myFullJID) {
+        // TODO: create a proper way to generate and get the key-pair
+        SessionID dummySess = new SessionID(myFullJID, "dummy_JID_doesnt_matter", "xmpp");
+        getKeyPair(dummySess);
+        return mOtrKeyManager.getLocalFingerprint(dummySess);
+    }
     private class HMCOtrListener implements OtrEngineListener {
         @Override
         public void sessionStatusChanged(final SessionID sessionID) {

@@ -47,6 +47,7 @@ import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
+import com.hmc.project.hmc.security.HMCOTRManager;
 import com.hmc.project.hmc.security.HMCSecurityPolicy;
 
 public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
@@ -140,9 +141,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             // TODO: add a way to set the name nice only if the device is
             // HMCServer
             mHMCName = "Popescus HMC";
-            // TODO: get my fingerprint from somewhere..or generate it now and
-            // store it
-            mThisDeviceDescriptor.setFingerprint("no-fingerprint-yet");
+            mThisDeviceDescriptor.setFingerprint(HMCOTRManager.getInstance().getLocalFingerprint(
+                                    mXMPPConnection.getUser()));
 
             switch (devType) {
                 case HMCDeviceItf.TYPE.HMC_SERVER: {

@@ -10,6 +10,7 @@ package com.hmc.project.hmc.devices.proxy;
 
 
 import java.util.HashMap;
+import java.util.concurrent.TimeoutException;
 
 import net.java.otr4j.session.SessionID;
 
@@ -43,37 +44,33 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     // |...type_of_message...|...operation_code...|...operation_id...|...other_data(params, reply value)...|
 
     protected SecureChat mSecureChat;
-    private HashMap<CommandUniqueIdentifier, Object> mRepliesLocks;
-    private HashMap<CommandUniqueIdentifier, String> mRepliesValues;
     private String mName = "no_name";
     protected HMCDeviceImplementation mLocalImplementation;
     protected DeviceDescriptor mDeviceDescriptor = null;
     protected String mFullJID;
+    private SyncResults mSyncResults;
 
     public HMCDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
         mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid, ver);
 
         mSecureChat.addMessageListener(this);
-        mRepliesLocks = new HashMap<CommandUniqueIdentifier, Object>();
-        mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
         mFullJID = remoteFullJid;
+        mSyncResults = new SyncResults();
 	}
 
     public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
         mSecureChat = new SecureChat(chat, localFullJID, ver);
         mSecureChat.addMessageListener(this);
-        mRepliesLocks = new HashMap<CommandUniqueIdentifier, Object>();
-        mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
         mFullJID = chat.getParticipant();
+        mSyncResults = new SyncResults();
     }
 
     public HMCDeviceProxy(SecureChat secureChat) {
         mSecureChat = secureChat;
         mSecureChat.addMessageListener(this);
-        mRepliesLocks = new HashMap<CommandUniqueIdentifier, Object>();
-        mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
         mFullJID = secureChat.getParticipant();
+        mSyncResults = new SyncResults();
     }
 
     public void setDeviceDescriptor(DeviceDescriptor desc) {
@@ -142,36 +139,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         // 0xffffff so maybe don't need to put the opcode as well
         commandUniqueIdentifier = new CommandUniqueIdentifier(commandCode, commandId);
         Log.d(TAG, "(send)commandUniqueIdentifier = " + commandUniqueIdentifier);
-        Object lLock = new Object();
-        // now wait for the remote reply.
-        synchronized (mRepliesLocks) {
-            mRepliesLocks.put(commandUniqueIdentifier, lLock);
-            Log.d(TAG, "We have waiting operations: " + mRepliesLocks.size());
-        }
 
-        try {
-            synchronized (lLock) {
-                Log.d(TAG, "Now waiting to be notified on:" + lLock.hashCode());
-                lLock.wait(REPLY_MAX_TIME_OUT);
-            }
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        // now we got back the result, so return the result
-        returnVal = mRepliesValues.get(commandUniqueIdentifier);
-
-        if (returnVal != null) {
-            mRepliesValues.remove(commandUniqueIdentifier);
-            Log.d(TAG, "Returned value:" + returnVal);
-        } else {
-            Log.e(TAG, "Didnt'get get any reply from remote");
-        }
-
-        synchronized (mRepliesLocks) {
-            mRepliesLocks.remove(commandUniqueIdentifier);
-        }
+        returnVal = mSyncResults.waitForResult(commandUniqueIdentifier);
 
         return returnVal;
 	}
@@ -247,24 +216,9 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         code = new CommandUniqueIdentifier(Integer.toHexString(0x10000 | opCode).substring(1)
                                 .toUpperCase(), Integer.toHexString(0x1000000 | opId).substring(1)
                                 .toUpperCase());
-        mRepliesValues.put(code, reply);
 
-        Log.d(TAG, "(reply)commandUniqueIdentifier= " + code);
-        // notify about the reply we got here
-        Object lLock = null;
-        synchronized (mRepliesLocks) {
-            lLock = mRepliesLocks.get(code);
-            Log.d(TAG, "We have waiting operations: " + mRepliesLocks.size());
-        }
+        mSyncResults.notifyReply(code, reply);
 
-        if (lLock != null) {
-            Log.d(TAG, "Notifying the waiting thread (" + lLock.hashCode() + ")");
-            synchronized (lLock) {
-                lLock.notify();
-            }
-        } else {
-            Log.e(TAG, "Unknown reply: no operation waiting for this reply");
-        }
     }
 
     // this method should not be needed to be overridden by subclasses
@@ -339,4 +293,79 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat.cleanOTRSession();
     }
 
+    private class SyncResults {
+        private HashMap<CommandUniqueIdentifier, Object> mRepliesLocks;
+        private HashMap<CommandUniqueIdentifier, String> mRepliesValues;
+
+        public SyncResults() {
+            mRepliesLocks = new HashMap<CommandUniqueIdentifier, Object>();
+            mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
+        }
+
+        public String waitForResult(CommandUniqueIdentifier commandUniqueIdentifier) {
+            String returnVal = null;
+            Object lLock = new Object();
+            boolean timedOut = false;
+
+            // now wait for the remote reply.
+            synchronized (mRepliesLocks) {
+                mRepliesLocks.put(commandUniqueIdentifier, lLock);
+                Log.d(TAG, "mRepliesLocks.size(): " + mRepliesLocks.size());
+            }
+
+            try {
+                synchronized (lLock) {
+                    Log.d(TAG, "Now waiting to be notified on:" + lLock.hashCode());
+                    long tBefore=System.currentTimeMillis();
+                    lLock.wait(REPLY_MAX_TIME_OUT);
+                    if ((System.currentTimeMillis() - tBefore) > REPLY_MAX_TIME_OUT) {
+                        timedOut = true;
+                        Log.d(TAG, "Timed out !");
+                    }
+                }
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            // now we got back the result, so return the result
+            returnVal = mRepliesValues.get(commandUniqueIdentifier);
+
+            if (returnVal != null) {
+                mRepliesValues.remove(commandUniqueIdentifier);
+                Log.d(TAG, "Returned value:" + returnVal);
+            } else {
+                Log.e(TAG, "Didnt'get get any reply from remote");
+            }
+
+            synchronized (mRepliesLocks) {
+                mRepliesLocks.remove(commandUniqueIdentifier);
+            }
+
+            return returnVal;
+        }
+
+        public void notifyReply(CommandUniqueIdentifier code, String reply) {
+            mRepliesValues.put(code, reply);
+
+            Log.d(TAG, "(reply)commandUniqueIdentifier= " + code + " (" + mRepliesLocks.size()
+                    + ")");
+            // notify about the reply we got here
+            Object lLock = null;
+            synchronized (mRepliesLocks) {
+                lLock = mRepliesLocks.get(code);
+                Log.d(TAG, "We have waiting operations: " + mRepliesLocks.size());
+            }
+
+            if (lLock != null) {
+                Log.d(TAG, "Notifying the waiting thread (" + lLock.hashCode() + ")");
+                synchronized (lLock) {
+                    lLock.notify();
+                }
+            } else {
+                Log.e(TAG, "Unknown reply: no operation waiting for this reply");
+            }
+        }
+
+    }
 }

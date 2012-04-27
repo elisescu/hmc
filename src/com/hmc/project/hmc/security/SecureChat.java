@@ -58,6 +58,9 @@ public class SecureChat implements MessageListener {
     }
 
     public void cleanOTRSession() {
+        if (mOTRStatus == SecureChatState.ENCRYPTED || mOTRStatus == SecureChatState.AUTHENTICATED) {
+            stopOtrSession();
+        }
         HMCOTRManager.getInstance().removeChat(mOtrSessionId, this);
     }
 
@@ -214,7 +217,6 @@ public class SecureChat implements MessageListener {
             Log.d(TAG, "Stopping the OTR session here ");
             stopOtrSession();
         }
-
     }
     
     SecureChatState toChatState(SessionStatus sessSt) {

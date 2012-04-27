@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.java.otr4j.session.SessionID;
+
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.ChatManagerListener;
@@ -56,7 +58,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private static final int STATE_INITIALIZED = 1;
 
     HashMap<String, HMCDeviceProxy> mLocalDevices;
-    HashMap<String, HMCDeviceProxy> mAnonymysDevices;
+    HashMap<String, HMCDeviceProxy> mAnonymousDevices;
 
     HMCServerProxy mLocalServer;
     HashMap<String, HashMap<String, HMCDeviceProxy>> mExternalHMCs;
@@ -74,7 +76,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     public HMCManager(Connection xmppConnection) {
         mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
         mLocalDevices = new HashMap<String, HMCDeviceProxy>();
-        mAnonymysDevices = new HashMap<String, HMCDeviceProxy>();
+        mAnonymousDevices = new HashMap<String, HMCDeviceProxy>();
         mXMPPConnection = xmppConnection;
         mXMPPChatManager = mXMPPConnection.getChatManager();
         mXMPPChatManager.addChatListener(this);
@@ -93,7 +95,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             HMCDeviceProxy devProxy = new HMCAnonymousDeviceProxy(chat, mXMPPConnection.getUser(),
                                     this);
             devProxy.setLocalImplementation(mLocalImplementation);
-            mAnonymysDevices.put(chat.getParticipant(), devProxy);
+            mAnonymousDevices.put(chat.getParticipant(), devProxy);
         }
     }
 
@@ -219,7 +221,14 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             // TODO: change this to send the presence to specific device, using
             // the resource as well (i.e. parsing the bare JID)
             HMCDeviceProxy dev = mLocalDevices.get(pres.getFrom());
+            if (dev == null) {
+                // try to anonymous device proxies
+                dev = mAnonymousDevices.get(pres.getFrom());
+            }
+
             if (dev != null) {
+                // let the device proxy that the remote changed its presence.
+                // Useful to turn of the otr session if the remote went offline
                 dev.presenceChanged(pres);
             } else {
                 Log.e(TAG, "Received presence information from unknown device: " + pres.getFrom());
@@ -232,7 +241,20 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         HMCAnonymousDeviceProxy retVal = null;
         retVal = new HMCAnonymousDeviceProxy(mXMPPChatManager, mXMPPConnection.getUser(), fullJID,
                 this);
+
+        mAnonymousDevices.put(fullJID, retVal);
+
         return retVal;
+    }
+
+    public void deleteAnonymousProxy(String fullJID) {
+        HMCAnonymousDeviceProxy dev = (HMCAnonymousDeviceProxy) mAnonymousDevices.get(fullJID);
+        if (dev != null) {
+            dev.cleanOTRSession();
+            mAnonymousDevices.remove(fullJID);
+        } else {
+            Log.e(TAG, "Asked to remove unknown anonymous proxy:" + fullJID);
+        }
     }
 
     public String getHMCName() {
@@ -286,6 +308,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
 
     @Override
+    // TODO: change this to return list of descriptors ..
     public Map getListOfLocalDevices() throws RemoteException {
         HashMap<String, String> retVal = new HashMap<String, String>();
 
@@ -308,4 +331,20 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         return retVal;
     }
 
+    public void deInit() {
+        Log.d(TAG, "Deinitializing the HMCManager");
+        mXMPPRoster.removeRosterListener(mRosterListener);
+        // close OTR session with local devices
+        Iterator<HMCDeviceProxy> iter = mLocalDevices.values().iterator();
+        while (iter.hasNext()) {
+            HMCDeviceProxy devPrx = iter.next();
+            devPrx.cleanOTRSession();
+        }
+
+        iter = mAnonymousDevices.values().iterator();
+        while (iter.hasNext()) {
+            HMCDeviceProxy devPrx = iter.next();
+            devPrx.cleanOTRSession();
+        }
+    }
 }

@@ -71,9 +71,4 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
 
         return accepted;
     }
-
-    public void cleanOTRSession() {
-        mSecureChat.cleanOTRSession();
-    }
-
 }

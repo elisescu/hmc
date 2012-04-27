@@ -149,7 +149,8 @@ public class HMCFacade extends IHMCFacade.Stub {
     @Override
     public void disconnect() throws RemoteException {
        if (mXMPPConnection != null && mXMPPConnection.isConnected()) {
-           mXMPPConnection.disconnect(new Presence(Type.unavailable));
+            mHMCManager.deInit();
+            mXMPPConnection.disconnect(new Presence(Type.unavailable));
        }
         
     }

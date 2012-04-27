@@ -335,4 +335,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         }
     }
 
+    public void cleanOTRSession() {
+        mSecureChat.cleanOTRSession();
+    }
+
 }

@@ -108,7 +108,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         remoteDevDesc = newDevProxy.hello(mDeviceDescriptor);
         // check the descriptor received
         if (remoteDevDesc == null) {
-            newDevProxy.cleanOTRSession();
+            mHMCManager.deleteAnonymousProxy(fullJID);
             return false;
         }
         newDevProxy.setDeviceDescriptor(remoteDevDesc);
@@ -127,7 +127,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
 
         if (!userConfirmation) {
             // the user didn't confirm the addition of the device
-            newDevProxy.cleanOTRSession();
+            mHMCManager.deleteAnonymousProxy(fullJID);
             return false;
         }
 

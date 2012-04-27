@@ -7,10 +7,13 @@
 
 package com.hmc.project.hmc.devices.implementations;
 
+import android.util.Log;
+
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCManager;
 
 public class HMCDeviceImplementation implements HMCDeviceItf {
+    private static final String TAG = "HMCDeviceImplementation";
     protected DeviceDescriptor mDeviceDescriptor;
     protected HMCManager mHMCManager;
 
@@ -47,5 +50,23 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
     @Override
     public int remoteIncrement(int val) {
         return (val + 1);
+    }
+
+    // this method should be implemented by the subclasses of device
+    // implementation
+    public void onNotificationReceived(int opCode, String params) {
+        switch (opCode) {
+            case HMCDeviceItf.CMD_TEST_NOTIFICATION:
+                testNotification(params);
+                break;
+            default:
+                Log.e(TAG, "Received unknown notification:" + opCode + " with params: " + params);
+                break;
+        }
+    }
+
+    @Override
+    public void testNotification(String notifString) {
+        Log.d(TAG, "Recieved notification: " + notifString);
     }
 }

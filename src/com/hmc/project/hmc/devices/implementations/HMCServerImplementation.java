@@ -24,7 +24,6 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
 
     private static final String TAG = "HMCServerImplementation";
     private IUserRequestsListener mUserRequestsListener;
-    private IUserRequestsListener mUserRequests;
 
     public HMCServerImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         super(hmcManager, thisDeviceDesc);
@@ -118,7 +117,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         Log.d(TAG, "Got remote dev desc: " + remoteDevDesc.toString()
                 + "\n And now ask the user for confirmatpion");
         try {
-            userConfirmation = mUserRequests.confirmDeviceAddition(remoteDevDesc);
+            userConfirmation = mUserRequestsListener.confirmDeviceAddition(remoteDevDesc);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't retrieve the user confirmation");
             e.printStackTrace();
@@ -137,9 +136,4 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
 
         return addingSuccess;
     }
-
-    public void addUserRequestsListener(IUserRequestsListener userRequests) {
-        mUserRequests = userRequests;
-    }
-
 }

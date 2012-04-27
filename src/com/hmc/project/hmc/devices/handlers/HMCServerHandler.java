@@ -38,10 +38,4 @@ public class HMCServerHandler extends IHMCServerHndl.Stub {
                             throws RemoteException {
         mLocalImplementation.unregisterUserRequestsListener(userReqListener);
     }
-
-    @Override
-    public void addUserRequestsListener(IUserRequestsListener addListener) throws RemoteException {
-        mLocalImplementation.addUserRequestsListener(addListener);
-    }
-
 }

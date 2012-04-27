@@ -92,7 +92,7 @@ public class AddNewDeviceWizzard extends Activity {
         } else {
             IHMCManager hmcMng = mHMCFacade.getHMCManager();
             IHMCServerHndl hmcServerHmdl = hmcMng.implHMCServer();
-            hmcServerHmdl.addUserRequestsListener(mUserRequestsListener);
+            hmcServerHmdl.registerUserRequestsListener(mUserRequestsListener);
             mAddDeviceProgressDialog = ProgressDialog.show(this, "Add new device",
                     "Getting device information.\nPlease wait...", true,
                     false);

@@ -36,6 +36,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     // hex code of the message type. Must be smaller than 0xF
     protected static final int CODE_SYNC_COMMAND = 0x1;
     protected static final int CODE_REPLY = 0x2;
+    protected static final int CODE_NOTIFICATION = 0x3;
 
     // max timeout for a command reply: 15 sec?
     private static final long REPLY_MAX_TIME_OUT = 15000;
@@ -102,14 +103,40 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         return mDeviceDescriptor;
     }
 
+    protected void sendNotification(int opCode, String params) {
+        String messageToBeSent = "";
+        String commandId;
+        String commandCode;
+
+        // build the type of request
+        messageToBeSent += Integer.toHexString(0x10 | CODE_NOTIFICATION).substring(1).toUpperCase();
+
+        // build the op-code to be sent
+        if (opCode > 0xFFFF) {
+            Log.e(TAG, "Used bad opcode in sendCommandSync");
+        }
+        commandCode = Integer.toHexString(0x10000 | opCode).substring(1).toUpperCase();
+        messageToBeSent += commandCode;
+
+        // build the command id used to map the reply back to original command
+        commandId = Integer.toHexString(0x1000000 | UniqueId.getUniqueId()).substring(1)
+                                .toUpperCase();
+        messageToBeSent += commandId;
+
+        // add the parameters as well
+        messageToBeSent += params;
+
+        // send the command to remote
+        Log.d(TAG, "Message to be sent to remote: " + messageToBeSent);
+        sendMessage(messageToBeSent);
+    }
+
     protected String sendCommandSync(int opCode, String params) {
         String returnVal = "";
         String messageToBeSent = "";
         String commandId;
         String commandCode;
         CommandUniqueIdentifier commandUniqueIdentifier;
-
-        // TODO: improve the way of building the request string
 
         // build the type of request
         messageToBeSent += Integer.toHexString(0x10 | CODE_SYNC_COMMAND).substring(1).toUpperCase();
@@ -123,7 +150,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         commandCode = Integer.toHexString(0x10000 | opCode).substring(1).toUpperCase();
         messageToBeSent += commandCode;
 
-        // build the command id used to map the reply back to original command
+        // build the command id.. even though this is not used in this case..
         commandId = Integer.toHexString(0x1000000 | UniqueId.getUniqueId()).substring(1)
                                 .toUpperCase();
         messageToBeSent += commandId;
@@ -150,9 +177,9 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     }
 
     public int remoteIncrement(int val) {
-	    int returnVal;
-	    String returnedString;
-	    
+        int returnVal;
+        String returnedString;
+
         Log.d(TAG, "Call sendCommandSync with: " + val);
         returnedString = sendCommandSync(CMD_REMOTE_INCREMENT, Integer.toString(val));
         try {
@@ -165,7 +192,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
             return val = 0xBAADF00D;
         }
         return returnVal;
-	}
+    }
 
 	public String getName() {
 		return mName;
@@ -195,17 +222,29 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
         // decode the type of message (reply, sync command, etc)
         switch (msgCode) {
-        case CODE_SYNC_COMMAND: {
+            case CODE_SYNC_COMMAND: {
                 onSyncCommand(opCode, opId, msg.substring(11));
-            break;
-        }
-        case CODE_REPLY: {
+                break;
+            }
+            case CODE_REPLY: {
                 onReplyReceived(opCode, opId, msg.substring(11));
-            break;
-        }
+                break;
+            }
+            case CODE_NOTIFICATION: {
+                onNotificationReceived(opCode, opId, msg.substring(11));
+                break;
+            }
         default:
                 Log.e(TAG, "Invalid message code: " + msgCode);
             break;
+        }
+    }
+
+    private void onNotificationReceived(int opCode, int opId, String params) {
+        if (mLocalImplementation != null) {
+            mLocalImplementation.onNotificationReceived(opCode, params);
+        } else {
+            Log.e(TAG, "Don't have local implementation to execute request!");
         }
     }
 
@@ -218,7 +257,6 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
                                 .toUpperCase());
 
         mSyncResults.notifyReply(code, reply);
-
     }
 
     // this method should not be needed to be overridden by subclasses
@@ -366,6 +404,10 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
                 Log.e(TAG, "Unknown reply: no operation waiting for this reply");
             }
         }
+    }
 
+    @Override
+    public void testNotification(String notifString) {
+        sendNotification(CMD_TEST_NOTIFICATION, notifString);
     }
 }

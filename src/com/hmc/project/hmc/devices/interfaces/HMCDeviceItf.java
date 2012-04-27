@@ -25,9 +25,12 @@ public interface HMCDeviceItf {
 
     static final int HMC_DEVICE_INITIAL_COMMAND = 1;
 
-    static final int CMD_REMOTE_INCREMENT = 4;
+    static final int CMD_REMOTE_INCREMENT = HMC_DEVICE_INITIAL_COMMAND + 1;
+    static final int CMD_TEST_NOTIFICATION = HMC_DEVICE_INITIAL_COMMAND + 2;
 
     static final int HMC_DEVICE_LAST_COMMAND = CMD_REMOTE_INCREMENT;
 	
     int remoteIncrement(int val);
+
+    void testNotification(String notifString);
 }

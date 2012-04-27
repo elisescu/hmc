@@ -64,7 +64,7 @@ public class HMCFacade extends IHMCFacade.Stub {
     public IHMCManager getHMCManager() throws RemoteException {
         if (mHMCManager == null) {
             if (mXMPPConnection.isAuthenticated()) {
-                mHMCManager = new HMCManager(mXMPPConnection);
+                mHMCManager = new HMCManager(mXMPPConnection, mHMCService);
             }
         }
         return mHMCManager;

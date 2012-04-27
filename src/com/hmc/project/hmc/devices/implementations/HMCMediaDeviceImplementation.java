@@ -16,6 +16,7 @@ import com.hmc.project.hmc.service.HMCManager;
 public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implements
                         HMCMediaDeviceItf {
     private static final String TAG = "HMCMediaDeviceImplementation";
+    private DeviceDescriptor mPendingDevDesc = null;
 
     public HMCMediaDeviceImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         super(hmcManager, thisDeviceDesc);
@@ -65,7 +66,9 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
 
     private DeviceDescriptor hello(DeviceDescriptor recvDevDesc) {
         if (recvDevDesc != null) {
-        Log.d(TAG, "Received devive descriptor from remote in hello msg: " + recvDevDesc.toString());
+            Log.d(TAG, "Received devive descriptor from remote in hello msg: "
+                                                            + recvDevDesc.toString());
+            mPendingDevDesc = recvDevDesc;
         } else {
             Log.e(TAG, "Didn't recieve descriptor from remote in hello: " + recvDevDesc);
         }
@@ -86,10 +89,19 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
 
 
     public boolean joinHMC(String remoteHMCName) {
-        // TODO Auto-generated method stub
+        boolean retVal = false;
 
         Log.d(TAG, "Received call from " + remoteHMCName + "to join the HMC");
-        return true;
+        Log.d(TAG, "Starting the user confirmation activity, using the listener:"
+                                + mDeviceAditionConfirmationListener);
+        if (mPendingDevDesc != null) {
+            retVal = mDeviceAditionConfirmationListener.confirmDeviceAddition(mPendingDevDesc,
+                                    remoteHMCName);
+        } else {
+            Log.e(TAG, "Cannot ask the user for confirmation. Listener is null");
+            retVal = false;
+        }
+        return retVal;
     }
 
 }

@@ -26,6 +26,10 @@ import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
 
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -35,6 +39,7 @@ import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
 import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
 import com.hmc.project.hmc.aidl.IHMCServerHndl;
+import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.handlers.HMCMediaClientHandler;
 import com.hmc.project.hmc.devices.handlers.HMCServerHandler;
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
@@ -49,6 +54,7 @@ import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.HMCOTRManager;
 import com.hmc.project.hmc.security.HMCSecurityPolicy;
+import com.hmc.project.hmc.ui.mediaclient.ConfirmJoinHMC;
 
 public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                         HMCFingerprintsVerifier {
@@ -70,11 +76,13 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private RosterListener mRosterListener = new HMCRosterListener();
     private HMCDeviceImplementation mLocalImplementation;
     private Object mLocalImplHandler = null;
-    private DeviceDescriptor mThisDeviceDescriptor;
+    private DeviceDescriptor mLocalDeviceDescriptor;
     private String mHMCName;
     private IHMCDevicesListener mHMCDevicesListener = null;
+    private HMCService mHMCService;
+    private DeviceAditionConfirmationListener mDeviceAdditionListener;
 
-    public HMCManager(Connection xmppConnection) {
+    public HMCManager(Connection xmppConnection, HMCService service) {
         mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
         mLocalDevices = new HashMap<String, HMCDeviceProxy>();
         mAnonymousDevices = new HashMap<String, HMCDeviceProxy>();
@@ -82,6 +90,9 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         mXMPPChatManager = mXMPPConnection.getChatManager();
         mXMPPChatManager.addChatListener(this);
         mXMPPRoster = mXMPPConnection.getRoster();
+        mHMCService = service;
+
+        mDeviceAdditionListener = new DeviceAditionConfirmationListener(mHMCService);
 
         Log.d(TAG, "Constructed the HMCManager for " + mXMPPConnection.getUser());
         // set the subscription mode to manually
@@ -134,30 +145,31 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             for (RosterEntry entry : entries) {
                 Log.d(TAG, "Device name " + entry.getName() + ", bareJID:" + entry.getUser());
             }
-            mThisDeviceDescriptor = new DeviceDescriptor();
-            mThisDeviceDescriptor.setDeviceName(deviceName);
-            mThisDeviceDescriptor.setUserName(userName);
-            mThisDeviceDescriptor.setFullJID(mXMPPConnection.getUser());
+            mLocalDeviceDescriptor = new DeviceDescriptor();
+            mLocalDeviceDescriptor.setDeviceName(deviceName);
+            mLocalDeviceDescriptor.setUserName(userName);
+            mLocalDeviceDescriptor.setFullJID(mXMPPConnection.getUser());
             // TODO: add a way to set the name nice only if the device is
             // HMCServer
             mHMCName = "Popescus HMC";
-            mThisDeviceDescriptor.setFingerprint(HMCOTRManager.getInstance().getLocalFingerprint(
+            mLocalDeviceDescriptor.setFingerprint(HMCOTRManager.getInstance().getLocalFingerprint(
                                     mXMPPConnection.getUser()));
 
             switch (devType) {
                 case HMCDeviceItf.TYPE.HMC_SERVER: {
                     if (mLocalImplementation == null) {
-                        mThisDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_SERVER);
+                        mLocalDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_SERVER);
                         mLocalImplementation = new HMCServerImplementation(this,
-                                                mThisDeviceDescriptor);
+                                                mLocalDeviceDescriptor);
                     }
                 }
                 break;
                 case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE: {
                     if (mLocalImplementation == null) {
-                        mThisDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE);
+                        mLocalDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE);
                         mLocalImplementation = new HMCMediaClientDeviceImplementation(this,
-                                                mThisDeviceDescriptor);
+                                                mLocalDeviceDescriptor);
+                        mLocalImplementation.registerDeviceAditionConfirmationListener(mDeviceAdditionListener);
                     }
                 }
                 break;
@@ -346,5 +358,10 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             HMCDeviceProxy devPrx = iter.next();
             devPrx.cleanOTRSession();
         }
+    }
+
+    @Override
+    public IDeviceDescriptor getLocalDevDescriptor() throws RemoteException {
+        return mLocalDeviceDescriptor;
     }
 }

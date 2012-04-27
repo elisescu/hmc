@@ -23,7 +23,6 @@ import com.hmc.project.hmc.utils.HMCUserNotifications;
 public class HMCServerImplementation extends HMCDeviceImplementation implements HMCServerItf {
 
     private static final String TAG = "HMCServerImplementation";
-    private IUserRequestsListener mUserRequestsListener;
 
     public HMCServerImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         super(hmcManager, thisDeviceDesc);
@@ -82,18 +81,6 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return retVal;
     }
 
-    public void registerUserRequestsListener(IUserRequestsListener usrReqListener) {
-        mUserRequestsListener = usrReqListener;
-    }
-
-    public void unregisterUserRequestsListener(IUserRequestsListener userReqListener) {
-        if (mUserRequestsListener == userReqListener) {
-            mUserRequestsListener = null;
-        } else {
-            Log.e(TAG, "Unknown listerner for de-registration");
-        }
-    }
-
     public boolean addNewDevice(String fullJID) {
         Log.d(TAG, "Have to add new device: !!" + fullJID);
         boolean addingSuccess = true;
@@ -112,10 +99,13 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         }
         newDevProxy.setDeviceDescriptor(remoteDevDesc);
 
+        Log.d(TAG, "Got remote dev desc: " + remoteDevDesc.toString()
+                                + "\n Now send the joining request");
+        // sending the join request
+        addingSuccess = newDevProxy.joinHMC(mHMCManager.getHMCName());
+
         // now the user should confirm or deny adding the device with
         // information present in remoteDevDesc data
-        Log.d(TAG, "Got remote dev desc: " + remoteDevDesc.toString()
-                + "\n And now ask the user for confirmatpion");
         try {
             userConfirmation = mUserRequestsListener.confirmDeviceAddition(remoteDevDesc);
         } catch (RemoteException e) {
@@ -130,7 +120,6 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             return false;
         }
 
-        addingSuccess = newDevProxy.joinHMC(mHMCManager.getHMCName());
 
         mHMCManager.promoteAnonymousProxy(newDevProxy);
 

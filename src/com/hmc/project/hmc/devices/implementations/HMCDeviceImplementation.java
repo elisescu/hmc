@@ -9,13 +9,17 @@ package com.hmc.project.hmc.devices.implementations;
 
 import android.util.Log;
 
+import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
+import com.hmc.project.hmc.service.DeviceAditionConfirmationListener;
 import com.hmc.project.hmc.service.HMCManager;
 
 public class HMCDeviceImplementation implements HMCDeviceItf {
     private static final String TAG = "HMCDeviceImplementation";
     protected DeviceDescriptor mDeviceDescriptor;
     protected HMCManager mHMCManager;
+    protected IUserRequestsListener mUserRequestsListener;
+    protected DeviceAditionConfirmationListener mDeviceAditionConfirmationListener;
 
     public HMCDeviceImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         mHMCManager = hmcManager;
@@ -69,4 +73,34 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
     public void testNotification(String notifString) {
         Log.d(TAG, "Recieved notification: " + notifString);
     }
+
+    public void registerUserRequestsListener(IUserRequestsListener usrReqListener) {
+        mUserRequestsListener = usrReqListener;
+    }
+
+    public void unregisterUserRequestsListener(IUserRequestsListener userReqListener) {
+        if (mUserRequestsListener == userReqListener) {
+            mUserRequestsListener = null;
+        } else {
+            Log.e(TAG, "Unknown listerner for de-registration (mUserRequestsListener)");
+        }
+    }
+
+    // TODO: this is use only if the implementation is instance of
+    // HMCMediaDeviceImplementation. In future maybe fix this, but now since we
+    // use the same code for different devices, we have to deal with it
+    public void registerDeviceAditionConfirmationListener(
+                            DeviceAditionConfirmationListener deviceAdditionListener) {
+        mDeviceAditionConfirmationListener = deviceAdditionListener;
+    }
+
+    public void unregisterDeviceAditionConfirmationListener(
+                            DeviceAditionConfirmationListener deviceAdditionListener) {
+        if (mDeviceAditionConfirmationListener == deviceAdditionListener) {
+            mDeviceAditionConfirmationListener = null;
+        } else {
+            Log.e(TAG, "Unknown listerner for de-registration (mDeviceAditionConfirmationListener)");
+        }
+    }
+
 }

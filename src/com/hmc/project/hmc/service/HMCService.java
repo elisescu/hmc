@@ -33,9 +33,11 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -103,10 +105,7 @@ public class HMCService extends Service {
         return mHMCFacade;
     }
 
-
-    /**
-     * Show a notification while this service is running.
-     */
+    // TODO: taken from Beem. Rewrite it!
     private void showNotification() {
         // In this sample, we'll use the same text for the ticker and the expanded notification
         CharSequence text = "Tap here";
@@ -126,6 +125,15 @@ public class HMCService extends Service {
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
         mNotificationManager.notify(mNotificationId, notification);
+    }
+
+    // TODO: taken from Beem. Rewrite it!
+    public void sendNotification(int id, Notification notif) {
+        notif.ledARGB = 0xff0000ff; // Blue color
+        notif.ledOnMS = 1000;
+        notif.ledOffMS = 1000;
+        notif.defaults |= Notification.DEFAULT_LIGHTS;
+        mNotificationManager.notify(id, notif);
     }
 }
 

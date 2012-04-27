@@ -223,7 +223,10 @@ public class AddNewDeviceWizzard extends Activity {
                     new AlertDialog.Builder(AddNewDeviceWizzard.this)
                             .setTitle("Please confirm adding this device")
                             .setMessage("Name: " + mNewDeviceDesc.getDeviceName() + 
-                                        "\nFingerprint: "+ mNewDeviceDesc.getFingerprint())
+                                        "\nFingerprint: "+ mNewDeviceDesc.getFingerprint()+
+                                        "\n\n\nMy fingerprint:\n" + 
+                                        mHMCFacade.getHMCManager().getLocalDevDescriptor()
+                                        .getFingerprint())
                             .setPositiveButton("YES", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface arg0, int arg1) {
                                     synchronized (mUserConfirmedNotif) {

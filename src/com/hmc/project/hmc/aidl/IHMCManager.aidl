@@ -20,4 +20,6 @@ interface IHMCManager {
 	void registerDevicesListener(IHMCDevicesListener listener);
 	void unregisterDevicesListener(IHMCDevicesListener listener);
 	Map getListOfLocalDevices();
+	IDeviceDescriptor getLocalDevDescriptor();
+	
 }

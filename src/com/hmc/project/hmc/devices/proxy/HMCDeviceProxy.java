@@ -412,17 +412,17 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     }
 
     private class SyncResults {
-        private HashMap<CommandUniqueIdentifier, Object> mRepliesLocks;
+        private HashMap<CommandUniqueIdentifier, String> mRepliesLocks;
         private HashMap<CommandUniqueIdentifier, String> mRepliesValues;
 
         public SyncResults() {
-            mRepliesLocks = new HashMap<CommandUniqueIdentifier, Object>();
+            mRepliesLocks = new HashMap<CommandUniqueIdentifier, String>();
             mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
         }
 
         public String waitForResult(CommandUniqueIdentifier commandUniqueIdentifier) {
             String returnVal = null;
-            Object lLock = new Object();
+            String lLock = System.currentTimeMillis() + "";
             boolean timedOut = false;
 
             // now wait for the remote reply.
@@ -433,7 +433,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
             try {
                 synchronized (lLock) {
-                    Log.d(TAG, "Now waiting to be notified on:" + lLock.hashCode());
+                    Log.d(TAG, "Now waiting to be notified on:" + lLock);
                     long tBefore=System.currentTimeMillis();
                     lLock.wait(REPLY_MAX_TIME_OUT);
                     if ((System.currentTimeMillis() - tBefore) > REPLY_MAX_TIME_OUT) {
@@ -465,14 +465,14 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
             Log.d(TAG, "(reply)commandUniqueIdentifier= " + code + " (" + mRepliesLocks.size()
                     + ")");
             // notify about the reply we got here
-            Object lLock = null;
+            String lLock = null;
             synchronized (mRepliesLocks) {
                 lLock = mRepliesLocks.get(code);
                 Log.d(TAG, "We have waiting operations: " + mRepliesLocks.size());
             }
 
             if (lLock != null) {
-                Log.d(TAG, "Notifying the waiting thread (" + lLock.hashCode() + ")");
+                Log.d(TAG, "Notifying the waiting thread (" + lLock + ")");
                 synchronized (lLock) {
                     lLock.notify();
                 }

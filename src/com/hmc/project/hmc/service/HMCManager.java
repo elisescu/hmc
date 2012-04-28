@@ -330,7 +330,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         }
 
         devProxy.setLocalImplementation(mLocalImplementation);
-        devProxy.setDeviceDescriptor(mLocalDeviceDescriptor);
+        devProxy.setDeviceDescriptor(devDesc);
 
         mLocalDevices.put(devDesc.getFullJID(), devProxy);
 
@@ -340,6 +340,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
     private void onLocalDevicesListChanged(String string, HMCDeviceProxy newDevProxy) {
         Log.d(TAG, "List of local devices has now " + mLocalDevices.size() + "entries");
+
         if (mHMCDevicesListener != null) {
             try {
                 mHMCDevicesListener.onDevicesListChanged(string, newDevProxy.getDeviceDescriptor());

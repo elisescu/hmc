@@ -9,4 +9,5 @@ package com.hmc.project.hmc.aidl;
 interface IDeviceDescriptor {
     String getDeviceName();
     String getFingerprint();
+    String getFullJID();
 }

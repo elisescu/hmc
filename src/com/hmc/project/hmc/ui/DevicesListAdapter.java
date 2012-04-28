@@ -7,6 +7,8 @@
 
 package com.hmc.project.hmc.ui;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -21,12 +23,21 @@ import com.hmc.project.hmc.R;
 
 public class DevicesListAdapter extends ArrayAdapter<String> {
     private final Context context;
-    private List<String> mDeviceNames;
+    //private List<String> mDeviceNames;
+    private LinkedHashMap<String, String> mDevices;
 
-    public DevicesListAdapter(Context context, List<String> mDevicesNames) {
-        super(context, R.layout.list_item, mDevicesNames);
+    public DevicesListAdapter(Context context) {
+        super(context, R.layout.list_item);
         this.context = context;
-        this.mDeviceNames = mDevicesNames;
+        // mDeviceNames = new ArrayList<String>();
+        mDevices = new LinkedHashMap<String, String>();
+    }
+
+    public void add(String jid, String name) {
+        if (!mDevices.containsKey(jid)) {
+            super.add(name);
+            mDevices.put(jid, name);
+        }
     }
 
     @Override
@@ -37,7 +48,7 @@ public class DevicesListAdapter extends ArrayAdapter<String> {
         View rowView = inflater.inflate(R.layout.list_item, parent, false);
         TextView textView = (TextView) rowView.findViewById(R.id.label);
         ImageView imageView = (ImageView) rowView.findViewById(R.id.logo);
-        textView.setText(mDeviceNames.get(position));
+        textView.setText(mDevices.values().toArray()[position].toString());
 
         imageView.setImageResource(R.drawable.device_icon);
 

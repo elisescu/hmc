@@ -47,16 +47,15 @@ public class HMCServerMainScreen extends Activity {
     private HMCService mBoundService;
     private IHMCFacade mHMCFacade;
     private HMCApplication mHMCApplication;
-    private ArrayList<String> mDevicesNames;
     private ListView mDevicesListView;
     private DevicesListAdapter mDeviceNamesAdapter;
     HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
-    HashMap<String, String> mLocalDevDescriptors;
+    HashMap<String, String> mLocalDevNames;
 
     private OnClickListener mTestMethodListener = new OnClickListener() {
         public void onClick(View v) {
             if (mHMCFacade != null) {
-                mDeviceNamesAdapter.add("New device");
+                // mDeviceNamesAdapter.add("New device");
             }
         }
     };;
@@ -72,7 +71,7 @@ public class HMCServerMainScreen extends Activity {
                                             HMCDeviceItf.TYPE.HMC_SERVER);
                     mHMCFacade.getHMCManager().registerDevicesListener(mHMCDevicesListener);
 
-                    mLocalDevDescriptors = (HashMap<String, String>) mHMCFacade.getHMCManager()
+                    mLocalDevNames = (HashMap<String, String>) mHMCFacade.getHMCManager()
                                             .getListOfLocalDevices();
 
                     updateListOfLocalDevicesUIThread();
@@ -93,10 +92,10 @@ public class HMCServerMainScreen extends Activity {
     private void updateListOfLocalDevicesUIThread() {
         HMCServerMainScreen.this.runOnUiThread(new Runnable() {
             public void run() {
-
-                Iterator<String> iter = mLocalDevDescriptors.values().iterator();
+                Iterator<String> iter = mLocalDevNames.keySet().iterator();
                 while (iter.hasNext()) {
-                    mDeviceNamesAdapter.add(iter.next());
+                    String jid = iter.next();
+                    mDeviceNamesAdapter.add(jid, mLocalDevNames.get(jid));
                 }
             }
         });
@@ -141,11 +140,9 @@ public class HMCServerMainScreen extends Activity {
         button.setOnClickListener(mTestMethodListener);
 
         mDevicesListView = (ListView) findViewById(R.id.hmc_devices_list);
-        mDevicesNames = new ArrayList<String>();
-        mDeviceNamesAdapter = new DevicesListAdapter(this, mDevicesNames);
+        mDeviceNamesAdapter = new DevicesListAdapter(this);
         mDevicesListView.setAdapter(mDeviceNamesAdapter);
-
-        mLocalDevDescriptors = new HashMap<String, String>();
+        mLocalDevNames = new HashMap<String, String>();
 
         // make sure we ended up in this activity with the app connected to XMPP
         // server
@@ -202,7 +199,9 @@ public class HMCServerMainScreen extends Activity {
                 HMCServerMainScreen.this.runOnUiThread(new Runnable() {
                     public void run() {
                         try {
-                            mDeviceNamesAdapter.add(modifDeviceDescriptor.getDeviceName());
+                            String jid = modifDeviceDescriptor.getFullJID();
+                            String name = modifDeviceDescriptor.getDeviceName();
+                            mDeviceNamesAdapter.add(jid, name);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Cannot retrieve the details about modified device");
                             e.printStackTrace();

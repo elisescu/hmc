@@ -49,10 +49,7 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
         return retDevDesc;
     }
 
-    public boolean joinHMC(String hmcName) {
-        boolean accepted = false;
-        String retVal = sendCommandSync(HMCMediaDeviceItf.CMD_JOIN_HMC, hmcName);
-        accepted = Boolean.parseBoolean(retVal);
-        return accepted;
+    public void joinHMC(String hmcName, AsyncCommandReplyListener listener) {
+        sendCommandAsync(HMCMediaDeviceItf.CMD_JOIN_HMC, hmcName, listener);
     }
 }

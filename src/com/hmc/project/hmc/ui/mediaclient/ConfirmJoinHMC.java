@@ -10,6 +10,7 @@ package com.hmc.project.hmc.ui.mediaclient;
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.hmcserver.AddNewDeviceWizzard;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
@@ -21,6 +22,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,12 +38,20 @@ public class ConfirmJoinHMC extends Activity {
     private boolean mIsBound;
     private HMCApplication mHMCApplication;
     private ConfirmJoinHMC mContext;
+    private IHMCManager mHMCManager;
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
             mHMCFacade = IHMCFacade.Stub.asInterface(service);
             if (mHMCFacade != null) {
+                try {
+                    mHMCManager = mHMCFacade.getHMCManager();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e(TAG, "Error. Couldn't retrieve the HMC serviec internals!");
             }
         }
         public void onServiceDisconnected(ComponentName className) {
@@ -96,6 +106,11 @@ public class ConfirmJoinHMC extends Activity {
         Log.d(TAG, "Fingerprint of remote device: " + hmcServerFingerprint);
         textViewHMCServerDetails.setText(temp);
 
+        Button yesButt = (Button) findViewById(R.id.confirm_join_button_yes);
+        Button noButt = (Button) findViewById(R.id.confirm_join_button_no);
+
+        yesButt.setOnClickListener(mButtonsListener);
+        noButt.setOnClickListener(mButtonsListener);
     }
 
     private OnClickListener mButtonsListener = new OnClickListener() {
@@ -103,10 +118,22 @@ public class ConfirmJoinHMC extends Activity {
             switch (v.getId()) {
                 case R.id.confirm_join_button_yes: {
                     Log.d(TAG, "User replied with YES");
+                    try {
+                        mHMCManager.setUserReplyDeviceAddition(true);
+                    } catch (RemoteException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
                     break;
                 case R.id.confirm_join_button_no: {
-                    Log.d(TAG, "User replied with YES");
+                    Log.d(TAG, "User replied with NO");
+                    try {
+                        mHMCManager.setUserReplyDeviceAddition(false);
+                    } catch (RemoteException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
                     break;
                 default:

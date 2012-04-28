@@ -101,6 +101,8 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
             Log.e(TAG, "Cannot ask the user for confirmation. Listener is null");
             retVal = false;
         }
+
+        Log.d(TAG, "Returned with user's response: " + retVal);
         return retVal;
     }
 

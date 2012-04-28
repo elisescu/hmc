@@ -22,7 +22,9 @@ import com.hmc.project.hmc.ui.mediaclient.ConfirmJoinHMC;
 public class DeviceAditionConfirmationListener {
     private static final int DEVICE_ADDITION_CONFIRMATION_ID = 14; // out of the blue
     private static final String TAG = "DeviceAditionConfirmationListener";
-    HMCService mHMCService;
+    private HMCService mHMCService;
+    private String mWaitLock = null;
+    private Boolean mUserReply = false;
 
     public DeviceAditionConfirmationListener(HMCService serv) {
         mHMCService = serv;
@@ -52,7 +54,26 @@ public class DeviceAditionConfirmationListener {
         mHMCService.sendNotification(DEVICE_ADDITION_CONFIRMATION_ID, notification);
 
         Log.d(TAG, "Notification seeeent ");
+        // now wait for the user to press one of the buttons in the confirmation
+        // activity
+        mWaitLock = System.currentTimeMillis() + "";
 
-        return false;
+        try {
+            synchronized (mWaitLock) {
+                mWaitLock.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return mUserReply;
+    }
+
+    public void setUserReply(boolean val) {
+        Log.d(TAG, "Got the user response.. now let the HMC server know");
+        mUserReply = val;
+        synchronized (mWaitLock) {
+            mWaitLock.notify();
+        }
     }
 }

@@ -21,5 +21,7 @@ interface IHMCManager {
 	void unregisterDevicesListener(IHMCDevicesListener listener);
 	Map getListOfLocalDevices();
 	IDeviceDescriptor getLocalDevDescriptor();
+	// TODO: find something more elegant than this mechanism
+	void setUserReplyDeviceAddition(boolean val); 
 	
 }

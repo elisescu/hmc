@@ -364,4 +364,9 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     public IDeviceDescriptor getLocalDevDescriptor() throws RemoteException {
         return mLocalDeviceDescriptor;
     }
+
+    @Override
+    public void setUserReplyDeviceAddition(boolean val) throws RemoteException {
+        mDeviceAdditionListener.setUserReply(val);
+    }
 }

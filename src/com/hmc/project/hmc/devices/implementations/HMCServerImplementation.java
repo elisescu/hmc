@@ -77,9 +77,9 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return retVal;
     }
 
+    boolean addingSuccess = true;
     public boolean addNewDevice(String fullJID) {
         Log.d(TAG, "Have to add new device: !!" + fullJID);
-        boolean addingSuccess = true;
         boolean userConfirmation = false;
         DeviceDescriptor remoteDevDesc = null;
         HMCAnonymousDeviceProxy newDevProxy = mHMCManager.createAnonymousProxy(fullJID);
@@ -97,7 +97,12 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         Log.d(TAG, "Got remote dev desc: " + remoteDevDesc.toString()
                                 + "\n Now send the joining request");
         // sending the join request
-        addingSuccess = newDevProxy.joinHMC(mHMCManager.getHMCName());
+        newDevProxy.joinHMC(mHMCManager.getHMCName(), new AsyncCommandReplyListener() {
+            public void onReplyReceived(String reply) {
+                addingSuccess = Boolean.parseBoolean(reply);
+                Log.d(TAG, "Got the reply from media deviec user:" + addingSuccess);
+            }
+        });
 
         // now the user should confirm or deny adding the device with
         // information present in remoteDevDesc data
@@ -114,7 +119,6 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             mHMCManager.deleteAnonymousProxy(fullJID);
             return false;
         }
-
 
         mHMCManager.promoteAnonymousProxy(newDevProxy);
 

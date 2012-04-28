@@ -16,17 +16,10 @@ import com.hmc.project.hmc.security.SecureChat;
 
 
 public class HMCMediaClientDeviceProxy extends HMCMediaDeviceProxy implements HMCMediaClientDeviceItf {
-
-    /**
-     * @param chatManager
-     * @param remoteFullJid
-     * @param ver
-     */
     public HMCMediaClientDeviceProxy(ChatManager chatManager, String localFUllJID,
                             String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
         super(chatManager, localFUllJID, remoteFullJid, ver);
-        // TODO Auto-generated constructor stub
     }
 
     public HMCMediaClientDeviceProxy(SecureChat secureChat) {

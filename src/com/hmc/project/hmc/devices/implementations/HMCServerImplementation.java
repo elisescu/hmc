@@ -14,6 +14,8 @@ import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.devices.proxy.AsyncCommandReplyListener;
 import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
+import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
+import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
 import com.hmc.project.hmc.service.HMCManager;
 
 public class HMCServerImplementation extends HMCDeviceImplementation implements HMCServerItf {
@@ -120,7 +122,15 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             return false;
         }
 
-        mHMCManager.promoteAnonymousProxy(newDevProxy);
+        // if remote device accepted to join HMC, then send it the list of
+        // devices
+        if (addingSuccess) {
+            HMCMediaDeviceProxy specificDevPrxy = (HMCMediaDeviceProxy)mHMCManager
+                                    .promoteAnonymousProxy(newDevProxy);
+            // now that we have the specific proxy, added also in our list of
+            // devices
+            specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
+        }
 
         return addingSuccess;
     }

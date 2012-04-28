@@ -10,11 +10,16 @@ package com.hmc.project.hmc.devices.proxy;
 
 import org.jivesoftware.smack.ChatManager;
 
+import android.util.Log;
+
+import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.SecureChat;
 
 public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDeviceItf {
+
+    private static final String TAG = "HMCMediaDeviceProxy";
 
     public HMCMediaDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
@@ -37,4 +42,11 @@ public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDevic
 		// TODO Auto-generated method stub
 		
 	}
+
+    public void sendListOfDevices(HMCDevicesList list) {
+        // Send the list of deviecs to the newly added client. Use the
+        // notification RPC mechanism
+        Log.d(TAG, "Send the list to remote: " + list.toXMLString());
+        sendNotification(CMD_SEND_LIST_DEVICES, list.toXMLString());
+    }
 }

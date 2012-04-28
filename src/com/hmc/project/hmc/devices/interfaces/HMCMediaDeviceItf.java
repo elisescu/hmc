@@ -19,6 +19,8 @@ public interface HMCMediaDeviceItf {
 
     static final int CMD_JOIN_HMC = HMC_MEDIA_DEVICE_INITIAL_COMMAND + 2;
 
+    static final int CMD_SEND_LIST_DEVICES = HMC_MEDIA_DEVICE_INITIAL_COMMAND + 3;
+
     void deviceRemovedNotification();
 
     void deviceAddedNotification();

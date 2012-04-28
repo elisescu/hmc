@@ -8,6 +8,8 @@
 package com.hmc.project.hmc.ui.mediaclient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import android.app.Activity;
@@ -18,6 +20,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,6 +39,8 @@ import android.widget.Toast;
 
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
+import com.hmc.project.hmc.aidl.IDeviceDescriptor;
+import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 import com.hmc.project.hmc.aidl.IHMCFacade;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
@@ -55,6 +60,8 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
     ArrayList<String> mDevicesNames;
     private ListView mDevicesListView;
     private DevicesListAdapter mDeviceNamesAdapter;
+    HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
+    HashMap<String, String> mLocalDevDescriptors;
 
     private OnClickListener mTestMethodListener = new OnClickListener() {
         public void onClick(View v) {
@@ -74,6 +81,14 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
                 try {
                     mHMCFacade.getHMCManager().init(mHMCApplication.getDeviceName(), "",
                                             HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE);
+
+                    mHMCFacade.getHMCManager().registerDevicesListener(mHMCDevicesListener);
+
+                    mLocalDevDescriptors = (HashMap<String, String>) mHMCFacade.getHMCManager()
+                                            .getListOfLocalDevices();
+
+                    updateListOfLocalDevicesUIThread();
+
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -88,6 +103,17 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         }
     };
 
+    private void updateListOfLocalDevicesUIThread() {
+        HMCMediaClientDeviceMainScreen.this.runOnUiThread(new Runnable() {
+            public void run() {
+                Iterator<String> iter = mLocalDevDescriptors.values().iterator();
+                while (iter.hasNext()) {
+                    mDeviceNamesAdapter.add(iter.next());
+                }
+            }
+        });
+    }
+
     void doBindService() {
         bindService(new Intent(HMCMediaClientDeviceMainScreen.this, HMCService.class), mConnection,
                                 Context.BIND_AUTO_CREATE);
@@ -96,6 +122,12 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
 
     void doUnbindService() {
         if (mIsBound) {
+            try {
+                mHMCFacade.getHMCManager().unregisterDevicesListener(mHMCDevicesListener);
+            } catch (RemoteException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             unbindService(mConnection);
             mIsBound = false;
         }
@@ -162,6 +194,31 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         doUnbindService();
         stopService(new Intent(HMCMediaClientDeviceMainScreen.this, HMCService.class));
         finish();
+    }
+
+    private class HMCDevicesListener extends IHMCDevicesListener.Stub {
+        IDeviceDescriptor modifDeviceDescriptor = null;
+
+        @Override
+        public void onDevicesListChanged(String whatChanged, IDeviceDescriptor devDesc)
+                                throws RemoteException {
+            modifDeviceDescriptor = devDesc;
+            if (whatChanged.equals("added")) {
+                // add the device in the list, inside ui thread
+                HMCMediaClientDeviceMainScreen.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        try {
+                            mDeviceNamesAdapter.add(modifDeviceDescriptor.getDeviceName());
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Cannot retrieve the details about modified device");
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            }
+        }
+
     }
 
 }

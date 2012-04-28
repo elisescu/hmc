@@ -7,6 +7,8 @@
 
 package com.hmc.project.hmc.devices.implementations;
 
+import java.util.Iterator;
+
 import android.util.Log;
 
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
@@ -20,6 +22,23 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
 
     public HMCMediaDeviceImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         super(hmcManager, thisDeviceDesc);
+    }
+
+    @Override
+    public void onNotificationReceived(int opCode, String params) {
+        switch (opCode) {
+            case HMCMediaDeviceItf.CMD_SEND_LIST_DEVICES:
+                _sendListOfDevices(params);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void _sendListOfDevices(String params) {
+        HMCDevicesList devList = HMCDevicesList.fromXMLString(params);
+        // update the HMCManager about the new list of devices
+        mHMCManager.updateListOfLocalDevices(devList);
     }
 
     @Override
@@ -39,11 +58,6 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         return retVal;
     }
 
-
-    /**
-     * @param params
-     * @return
-     */
     private String _joinHMC(String params) {
         String retVal = null;
 

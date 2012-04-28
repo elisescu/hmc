@@ -44,12 +44,14 @@ import com.hmc.project.hmc.devices.handlers.HMCMediaClientHandler;
 import com.hmc.project.hmc.devices.handlers.HMCServerHandler;
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation;
+import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.implementations.HMCMediaDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCMediaClientDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCServerImplementation;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
+import com.hmc.project.hmc.devices.proxy.HMCMediaClientDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.HMCOTRManager;
@@ -177,6 +179,10 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                     Log.e(TAG, "Don't have implementation for that specific device: " + devType);
                     break;
             }
+            // add myself in my list of devices. This makes sense if I'm
+            // HMCServer, otherwise, my list of devices will be replaced with
+            // the one received frmo HCMServer
+            createNewLocalDevice(mLocalDeviceDescriptor);
             mState = STATE_INITIALIZED;
         } else {
             Log.w(TAG, "Already initialized");
@@ -277,7 +283,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         mHMCName = name;
     }
 
-    public void promoteAnonymousProxy(HMCAnonymousDeviceProxy newDevProxy) {
+    public HMCDeviceProxy promoteAnonymousProxy(HMCAnonymousDeviceProxy newDevProxy) {
         // create a specific proxy for the newly added device and add it to the
         // devices list
         HMCDeviceProxy knownDevice = null;
@@ -292,9 +298,47 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                                 + ") was promoted and added to our list of devices");
         // TODO: replace operation strings with constants defined somewhere
         onLocalDevicesListChanged("added", newDevProxy);
+        return knownDevice;
     }
 
-    private void onLocalDevicesListChanged(String string, HMCAnonymousDeviceProxy newDevProxy) {
+    public void createNewLocalDevice(DeviceDescriptor devDesc) {
+        if (devDesc == null) {
+            Log.e(TAG, "Cannot add new device with null DeviceDescriptor");
+            return;
+        }
+        // create the device proxy
+        HMCDeviceProxy devProxy = null;
+        switch (devDesc.getDeviceType()) {
+            case HMCDeviceItf.TYPE.HMC_SERVER:
+                devProxy = new HMCServerProxy(mXMPPChatManager,
+                                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(),
+                                        this);
+                break;
+            case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
+                devProxy = new HMCMediaClientDeviceProxy(mXMPPChatManager,
+                                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(),
+                                        this);
+                break;
+            default:
+                devProxy = null;
+                break;
+        }
+
+        if (devProxy == null) {
+            Log.e(TAG, "Unknown type of device");
+            return;
+        }
+
+        devProxy.setLocalImplementation(mLocalImplementation);
+        devProxy.setDeviceDescriptor(mLocalDeviceDescriptor);
+
+        mLocalDevices.put(devDesc.getFullJID(), devProxy);
+
+        // TODO: replace operation strings with constants defined somewhere
+        onLocalDevicesListChanged("added", devProxy);
+    }
+
+    private void onLocalDevicesListChanged(String string, HMCDeviceProxy newDevProxy) {
         Log.d(TAG, "List of local devices has now " + mLocalDevices.size() + "entries");
         if (mHMCDevicesListener != null) {
             try {
@@ -368,5 +412,22 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     @Override
     public void setUserReplyDeviceAddition(boolean val) throws RemoteException {
         mDeviceAdditionListener.setUserReply(val);
+    }
+
+    public void updateListOfLocalDevices(HMCDevicesList devList) {
+        if (devList == null) {
+            Log.e(TAG, "Received corrupted list of devices");
+        }
+
+        if (mLocalDevices.size() != 0) {
+            Log.e(TAG, "I'm already part of another HMC");
+        }
+
+        Iterator<DeviceDescriptor> iter = devList.getIterator();
+        while (iter.hasNext()) {
+            DeviceDescriptor devDesc = iter.next();
+            Log.d(TAG, "Creating new device: " + devDesc);
+            createNewLocalDevice(devDesc);
+        }
     }
 }

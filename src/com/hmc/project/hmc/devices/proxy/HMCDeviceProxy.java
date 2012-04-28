@@ -35,8 +35,11 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     // hex code of the message type. Must be smaller than 0xF
     protected static final int CODE_SYNC_COMMAND = 0x1;
-    protected static final int CODE_REPLY = 0x2;
+    protected static final int CODE_SYNC_REPLY = 0x2;
     protected static final int CODE_NOTIFICATION = 0x3;
+    protected static final int CODE_ASYNC_COMMAND = 0x4;
+    protected static final int CODE_ASYNC_REPLY = 0x5;
+    protected static final int CODE_REMOTE_EXCEPTION = 0x6; // not used yet
 
     // max timeout for a command reply: 15 sec?
     private static final long REPLY_MAX_TIME_OUT = 15000;
@@ -50,6 +53,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     protected DeviceDescriptor mDeviceDescriptor = null;
     protected String mFullJID;
     private SyncResults mSyncResults;
+    private ASyncResults mAsyncResults;
 
     public HMCDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
@@ -58,6 +62,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat.addMessageListener(this);
         mFullJID = remoteFullJid;
         mSyncResults = new SyncResults();
+        mAsyncResults = new ASyncResults();
 	}
 
     public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
@@ -65,6 +70,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat.addMessageListener(this);
         mFullJID = chat.getParticipant();
         mSyncResults = new SyncResults();
+        mAsyncResults = new ASyncResults();
     }
 
     public HMCDeviceProxy(SecureChat secureChat) {
@@ -72,6 +78,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mSecureChat.addMessageListener(this);
         mFullJID = secureChat.getParticipant();
         mSyncResults = new SyncResults();
+        mAsyncResults = new ASyncResults();
     }
 
     public void setDeviceDescriptor(DeviceDescriptor desc) {
@@ -101,6 +108,46 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     public DeviceDescriptor getDeviceDescriptor() {
         return mDeviceDescriptor;
+    }
+
+    protected void sendCommandAsync(int opCode, String params,
+                            AsyncCommandReplyListener replyListener) {
+        String messageToBeSent = "";
+        String commandId;
+        String commandCode;
+        CommandUniqueIdentifier commandUniqueIdentifier;
+
+        // build the type of request
+        messageToBeSent += Integer.toHexString(0x10 | CODE_ASYNC_COMMAND).substring(1)
+                                .toUpperCase();
+
+        // build the op-code to be sent
+        if (opCode > 0xFFFF) {
+            Log.e(TAG, "Used bad opcode in sendCommandSync");
+            // TODO: improve the error mechanism.
+            return;
+        }
+        commandCode = Integer.toHexString(0x10000 | opCode).substring(1).toUpperCase();
+        messageToBeSent += commandCode;
+
+        // build the command id.. even though this is not used in this case..
+        commandId = Integer.toHexString(0x1000000 | UniqueId.getUniqueId()).substring(1)
+                                .toUpperCase();
+        messageToBeSent += commandId;
+
+        // add the parameters as well
+        messageToBeSent += params;
+
+        // send the command to remote
+        Log.d(TAG, "Message to be sent to remote: " + messageToBeSent);
+        sendMessage(messageToBeSent);
+
+        // optimize this. the number of pending operations can't be bigger than
+        // 0xffffff so maybe don't need to put the opcode as well
+        commandUniqueIdentifier = new CommandUniqueIdentifier(commandCode, commandId);
+        Log.d(TAG, "(send)commandUniqueIdentifier = " + commandUniqueIdentifier);
+
+        mAsyncResults.notifyListenerWhenResultCame(commandUniqueIdentifier, replyListener);
     }
 
     protected void sendNotification(int opCode, String params) {
@@ -226,18 +273,37 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
                 onSyncCommand(opCode, opId, msg.substring(11));
                 break;
             }
-            case CODE_REPLY: {
-                onReplyReceived(opCode, opId, msg.substring(11));
+            case CODE_SYNC_REPLY: {
+                onSyncReplyReceived(opCode, opId, msg.substring(11));
                 break;
             }
             case CODE_NOTIFICATION: {
                 onNotificationReceived(opCode, opId, msg.substring(11));
                 break;
             }
+            case CODE_ASYNC_COMMAND: {
+                onAsyncCommand(opCode, opId, msg.substring(11));
+                break;
+            }
+            case CODE_ASYNC_REPLY: {
+                onAsyncReplyReceived(opCode, opId, msg.substring(11));
+                break;
+            }
         default:
                 Log.e(TAG, "Invalid message code: " + msgCode);
             break;
         }
+    }
+
+    private void onAsyncReplyReceived(int opCode, int opId, String reply) {
+        Log.d(TAG, "Async Reply from remote: " + reply + " for opcode= " + opCode + " and opId= "
+                                + opId);
+        CommandUniqueIdentifier code;
+        code = new CommandUniqueIdentifier(Integer.toHexString(0x10000 | opCode).substring(1)
+                                .toUpperCase(), Integer.toHexString(0x1000000 | opId).substring(1)
+                                .toUpperCase());
+
+        mAsyncResults.notifyListenerForReply(code, reply);
     }
 
     private void onNotificationReceived(int opCode, int opId, String params) {
@@ -249,7 +315,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     }
 
     // this method should not be needed to be overridden by subclasses
-    private void onReplyReceived(int opCode, int opId, String reply) {
+    private void onSyncReplyReceived(int opCode, int opId, String reply) {
         Log.d(TAG, "Reply from remote: " + reply + " for opcode= " + opCode + " and opId= " + opId);
         CommandUniqueIdentifier code;
         code = new CommandUniqueIdentifier(Integer.toHexString(0x10000 | opCode).substring(1)
@@ -261,10 +327,10 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     // this method should not be needed to be overridden by subclasses
     private void onSyncCommand(int opCode, int opId, String params) {
-        String reply = executeLocalSyncCommand(opCode, params);
+        String reply = executeLocalCommand(opCode, params);
 
         // pack back the reply and send it to remote entity
-        String msgToBeSent = Integer.toHexString(0x10 | CODE_REPLY).substring(1)
+        String msgToBeSent = Integer.toHexString(0x10 | CODE_SYNC_REPLY).substring(1)
                                 .toUpperCase();
         msgToBeSent += Integer.toHexString(0x10000 | opCode).substring(1)
                                 .toUpperCase();
@@ -275,9 +341,23 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         sendMessage(msgToBeSent);
     }
 
+    // this method should not be needed to be overridden by subclasses
+    private void onAsyncCommand(int opCode, int opId, String params) {
+        String reply = executeLocalCommand(opCode, params);
+
+        // pack back the reply and send it to remote entity
+        String msgToBeSent = Integer.toHexString(0x10 | CODE_ASYNC_REPLY).substring(1)
+                                .toUpperCase();
+        msgToBeSent += Integer.toHexString(0x10000 | opCode).substring(1).toUpperCase();
+        msgToBeSent += Integer.toHexString(0x1000000 | opId).substring(1).toUpperCase();
+        msgToBeSent += reply;
+        Log.d(TAG, "Reply message that is sent back is: " + msgToBeSent);
+        sendMessage(msgToBeSent);
+    }
+
     // this should NOT be overridden by subclasses. The implementation will take
     // care of executing the local method and return back the proper value
-    protected String executeLocalSyncCommand(int opCode, String params) {
+    protected String executeLocalCommand(int opCode, String params) {
         if (mLocalImplementation != null) {
             return mLocalImplementation.localExecute(opCode, params);
         } else {
@@ -406,8 +486,36 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         }
     }
 
+    private class ASyncResults {
+        private HashMap<CommandUniqueIdentifier, AsyncCommandReplyListener> mRepliesListeners;
+
+        public ASyncResults() {
+            mRepliesListeners = new HashMap<CommandUniqueIdentifier, AsyncCommandReplyListener>();
+        }
+
+        public void notifyListenerWhenResultCame(CommandUniqueIdentifier commandUniqueIdentifier,
+                                AsyncCommandReplyListener listener) {
+            mRepliesListeners.put(commandUniqueIdentifier, listener);
+        }
+
+        public void notifyListenerForReply(CommandUniqueIdentifier code, String reply) {
+            AsyncCommandReplyListener listener = mRepliesListeners.get(code);
+            if (listener != null) {
+                listener.onReplyReceived(reply);
+                mRepliesListeners.remove(code);
+            } else {
+                Log.e(TAG, "Don't have a listener to wait for this reply !!");
+            }
+        }
+    }
+
     @Override
     public void testNotification(String notifString) {
         sendNotification(CMD_TEST_NOTIFICATION, notifString);
     }
+
+    public void testAsyncCommand(String param, AsyncCommandReplyListener listener) {
+        sendCommandAsync(CMD_TEST_ASYNC_COMMAND, param, listener);
+    }
+
 }

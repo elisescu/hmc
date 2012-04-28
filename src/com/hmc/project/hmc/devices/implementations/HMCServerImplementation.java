@@ -7,18 +7,14 @@
 
 package com.hmc.project.hmc.devices.implementations;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-
 import android.os.RemoteException;
 import android.util.Log;
-
-import com.hmc.project.hmc.aidl.IAddDeviceListener;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
+import com.hmc.project.hmc.devices.proxy.AsyncCommandReplyListener;
 import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.service.HMCManager;
-import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 public class HMCServerImplementation extends HMCDeviceImplementation implements HMCServerItf {
 
@@ -88,7 +84,6 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         DeviceDescriptor remoteDevDesc = null;
         HMCAnonymousDeviceProxy newDevProxy = mHMCManager.createAnonymousProxy(fullJID);
         newDevProxy.setLocalImplementation(this);
-
         // send a hello message to remote anonymous device to negotiate OTR and
         // get information about device which will be approved by the user
         remoteDevDesc = newDevProxy.hello(mDeviceDescriptor);

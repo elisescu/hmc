@@ -12,6 +12,7 @@ import android.util.Log;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.DeviceAditionConfirmationListener;
+import com.hmc.project.hmc.devices.proxy.AsyncCommandReplyListener;
 import com.hmc.project.hmc.service.HMCManager;
 
 public class HMCDeviceImplementation implements HMCDeviceItf {
@@ -32,6 +33,9 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         switch (opCode) {
             case HMCDeviceItf.CMD_REMOTE_INCREMENT:
                 retVal = _remoteIncrement(params);
+                break;
+            case HMCDeviceItf.CMD_TEST_ASYNC_COMMAND:
+                retVal = testAsyncCommand(params, null);
                 break;
             default:
                 retVal = "invalid-operation";
@@ -103,4 +107,19 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         }
     }
 
+    public String testAsyncCommand(String param, AsyncCommandReplyListener listener) {
+        String retVal = "relpy async test";
+        Log.d(TAG, "Received test async command with param: " + param);
+
+        // simulate long processing
+        try {
+            Thread.sleep(12000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "Returning the value for async test command: " + retVal);
+
+        return retVal;
+    }
 }

@@ -45,8 +45,8 @@
 		    the value send as parameter</string>
 	    <string name="hmc_server_default_screen_stop_hmc">Log out</string>    
     	<string name="hmc_server_default_screen_add_new_device">Add new device</string>
-    
-    	
+	    <string name="hmc_server_default_screen_hmc_interconnect">Interconnect to HMC</string>
+
 
 	<!-- =======================HMC media client main screen=========================== -->
 		<string name="mediaclient_default_screen_description">

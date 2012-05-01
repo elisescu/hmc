@@ -11,7 +11,6 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
                         HMCMediaClientDeviceItf {
 
     private static final String TAG = "HMCMediaClientDeviceImplementation";
-    private IUserRequestsListener mUserRequestListener;
 
     public HMCMediaClientDeviceImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         super(hmcManager, thisDeviceDesc);
@@ -40,23 +39,4 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
         // TODO Auto-generated method stub
 
     }
-
-    /**
-     * @param usrReqListener
-     */
-    public void registerUserRequestsListener(IUserRequestsListener usrReqListener) {
-        mUserRequestListener = usrReqListener;
-    }
-
-    /**
-     * @param userReqListener
-     */
-    public void unregisterUserRequestsListener(IUserRequestsListener userReqListener) {
-        if (mUserRequestListener == userReqListener) {
-            mUserRequestListener = null;
-        } else {
-            Log.e(TAG, "Unknown listerner for de-registration");
-        }
-    }
-
 }

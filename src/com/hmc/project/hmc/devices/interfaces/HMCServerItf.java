@@ -19,15 +19,9 @@ public interface HMCServerItf {
 
     static final int CMD_GET_LIST_OF_LOCAL_HMC_DEVICES = HMC_SERVER_INITIAL_COMMAND + 1;
 
-    static final int HMC_SERVER_LAST_COMMAND = CMD_GET_LIST_OF_LOCAL_HMC_DEVICES;
+    static final int CMD_INTERCONNECTION_REQUEST = HMC_SERVER_INITIAL_COMMAND + 2;
 
-    /**
-     * Interconnects with an external HMC. The request is sent by an external
-     * HMCServer that we are going to interconnect to. Once the admin approves
-     * and verifies the fingerprint of the remote HMCServer, we can send a
-     * request to get the list of the external devices.
-     */
-    void interconnectionRequest(String requesterName);
+    static final int HMC_SERVER_LAST_COMMAND = CMD_INTERCONNECTION_REQUEST;
 
     /**
      * retrieves the list of HMC devices XMPP JIDs and their public keys from

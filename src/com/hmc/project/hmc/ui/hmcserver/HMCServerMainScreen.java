@@ -168,6 +168,9 @@ public class HMCServerMainScreen extends Activity {
             case R.id.hmc_server_default_screen_add_new_device:
                 startActivity(new Intent(this, AddNewDeviceWizzard.class));
                 return true;
+            case R.id.hmc_server_default_screen_hmc_interconnect:
+                startActivity(new Intent(this, HMCInterconnectionWizzard.class));
+                return true;
             default:
                 return false;
         }

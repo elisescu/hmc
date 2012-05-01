@@ -115,11 +115,11 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         Log.d(TAG, "Received call from " + remoteHMCName + "to join the HMC");
         Log.d(TAG, "Starting the user confirmation activity, using the listener:"
                                 + mDeviceAditionConfirmationListener);
-        if (mPendingDevDesc != null) {
+        if (mPendingDevDesc != null && mDeviceAditionConfirmationListener != null) {
             retVal = mDeviceAditionConfirmationListener.confirmDeviceAddition(mPendingDevDesc,
                                     remoteHMCName);
         } else {
-            Log.e(TAG, "Cannot ask the user for confirmation. Listener is null");
+            Log.e(TAG, "Cannot ask the user for confirmation");
             retVal = false;
         }
 

@@ -28,7 +28,11 @@
         <activity android:name=".ui.hmcserver.AddNewDeviceWizzard" 
             android:launchMode="standard">
         </activity>
-        
+
+        <activity android:name=".ui.hmcserver.HMCInterconnectionWizzard" 
+            android:launchMode="standard">
+        </activity>
+
         <activity android:name=".ui.mediaclient.HMCMediaClientDeviceMainScreen" 
             android:launchMode="standard">
         </activity>

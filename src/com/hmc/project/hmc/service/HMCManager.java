@@ -86,6 +86,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private String mHMCName;
     private HMCService mHMCService;
     private DeviceAditionConfirmationListener mDeviceAdditionListener;
+    private HMCInterconnectionConfirmationListener mInterconnectionHMCListener;
     private HMCDevicesStore mHMCDevicesStore;
 
     public HMCManager(Connection xmppConnection, HMCService service) {
@@ -167,6 +168,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                         mLocalDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_SERVER);
                         mLocalImplementation = new HMCServerImplementation(this,
                                                 mLocalDeviceDescriptor);
+                        ((HMCServerImplementation) mLocalImplementation)
+                                                .registerDeviceAditionConfirmationListener(mInterconnectionHMCListener);
                     }
                 }
                 break;

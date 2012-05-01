@@ -38,4 +38,9 @@ public class HMCServerHandler extends IHMCServerHndl.Stub {
                             throws RemoteException {
         mLocalImplementation.unregisterUserRequestsListener(userReqListener);
     }
+
+    @Override
+    public boolean interconnectTo(String fullJID) throws RemoteException {
+        return mLocalImplementation.interconnectTo(fullJID);
+    }
 }

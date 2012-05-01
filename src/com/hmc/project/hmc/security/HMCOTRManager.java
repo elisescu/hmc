@@ -116,6 +116,7 @@ public class HMCOTRManager implements OtrEngineHost {
                 mOtrKeyManager.savePublicKey(sessionID, mOtrEngine.getRemotePublicKey(sessionID));
             }
 
+            // TODO: check here if chat is null !!!
             mChats.get(sessionID).otrStatusChanged(mOtrEngine.getSessionStatus(sessionID));
         }
     }

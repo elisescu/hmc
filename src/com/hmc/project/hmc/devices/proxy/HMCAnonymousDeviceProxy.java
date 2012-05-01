@@ -15,6 +15,7 @@ import android.util.Log;
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
+import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 
 /**
@@ -51,5 +52,9 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
 
     public void joinHMC(String hmcName, AsyncCommandReplyListener listener) {
         sendCommandAsync(HMCMediaDeviceItf.CMD_JOIN_HMC, hmcName, listener);
+    }
+
+    public void interconnectionRequest(String hmcName, AsyncCommandReplyListener listener) {
+        sendCommandAsync(HMCServerItf.CMD_INTERCONNECTION_REQUEST, hmcName, listener);
     }
 }

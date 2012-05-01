@@ -11,6 +11,7 @@ import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 interface IUserRequestsListener {
 
     boolean confirmDeviceAddition(IDeviceDescriptor newDevice); 
+    boolean confirmHMCInterconnection(IDeviceDescriptor remoteHMCServer, String remoteHMCName);
     boolean verifyFingerprint(String localFingerprint, String remoteFingerprint, String deviceName);
 
 }

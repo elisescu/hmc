@@ -35,11 +35,6 @@ public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
     }
 
     @Override
-    public void interconnectionRequest(String requesterName) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public HMCDevicesList getListOfLocalHMCDevices() {
         String returnedString;
 

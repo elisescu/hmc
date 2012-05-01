@@ -10,6 +10,7 @@ import com.hmc.project.hmc.aidl.IAddDeviceListener;
 
 interface IHMCServerHndl {
     boolean addNewDevice(String JID);
+    boolean interconnectTo(String JID);
     
     void registerUserRequestsListener(IUserRequestsListener usrReqListener);
     

@@ -6,4 +6,7 @@
 	<item android:id="@+id/hmc_server_default_screen_add_new_device"
 		android:visible="true"
 		android:title="@string/hmc_server_default_screen_add_new_device"/>
+	<item android:id="@+id/hmc_server_default_screen_hmc_interconnect"
+		android:visible="true"
+		android:title="@string/hmc_server_default_screen_hmc_interconnect"/>
 </menu>

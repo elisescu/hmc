@@ -47,7 +47,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class AddNewDeviceWizzard extends Activity {
+public class HMCInterconnectionWizzard extends Activity {
     protected static final String TAG = "DeviceMainScreen";
     private boolean mIsBound;
     private HMCService mBoundService;
@@ -57,18 +57,20 @@ public class AddNewDeviceWizzard extends Activity {
     private EditText mJidTextView;  
     private Context mContext; 
     private UserRequestsListener mUserRequestsListener = new UserRequestsListener();
-    private ProgressDialog mAddDeviceProgressDialog;
-    private IDeviceDescriptor mNewDeviceDesc;
+    private ProgressDialog mInterconnectProgressDialog;
+    private IDeviceDescriptor mExternalHMCServer;
     private boolean mValidJid;
     private Boolean mUserConfirmed = new Boolean(false);;
     private Object mUserConfirmedNotif = new Object();
+    private String mExternalHMCName;
+
     private OnClickListener mButtonsListener = new OnClickListener() {
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.add_new_dev_butt_add: {
+                case R.id.interconnect_hmc_butt_interc: {
                     if (checkUsername(mJidTextView.getText().toString())) {
                         try {
-                            addNewDevice(mJidTextView.getText().toString());
+                            interconnectToHMC(mJidTextView.getText().toString());
                         } catch (Exception e) {
                             HMCUserNotifications.normalToast(mContext, "Internal error");
                             e.printStackTrace();
@@ -85,18 +87,17 @@ public class AddNewDeviceWizzard extends Activity {
 
     };
 
-    private void addNewDevice(String newDevFullJid) throws Exception {
-
+    private void interconnectToHMC(String newDevFullJid) throws Exception {
         if (mHMCConnection == null) {
             throw new Exception();
         } else {
             IHMCManager hmcMng = mHMCConnection.getHMCManager();
             IHMCServerHndl hmcServerHmdl = hmcMng.implHMCServer();
             hmcServerHmdl.registerUserRequestsListener(mUserRequestsListener);
-            mAddDeviceProgressDialog = ProgressDialog.show(this, "Add new device",
-                    "Getting device information.\nPlease wait...", true,
+            mInterconnectProgressDialog = ProgressDialog.show(this, "Interconnecting",
+                    "Getting information from external HMC server.\nPlease wait...", true,
                     false);
-            new AddDeviceAsyncTask().execute(hmcServerHmdl, newDevFullJid);
+            new HMCInterconnectionAsyncTask().execute(hmcServerHmdl, newDevFullJid);
         }
     }
 
@@ -111,13 +112,13 @@ public class AddNewDeviceWizzard extends Activity {
 
         public void onServiceDisconnected(ComponentName className) {
             mBoundService = null;
-            Toast.makeText(AddNewDeviceWizzard.this, R.string.local_service_disconnected,
+            Toast.makeText(HMCInterconnectionWizzard.this, R.string.local_service_disconnected,
                     Toast.LENGTH_SHORT).show();
         }
     };
 
     void doBindService() {
-        bindService(new Intent(AddNewDeviceWizzard.this,
+        bindService(new Intent(HMCInterconnectionWizzard.this,
                 HMCService.class), mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
@@ -142,14 +143,14 @@ public class AddNewDeviceWizzard extends Activity {
         mHMCApplication = (HMCApplication)getApplication();
         mContext = this;
 
-        setContentView(R.layout.add_new_device_wizzard);
+        setContentView(R.layout.interconnect_hmc_wizzard);
+
+        mJidTextView = (EditText) findViewById(R.id.add_new_dev_text_jid);
 
         // Watch for button clicks.
-        Button button = (Button) findViewById(R.id.add_new_dev_butt_add);
+        Button button = (Button) findViewById(R.id.interconnect_hmc_butt_interc);
         button.setOnClickListener(mButtonsListener);
 
-        mInfoTextView = (TextView) findViewById(R.id.add_new_dev_text_info);
-        mJidTextView =  (EditText) findViewById(R.id.add_new_dev_text_jid);
         // make sure we ended up in this activity with the app connected to XMPP
         // server
         if (!mHMCApplication.isConnected()) {
@@ -173,12 +174,7 @@ public class AddNewDeviceWizzard extends Activity {
 
         @Override
         public boolean confirmDeviceAddition(IDeviceDescriptor newDevice) throws RemoteException {
-            mNewDeviceDesc = newDevice;
-            // mInfoTextView.setText(newDevice.toString());
-            mAddDeviceProgressDialog.dismiss();
-            // ask the user to confirm the device description
-
-            return askUserConfirmation();
+            return false;
         }
 
         @Override
@@ -188,17 +184,16 @@ public class AddNewDeviceWizzard extends Activity {
             return false;
         }
 
-        /*
-         * (non-Javadoc)
-         * @see
-         * com.hmc.project.hmc.aidl.IUserRequestsListener#confirmHMCInterconnection
-         * (com.hmc.project.hmc.aidl.IDeviceDescriptor, java.lang.String)
-         */
         @Override
         public boolean confirmHMCInterconnection(IDeviceDescriptor remoteHMCServer,
                                 String remoteHMCName) throws RemoteException {
-            // TODO Auto-generated method stub
-            return false;
+            mExternalHMCServer = remoteHMCServer;
+            mExternalHMCName = remoteHMCName;
+            // mInfoTextView.setText(newDevice.toString());
+            mInterconnectProgressDialog.dismiss();
+            // ask the user to confirm the device description
+
+            return askUserConfirmation();
         }
     }
     
@@ -217,9 +212,9 @@ public class AddNewDeviceWizzard extends Activity {
         }
 
         // finish the rest of adding new device protocol
-        AddNewDeviceWizzard.this.runOnUiThread(new Runnable() {
+        HMCInterconnectionWizzard.this.runOnUiThread(new Runnable() {
             public void run() {
-                mAddDeviceProgressDialog = ProgressDialog.show(AddNewDeviceWizzard.this,
+                mInterconnectProgressDialog = ProgressDialog.show(HMCInterconnectionWizzard.this,
                         "Add new device",
                         "Sending HMC information.\nPlease wait...", true, false);
             }
@@ -230,13 +225,14 @@ public class AddNewDeviceWizzard extends Activity {
     }
 
     private void askUserConfirmationUITh() {
-        AddNewDeviceWizzard.this.runOnUiThread(new Runnable() {
+        HMCInterconnectionWizzard.this.runOnUiThread(new Runnable() {
             public void run() {
                 try {
-                    new AlertDialog.Builder(AddNewDeviceWizzard.this)
-                            .setTitle("Please confirm adding this device")
-                            .setMessage("Name: " + mNewDeviceDesc.getDeviceName() + 
-                                        "\nFingerprint: "+ mNewDeviceDesc.getFingerprint()+
+                    new AlertDialog.Builder(HMCInterconnectionWizzard.this)
+                                            .setTitle("Please confirm interconnection to "
+                                                                    + mExternalHMCName)
+                            .setMessage("Name: " + mExternalHMCServer.getDeviceName() + 
+                                        "\nFingerprint: "+ mExternalHMCServer.getFingerprint()+
                                         "\n\n\nMy fingerprint:\n" + 
                                         mHMCConnection.getHMCManager().getLocalDevDescriptor()
                                         .getFingerprint())
@@ -263,37 +259,37 @@ public class AddNewDeviceWizzard extends Activity {
         });
     }
 
-    private class AddDeviceAsyncTask extends AsyncTask<Object, Void, Boolean> {
+    private class HMCInterconnectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
         @Override
         protected Boolean doInBackground(Object... param) {
-            IHMCServerHndl hmcServerHmdl = (IHMCServerHndl) param[0];
+            IHMCServerHndl hmcServerHndl = (IHMCServerHndl) param[0];
             String fullJID = (String) param[1];
-            boolean addSuccess = true;
+            boolean interconnectionSuccess = true;
             try {
-                addSuccess = hmcServerHmdl.addNewDevice(fullJID);
+                interconnectionSuccess = hmcServerHndl.interconnectTo(fullJID);
             } catch (RemoteException e) {
                 Log.e(TAG,
                         "Problem calling remote method in HMCService: addNewDevice on HMCServerHandler");
                 e.printStackTrace();
-                addSuccess = false;
+                interconnectionSuccess = false;
             }
-            return new Boolean(addSuccess);
+            return new Boolean(interconnectionSuccess);
         }
 
         @Override
         protected void onPostExecute(Boolean result) {
             // mConnectionRemoteException = result;
-            Log.d(TAG, "Device adition finished");
-            mAddDeviceProgressDialog.dismiss();
+            Log.d(TAG, "Interconnection finished with success = " + result.booleanValue());
+            mInterconnectProgressDialog.dismiss();
             if (result == true) {
                 doUnbindService();
                 finish();
             } else {
                 // show user notification
-                AddNewDeviceWizzard.this.runOnUiThread(new Runnable() {
+                HMCInterconnectionWizzard.this.runOnUiThread(new Runnable() {
                     public void run() {
-                        HMCUserNotifications.normalToast(AddNewDeviceWizzard.this,
-                                "The new device was not added");
+                        HMCUserNotifications.normalToast(HMCInterconnectionWizzard.this,
+                                                "The interconnection failed");
                     }
                 });
             }

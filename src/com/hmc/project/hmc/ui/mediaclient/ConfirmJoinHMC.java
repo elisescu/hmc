@@ -9,7 +9,7 @@ package com.hmc.project.hmc.ui.mediaclient;
 
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
-import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.hmcserver.AddNewDeviceWizzard;
@@ -33,7 +33,7 @@ import android.widget.Toast;
 
 public class ConfirmJoinHMC extends Activity {
     protected static final String TAG = "ConfirmJoinHMC";
-    private IHMCFacade mHMCFacade;
+    private IHMCConnection mHMCConnection;
     private HMCService mBoundService;
     private boolean mIsBound;
     private HMCApplication mHMCApplication;
@@ -43,10 +43,10 @@ public class ConfirmJoinHMC extends Activity {
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
-            mHMCFacade = IHMCFacade.Stub.asInterface(service);
-            if (mHMCFacade != null) {
+            mHMCConnection = IHMCConnection.Stub.asInterface(service);
+            if (mHMCConnection != null) {
                 try {
-                    mHMCManager = mHMCFacade.getHMCManager();
+                    mHMCManager = mHMCConnection.getHMCManager();
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

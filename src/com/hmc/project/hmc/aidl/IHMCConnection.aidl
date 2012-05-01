@@ -10,7 +10,7 @@ package com.hmc.project.hmc.aidl;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IConnectionListener;
 
-interface IHMCFacade {
+interface IHMCConnection {
     
     // get the HMC manager from the HMC service
     IHMCManager getHMCManager();

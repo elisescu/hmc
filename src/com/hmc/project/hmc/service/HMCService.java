@@ -44,7 +44,7 @@ import android.widget.Toast;
 // Need the following import to get access to the app resources, since this
 // class is in a sub-package.
 import com.hmc.project.hmc.R;
-import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.ui.LocalServiceActivities;
 import com.hmc.project.hmc.ui.Login;
 
@@ -58,7 +58,7 @@ public class HMCService extends Service {
     
     // This is the object that receives interactions from clients.  See
     // RemoteService for a more complete example.
-    private IHMCFacade.Stub mHMCFacade;
+    private IHMCConnection.Stub mHMCConnection;
    
 
     /**
@@ -77,7 +77,7 @@ public class HMCService extends Service {
         mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
         // create the XMPPFacade that the UI activities will use 
-        mHMCFacade = new HMCFacade(this);
+        mHMCConnection = new HMCConnection(this);
 
         // Display a notification about us starting.  We put an icon in the status bar.
         showNotification();
@@ -102,7 +102,7 @@ public class HMCService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return mHMCFacade;
+        return mHMCConnection;
     }
 
     // TODO: taken from Beem. Rewrite it!

@@ -29,7 +29,7 @@ import android.widget.Toast;
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IConnectionListener;
-import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
@@ -43,7 +43,7 @@ public class Login extends Activity {
     private ServiceConnection mConnection = new HMCServiceConnection();
     private boolean mServiceIsBound;
     private boolean mServiceIsStarted;
-    private IHMCFacade mHMCFacade;
+    private IHMCConnection mHMCConnection;
     private ProgressDialog mLoginProgressDialog;
     HMCConnectionListener mConnectionListener = new HMCConnectionListener();
     private Button mStartButton;
@@ -150,10 +150,10 @@ public class Login extends Activity {
                 mPassword = mHMCApplication.getPassword();
                 mDeviceType = mHMCApplication.getDeviceType();
 
-                if (mHMCFacade != null) {
+                if (mHMCConnection != null) {
                     try {
-                        mHMCFacade.registerConnectionListener(mConnectionListener);
-                        mHMCFacade.connectAsync(mUsername, mPassword, 5222);
+                        mHMCConnection.registerConnectionListener(mConnectionListener);
+                        mHMCConnection.connectAsync(mUsername, mPassword, 5222);
                     } catch (RemoteException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -165,9 +165,9 @@ public class Login extends Activity {
     
     private void disconnectAndStopService() {
         // disconnect from XMPP server\
-        if (mHMCApplication.isConnected() && mHMCFacade != null) {
+        if (mHMCApplication.isConnected() && mHMCConnection != null) {
             try {
-                mHMCFacade.disconnect();
+                mHMCConnection.disconnect();
                 mHMCApplication.setConnected(false);
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block
@@ -212,11 +212,11 @@ public class Login extends Activity {
 
     private class HMCServiceConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            mHMCFacade = IHMCFacade.Stub.asInterface(service);
+            mHMCConnection = IHMCConnection.Stub.asInterface(service);
             if (mHMCApplication.isConfigured())  {
                 try {
-                    mHMCFacade.registerConnectionListener(mConnectionListener);
-                    mHMCFacade.connectAsync(mUsername, mPassword,  5222);
+                    mHMCConnection.registerConnectionListener(mConnectionListener);
+                    mHMCConnection.connectAsync(mUsername, mPassword, 5222);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

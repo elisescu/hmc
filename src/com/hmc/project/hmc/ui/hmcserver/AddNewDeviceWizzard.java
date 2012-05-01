@@ -13,7 +13,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IDeviceDescriptor;
-import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IHMCServerHndl;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
@@ -51,7 +51,7 @@ public class AddNewDeviceWizzard extends Activity {
     protected static final String TAG = "DeviceMainScreen";
     private boolean mIsBound;
     private HMCService mBoundService;
-    private IHMCFacade mHMCFacade;
+    private IHMCConnection mHMCConnection;
     private HMCApplication mHMCApplication;
     private TextView mInfoTextView;
     private EditText mJidTextView;  
@@ -87,10 +87,10 @@ public class AddNewDeviceWizzard extends Activity {
 
     private void addNewDevice(String newDevFullJid) throws Exception {
 
-        if (mHMCFacade == null) {
+        if (mHMCConnection == null) {
             throw new Exception();
         } else {
-            IHMCManager hmcMng = mHMCFacade.getHMCManager();
+            IHMCManager hmcMng = mHMCConnection.getHMCManager();
             IHMCServerHndl hmcServerHmdl = hmcMng.implHMCServer();
             hmcServerHmdl.registerUserRequestsListener(mUserRequestsListener);
             mAddDeviceProgressDialog = ProgressDialog.show(this, "Add new device",
@@ -103,8 +103,8 @@ public class AddNewDeviceWizzard extends Activity {
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
-            mHMCFacade = IHMCFacade.Stub.asInterface(service);
-            if (mHMCFacade != null) {
+            mHMCConnection = IHMCConnection.Stub.asInterface(service);
+            if (mHMCConnection != null) {
 
             }
         }
@@ -225,7 +225,7 @@ public class AddNewDeviceWizzard extends Activity {
                             .setMessage("Name: " + mNewDeviceDesc.getDeviceName() + 
                                         "\nFingerprint: "+ mNewDeviceDesc.getFingerprint()+
                                         "\n\n\nMy fingerprint:\n" + 
-                                        mHMCFacade.getHMCManager().getLocalDevDescriptor()
+                                        mHMCConnection.getHMCManager().getLocalDevDescriptor()
                                         .getFingerprint())
                             .setPositiveButton("YES", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface arg0, int arg1) {

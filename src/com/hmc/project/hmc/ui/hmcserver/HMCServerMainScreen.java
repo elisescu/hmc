@@ -33,7 +33,7 @@ import android.widget.Toast;
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IDeviceDescriptor;
-import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListAdapter;
@@ -45,7 +45,7 @@ public class HMCServerMainScreen extends Activity {
     protected static final String TAG = "DeviceMainScreen";
     private boolean mIsBound;
     private HMCService mBoundService;
-    private IHMCFacade mHMCFacade;
+    private IHMCConnection mHMCConnection;
     private HMCApplication mHMCApplication;
     private ListView mDevicesListView;
     private DevicesListAdapter mDeviceNamesAdapter;
@@ -54,7 +54,7 @@ public class HMCServerMainScreen extends Activity {
 
     private OnClickListener mTestMethodListener = new OnClickListener() {
         public void onClick(View v) {
-            if (mHMCFacade != null) {
+            if (mHMCConnection != null) {
                 // mDeviceNamesAdapter.add("New device");
             }
         }
@@ -63,15 +63,15 @@ public class HMCServerMainScreen extends Activity {
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
-            mHMCFacade = IHMCFacade.Stub.asInterface(service);
+            mHMCConnection = IHMCConnection.Stub.asInterface(service);
 
-            if (mHMCFacade != null) {
+            if (mHMCConnection != null) {
                 try {
-                    mHMCFacade.getHMCManager().init(mHMCApplication.getDeviceName(), "",
+                    mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(), "",
                                             HMCDeviceItf.TYPE.HMC_SERVER);
-                    mHMCFacade.getHMCManager().registerDevicesListener(mHMCDevicesListener);
+                    mHMCConnection.getHMCManager().registerDevicesListener(mHMCDevicesListener);
 
-                    mLocalDevNames = (HashMap<String, String>) mHMCFacade.getHMCManager()
+                    mLocalDevNames = (HashMap<String, String>) mHMCConnection.getHMCManager()
                                             .getListOfLocalDevices();
 
                     updateListOfLocalDevicesUIThread();
@@ -111,7 +111,7 @@ public class HMCServerMainScreen extends Activity {
     void doUnbindService() {
         if (mIsBound) {
             try {
-                mHMCFacade.getHMCManager().unregisterDevicesListener(mHMCDevicesListener);
+                mHMCConnection.getHMCManager().unregisterDevicesListener(mHMCDevicesListener);
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -174,9 +174,9 @@ public class HMCServerMainScreen extends Activity {
     }
 
     private void logOutAndExit() {
-        if (mHMCFacade != null) {
+        if (mHMCConnection != null) {
             try {
-                mHMCFacade.disconnect();
+                mHMCConnection.disconnect();
                 mHMCApplication.setConnected(false);
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block

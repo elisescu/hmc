@@ -23,8 +23,8 @@ import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.R.id;
 import com.hmc.project.hmc.R.layout;
 import com.hmc.project.hmc.R.string;
-import com.hmc.project.hmc.aidl.IHMCFacade;
-import com.hmc.project.hmc.service.HMCFacade;
+import com.hmc.project.hmc.aidl.IHMCConnection;
+import com.hmc.project.hmc.service.HMCConnection;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
@@ -165,7 +165,7 @@ public class LocalServiceActivities {
         private HMCService mBoundService;
 
         private ServiceConnection mConnection = new ServiceConnection() {
-            private IHMCFacade mHMCFacade;
+            private IHMCConnection mHMCConnection;
 
             public void onServiceConnected(ComponentName className, IBinder service) {
                 // This is called when the connection with the service has been
@@ -176,10 +176,10 @@ public class LocalServiceActivities {
                 //mBoundService = ((IHMCFacade)service).getService();
                 
                 
-                mHMCFacade = IHMCFacade.Stub.asInterface(service);
+                mHMCConnection = IHMCConnection.Stub.asInterface(service);
                 
                 try {
-                    mHMCFacade.connect("elisescu_1@jabber.org", "Cucurigu1", 5222);
+                    mHMCConnection.connect("elisescu_1@jabber.org", "Cucurigu1", 5222);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

@@ -36,7 +36,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.hmc.project.hmc.aidl.IConnectionListener;
-import com.hmc.project.hmc.aidl.IHMCFacade;
+import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 
@@ -46,17 +46,20 @@ import de.duenndns.ssl.MemorizingTrustManager;
  * @author elisescu
  *
  */
-public class HMCFacade extends IHMCFacade.Stub {
+public class HMCConnection extends IHMCConnection.Stub {
 
-    private static final String TAG = "XMPPFacade";
+    private static final String TAG = "HMCConnection";
     private HMCManager mHMCManager = null;
     private Connection mXMPPConnection = null;
     private HMCService mHMCService = null;
     private ConnectionListener mConnectionListener = new HMCConnectionListener();
     private IConnectionListener mRemoteConnectionListener;
     private RemoteException mConnectionRemoteException;
+    private String mFullJID;
+    private String mPassword;
+    private int mPort;
 
-    public HMCFacade(HMCService hmcService) {
+    public HMCConnection(HMCService hmcService) {
         mHMCService = hmcService;
     }
 
@@ -117,9 +120,31 @@ public class HMCFacade extends IHMCFacade.Stub {
     
     @Override
     public void connectAsync(String fullJID, String password, int port) throws RemoteException {
-        // TODO: change this to use normal java thread so that the HMC core will
-        // be portable
-        new LoginAsyncTask().execute(fullJID, password, port);
+        mFullJID = fullJID;
+        mPassword = password;
+        mPort = port;
+        new Thread(new Runnable() {
+            public void run() {
+                boolean success = new Boolean(true);
+                
+                Looper.prepare();
+
+                try {
+                    connectL(mFullJID, mPassword, mPort);
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                    success = false;
+                }
+
+                if (mRemoteConnectionListener != null) {
+                    try {
+                        mRemoteConnectionListener.connectionSuccessful(success);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     // create the XMPPConnection to be used for login, for getting the chatmanager, etc
@@ -274,41 +299,4 @@ public class HMCFacade extends IHMCFacade.Stub {
         // TODO: check the deal with Ping :-S
         //pm.addIQProvider(PingExtension.ELEMENT, PingExtension.NAMESPACE, PingExtension.class);
     }
-
-
-
-
-        private class LoginAsyncTask extends AsyncTask<Object, Void, Boolean> {
-            private RemoteException mRemoteException = null;
-            @Override
-            protected Boolean doInBackground(Object... param) {
-                String username = (String)param[0];
-                String password = (String)param[1];
-                Integer port = (Integer)param[2];
-
-                Looper.prepare();
-                Boolean success = new Boolean(true);
-                try {
-                connectL(username, password, port.intValue());
-                } catch (XMPPException e) {
-                    mRemoteException = new RemoteException();
-                    e.printStackTrace();
-                    success = new Boolean(false);
-                }
-                return success;
-            }
-            
-            @Override
-            protected void onPostExecute(Boolean result) {
-                //mConnectionRemoteException = result;
-                Log.d(TAG,"Connection and login finished:"+result.booleanValue());
-                if (mRemoteConnectionListener != null) {
-                    try {
-                        mRemoteConnectionListener.connectionSuccessful(result.booleanValue());
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
 }

@@ -9,4 +9,7 @@ import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 
 interface IHMCDevicesListener {
     void onDevicesListChanged(String whatChanged, IDeviceDescriptor devDesc); 
+    void onDeviceAdded(IDeviceDescriptor devDesc);
+    void onDeviceRemoved(IDeviceDescriptor devDesc);
+    void onPresenceChanged(String presence, IDeviceDescriptor devDesc);
 }

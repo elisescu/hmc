@@ -202,23 +202,37 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         @Override
         public void onDevicesListChanged(String whatChanged, IDeviceDescriptor devDesc)
                                 throws RemoteException {
-            modifDeviceDescriptor = devDesc;
-            if (whatChanged.equals("added")) {
-                // add the device in the list, inside ui thread
-                HMCMediaClientDeviceMainScreen.this.runOnUiThread(new Runnable() {
-                    public void run() {
-                        try {
-                            String jid = modifDeviceDescriptor.getFullJID();
-                            String name = modifDeviceDescriptor.getDeviceName();
-                            mDeviceNamesAdapter.add(jid, name);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Cannot retrieve the details about modified device");
-                            e.printStackTrace();
-                        }
-                    }
-                });
+        }
 
-            }
+        @Override
+        public void onDeviceAdded(IDeviceDescriptor devDesc) throws RemoteException {
+            // add the device in the list, inside ui thread
+            modifDeviceDescriptor = devDesc;
+            HMCMediaClientDeviceMainScreen.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    try {
+                        String jid = modifDeviceDescriptor.getFullJID();
+                        String name = modifDeviceDescriptor.getDeviceName();
+                        mDeviceNamesAdapter.add(jid, name);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot retrieve the details about modified device");
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onDeviceRemoved(IDeviceDescriptor devDesc) throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void onPresenceChanged(String presence, IDeviceDescriptor devDesc)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+
         }
 
     }

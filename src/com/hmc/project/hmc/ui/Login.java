@@ -132,7 +132,7 @@ public class Login extends Activity {
                 mServiceIsStarted = true;
             }
 
-            // bind to HMCService so that we get the HMCFacade
+            // bind to HMCService so that we get the HMCConnection
             if (!mServiceIsBound) {
                 doBindService();
             }

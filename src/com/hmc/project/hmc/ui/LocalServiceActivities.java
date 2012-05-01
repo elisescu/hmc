@@ -173,7 +173,7 @@ public class LocalServiceActivities {
                 // interact with the service.  Because we have bound to a explicit
                 // service that we know is running in our own process, we can
                 // cast its IBinder to a concrete class and directly access it.
-                //mBoundService = ((IHMCFacade)service).getService();
+                // mBoundService = ((IHMCConnection)service).getService();
                 
                 
                 mHMCConnection = IHMCConnection.Stub.asInterface(service);

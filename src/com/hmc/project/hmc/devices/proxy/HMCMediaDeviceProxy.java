@@ -12,6 +12,7 @@ import org.jivesoftware.smack.ChatManager;
 
 import android.util.Log;
 
+import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
@@ -32,15 +33,14 @@ public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDevic
     }
 
     @Override
-	public void deviceRemovedNotification() {
+	public void localDeviceRemovedNotification() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void deviceAddedNotification() {
-		// TODO Auto-generated method stub
-		
+	public void localDeviceAddedNotification(DeviceDescriptor newDev) {
+        sendNotification(CMD_DEVICE_ADDED_NOTIFICATION, newDev.toXMLString());
 	}
 
     public void sendListOfDevices(HMCDevicesList list) {

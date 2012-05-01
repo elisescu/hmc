@@ -8,6 +8,8 @@
  */
 package com.hmc.project.hmc.devices.interfaces;
 
+import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
+
 /**
  * 
  */
@@ -21,7 +23,9 @@ public interface HMCMediaDeviceItf {
 
     static final int CMD_SEND_LIST_DEVICES = HMC_MEDIA_DEVICE_INITIAL_COMMAND + 3;
 
-    void deviceRemovedNotification();
+    static final int CMD_DEVICE_ADDED_NOTIFICATION = HMC_MEDIA_DEVICE_INITIAL_COMMAND + 4;
 
-    void deviceAddedNotification();
+    void localDeviceRemovedNotification();
+
+    void localDeviceAddedNotification(DeviceDescriptor newDev);
 }

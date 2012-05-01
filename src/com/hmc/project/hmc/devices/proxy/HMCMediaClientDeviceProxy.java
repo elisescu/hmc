@@ -26,18 +26,6 @@ public class HMCMediaClientDeviceProxy extends HMCMediaDeviceProxy implements HM
         super(secureChat);
     }
 
-    @Override
-	public void deviceRemovedNotification() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void deviceAddedNotification() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	@Override
 	public void verifyFingerprints(String localFingerprint,
 			String remoteFingerprint) {

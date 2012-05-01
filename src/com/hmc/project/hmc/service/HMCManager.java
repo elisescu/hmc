@@ -53,6 +53,7 @@ import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCMediaClientDeviceProxy;
+import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.HMCOTRManager;
@@ -70,7 +71,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
     private static final String DEVICES_STORE_PATH = "/sdcard/HMCDeviceStore.dat";
 
-    HashMap<String, HMCDeviceProxy> mAnonymousDevices;
+    private HashMap<String, HMCDeviceProxy> mAnonymousDevices;
 
     HMCServerProxy mLocalServer;
     HashMap<String, HashMap<String, HMCDeviceProxy>> mExternalHMCs;
@@ -306,6 +307,23 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         HMCDeviceProxy knownDevice = null;
         knownDevice = newDevProxy.promoteToSpecificProxy();
         if (knownDevice != null ) {
+
+            // let know also the rest of devices about this addition
+            // local devices
+            Iterator<HMCDeviceProxy> localDevicesIter = mHMCDevicesStore.getListOfLocalDevices()
+                                    .values().iterator();
+            
+            while (localDevicesIter.hasNext()) {
+                HMCDeviceProxy localDev = localDevicesIter.next();
+                
+                // TODO: fix this bad approach
+                if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
+                    HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                    mediaDev.localDeviceAddedNotification(knownDevice.getDeviceDescriptor());
+                }
+            }
+
+            // add the new device in local store
             mHMCDevicesStore.addNewLocalDevice(knownDevice);
         } else {
             Log.e(TAG, "Couldn't promote the anonimous device");
@@ -315,43 +333,6 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                                 + ") was promoted and added to our list of devices");
         return knownDevice;
     }
-
-//    public void createNewLocalDevice(DeviceDescriptor devDesc) {
-//        if (devDesc == null) {
-//            Log.e(TAG, "Cannot add new device with null DeviceDescriptor");
-//            return;
-//        }
-//        // create the device proxy
-//        HMCDeviceProxy devProxy = null;
-//        switch (devDesc.getDeviceType()) {
-//            case HMCDeviceItf.TYPE.HMC_SERVER:
-//                devProxy = new HMCServerProxy(mXMPPChatManager,
-//                                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(),
-//                                        this);
-//                break;
-//            case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
-//                devProxy = new HMCMediaClientDeviceProxy(mXMPPChatManager,
-//                                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(),
-//                                        this);
-//                break;
-//            default:
-//                devProxy = null;
-//                break;
-//        }
-//
-//        if (devProxy == null) {
-//            Log.e(TAG, "Unknown type of device");
-//            return;
-//        }
-//
-//        devProxy.setLocalImplementation(mLocalImplementation);
-//        devProxy.setDeviceDescriptor(devDesc);
-//
-//        mLocalDevices.put(devDesc.getFullJID(), devProxy);
-//
-//        // TODO: replace operation strings with constants defined somewhere
-//        onLocalDevicesListChanged("added", devProxy.getDeviceDescriptor());
-//    }
 
     public HMCDeviceProxy createNewDeviceProxy(DeviceDescriptor devDesc) {
         if (devDesc == null) {
@@ -385,22 +366,9 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         return devProxy;
     }
     
-    // private void onLocalDevicesListChanged(String string, DeviceDescriptor
-    // devDesc) {
-    // Log.d(TAG, "List of local devices has now " + mLocalDevices.size() +
-    // "entries");
-    //
-    // if (mHMCDevicesListener != null) {
-    // try {
-    // mHMCDevicesListener.onDevicesListChanged(string, devDesc);
-    // } catch (RemoteException e) {
-    // Log.e(TAG,
-    // "Error when notifying listener about devices list modification: "
-    // + string);
-    // e.printStackTrace();
-    // }
-    // }
-    // }
+    public void localDeviceAddedNotification(DeviceDescriptor devDesc) {
+        mHMCDevicesStore.addNewLocalDevice(devDesc);
+    }
 
     @Override
     public void registerDevicesListener(IHMCDevicesListener listener) throws RemoteException {

@@ -30,9 +30,17 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
             case HMCMediaDeviceItf.CMD_SEND_LIST_DEVICES:
                 _sendListOfDevices(params);
                 break;
+            case HMCMediaDeviceItf.CMD_DEVICE_ADDED_NOTIFICATION:
+                _localDeviceAddedNotification(params);
+                break;
             default:
                 break;
         }
+    }
+
+    private void _localDeviceAddedNotification(String params) {
+        DeviceDescriptor newDev = DeviceDescriptor.fromXMLString(params);
+        localDeviceAddedNotification(newDev);
     }
 
     private void _sendListOfDevices(String params) {
@@ -90,15 +98,14 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
     }
 
     @Override
-    public void deviceRemovedNotification() {
+    public void localDeviceRemovedNotification() {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public void deviceAddedNotification() {
-        // TODO Auto-generated method stub
-
+    public void localDeviceAddedNotification(DeviceDescriptor newDev) {
+        mHMCManager.localDeviceAddedNotification(newDev);
     }
 
 

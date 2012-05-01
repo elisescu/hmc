@@ -90,7 +90,7 @@ public class HMCApplication extends Application {
         public void onSharedPreferenceChanged(SharedPreferences  sharedPreferences, String key) {
             mUsername = mSettings.getString("hmc_jid_key", "");
             mPassword = mSettings.getString("hmc_pass_key", "");
-            mDeviceName = mSettings.getString("hmc_device_name", "");
+            mDeviceName = mSettings.getString("hmc_devname_key", "");
 
             try {
                 mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
@@ -108,9 +108,12 @@ public class HMCApplication extends Application {
                                                                 + mPassword.length() + mDeviceName
                                                                 + mDeviceType);
             }
-            Log.d(TAG, "------------Configuration: " + mUsername + " " + mPassword.length() + " "
-                                    + mDeviceName + " " + mDeviceType);
 
+            Log.d(TAG, "------------Configuration:" +
+            		"\n username: " + mUsername +
+            		"\n password.length " + mPassword.length() +
+            		"\n device type:" + mDeviceType +
+            		"\n device name: " + mDeviceName);
         }
     }
 }

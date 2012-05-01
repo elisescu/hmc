@@ -51,9 +51,7 @@ public class Login extends Activity {
     private String mPassword;
     private String mUsername;
     private int mDeviceType;
-
-    // private final HMCPreferenceListener mPreferenceListener = new
-    // HMCPreferenceListener();
+    private String mDeviceName;
 
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
@@ -80,13 +78,10 @@ public class Login extends Activity {
 
         setContentView(R.layout.local_service_controller);
 
-        // initialize preferences listener and HMCApplication global state 
+        // get HMCApplication state
         mHMCApplication = (HMCApplication)getApplication();
-        
-        mUsername = mHMCApplication.getUsername();
-        mPassword = mHMCApplication.getPassword();
-        mDeviceType = mHMCApplication.getDeviceType();
 
+        mDeviceType = mHMCApplication.getDeviceType();
         // if we are already connected, then go directly to main screen
         if (mHMCApplication.isConnected()) {
             switch (mDeviceType) {
@@ -141,25 +136,6 @@ public class Login extends Activity {
             if (!mServiceIsBound) {
                 doBindService();
             }
-            
-            if (!mHMCApplication.isConnected() && mHMCApplication.isConfigured()) {
-                mLoginProgressDialog = ProgressDialog.show(Login.this, "Login", "wait please", true, 
-                        false);
-
-                mUsername = mHMCApplication.getUsername();
-                mPassword = mHMCApplication.getPassword();
-                mDeviceType = mHMCApplication.getDeviceType();
-
-                if (mHMCConnection != null) {
-                    try {
-                        mHMCConnection.registerConnectionListener(mConnectionListener);
-                        mHMCConnection.connectAsync(mUsername, mPassword, 5222);
-                    } catch (RemoteException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
         }
     };
     
@@ -211,22 +187,29 @@ public class Login extends Activity {
     }
 
     private class HMCServiceConnection implements ServiceConnection {
+
         public void onServiceConnected(ComponentName className, IBinder service) {
             mHMCConnection = IHMCConnection.Stub.asInterface(service);
-            if (mHMCApplication.isConfigured())  {
-                try {
-                    mHMCConnection.registerConnectionListener(mConnectionListener);
-                    mHMCConnection.connectAsync(mUsername, mPassword, 5222);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+
+            if (!mHMCApplication.isConnected() && mHMCApplication.isConfigured()) {
+                mLoginProgressDialog = ProgressDialog.show(Login.this, "Login", "wait please",
+                                        true, false);
+                mUsername = mHMCApplication.getUsername();
+                mPassword = mHMCApplication.getPassword();
+                mDeviceType = mHMCApplication.getDeviceType();
+                mDeviceName = mHMCApplication.getDeviceName();
+
+                if (mHMCConnection != null) {
+                    try {
+                        Log.d(TAG, "Username: " + mUsername + " on device: " + mDeviceName);
+                        mHMCConnection.registerConnectionListener(mConnectionListener);
+                        mHMCConnection.connectAsync(mUsername, mPassword, 5222);
+                    } catch (RemoteException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
-
-            Log.d(TAG,"Successfully binded the service");
-
-            // Tell the user about this for our demo.
-            //Toast.makeText(Login.this, R.string.local_service_connected,
-            //        Toast.LENGTH_SHORT).show();
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -269,23 +252,4 @@ public class Login extends Activity {
             }
         }
     }
-
-//    private class HMCPreferenceListener implements
-//            SharedPreferences.OnSharedPreferenceChangeListener {
-//        public HMCPreferenceListener() {
-//        }
-//
-//        @Override
-//        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-//            mUsername = mSettings.getString("hmc_username_key", "");
-//            mPassword = mSettings.getString("hmc_pass_key", "");
-//            try {
-//                mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
-//            } catch (NumberFormatException e) {
-//                mDeviceType = -1;
-//            }
-//            Log.e("EEEEEEEEEEE", "devicetype = " + mDeviceType);
-//        }
-//    }
-
 }

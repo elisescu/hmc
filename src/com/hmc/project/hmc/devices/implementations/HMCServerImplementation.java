@@ -138,7 +138,8 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             // Log.d(TAG, "Ask the user to confirm joining with HMCServer: " +
             // remoteHMCServer);
             retVal = mHMCInterconnectionConfirmationListener.confirmHMCInterconnection(
-                    remoteHMCServer, mPendingHMCInfo.getHMCName());
+                                    remoteHMCServer, mPendingHMCInfo.getHMCName(),
+                                    mDeviceDescriptor.getFingerprint());
         } else {
             Log.e(TAG, "Cannot ask the user for confirmation");
             retVal = false;

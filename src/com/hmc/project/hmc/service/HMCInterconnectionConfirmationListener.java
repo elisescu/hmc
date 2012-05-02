@@ -31,7 +31,8 @@ public class HMCInterconnectionConfirmationListener {
         mHMCService = serv;
     }
 
-    public boolean confirmHMCInterconnection(DeviceDescriptor newDevice, String hmcName) {
+    public boolean confirmHMCInterconnection(DeviceDescriptor newDevice, String hmcName,
+                            String myFingerprint) {
         boolean retVal = false;
         Notification notification = new Notification(android.R.drawable.stat_notify_more,
                                 "Interconnect to external HMC", System.currentTimeMillis());
@@ -42,6 +43,7 @@ public class HMCInterconnectionConfirmationListener {
         intent.putExtra("hmc_name", hmcName);
         intent.putExtra("hmc_srv_name", newDevice.getDeviceName());
         intent.putExtra("hmc_srv_fingerprint", newDevice.getFingerprint());
+        intent.putExtra("my_fingerprint", myFingerprint);
 
         // TODO: improve the way of setting the info text
         CharSequence contentTitle = "Request to interconnect to external HMC";

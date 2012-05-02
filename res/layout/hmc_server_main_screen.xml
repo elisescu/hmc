@@ -32,19 +32,19 @@
 	
 	<ViewFlipper android:id="@+id/flipper"
 	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
+	android:layout_height="match_parent"
 	android:flipInterval="2000"
 	android:layout_marginBottom="20dip" >
 	    <ListView
 	        android:id="@+id/hmc_local_devices_list"
 	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
+	        android:layout_height="match_parent" >
 	    </ListView>
-	    
+
 	    <ListView
 	        android:id="@+id/hmc_external_devices_list"
 	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
+	        android:layout_height="match_parent" >
 	    </ListView>
 	</ViewFlipper>
 	    

@@ -25,6 +25,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,7 +34,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -66,12 +69,15 @@ public class HMCServerMainScreen extends Activity {
     private ListView mExternalDevicesListView;
     private DevicesListAdapter mExternalDeviceNamesAdapter;
     private HashMap<String, String> mExternalDevNames;
+    private GestureDetector mGestureDetector;
+    private TextView mListTitle;
 
 
     HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
+        @SuppressWarnings("unchecked")
         public void onServiceConnected(ComponentName className, IBinder service) {
             mHMCConnection = IHMCConnection.Stub.asInterface(service);
 
@@ -81,18 +87,48 @@ public class HMCServerMainScreen extends Activity {
                             HMCDeviceItf.TYPE.HMC_SERVER, mHMCApplication.getHMCName());
                     mHMCConnection.getHMCManager().registerDevicesListener(mHMCDevicesListener);
 
+                    // it is save to type cast to HashMap because we know for
+                    // sure the result is a HashMap. The reason for returning
+                    // actually a reference of type Map is that IPC doesn't
+                    // support HashMap
                     mLocalDevNames = (HashMap<String, String>) mHMCConnection.getHMCManager()
                                             .getListOfLocalDevices();
 
                     mExternalDevNames = (HashMap<String, String>) mHMCConnection.getHMCManager()
-                                            .getListOfLocalDevices();
+                                            .getListOfExternalDevices();
 
                     updateListOfLocalDevicesUIThread();
+                    updateListOfRemoteDevicesUIThread();
 
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
             }
+        }
+
+        private void updateListOfRemoteDevicesUIThread() {
+            HMCServerMainScreen.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    Iterator<String> iter = mLocalDevNames.keySet().iterator();
+                    while (iter.hasNext()) {
+                        String jid = iter.next();
+                        mExternalDeviceNamesAdapter.add(jid, mExternalDevNames.get(jid));
+                    }
+                }
+            });
+        }
+
+        private void updateListOfLocalDevicesUIThread() {
+            HMCServerMainScreen.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    Iterator<String> iter = mLocalDevNames.keySet().iterator();
+                    while (iter.hasNext()) {
+                        String jid = iter.next();
+                        mLocalDeviceNamesAdapter.add(jid, mLocalDevNames.get(jid));
+                    }
+                }
+            });
+
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -101,20 +137,6 @@ public class HMCServerMainScreen extends Activity {
                     Toast.LENGTH_SHORT).show();
         }
     };
-
-    private void updateListOfLocalDevicesUIThread() {
-        HMCServerMainScreen.this.runOnUiThread(new Runnable() {
-            public void run() {
-                Iterator<String> iter = mLocalDevNames.keySet().iterator();
-                while (iter.hasNext()) {
-                    String jid = iter.next();
-                    mLocalDeviceNamesAdapter.add(jid, mLocalDevNames.get(jid));
-                    mExternalDeviceNamesAdapter.add(jid, mExternalDevNames.get(jid));
-                }
-            }
-        });
-
-    }
 
     void doBindService() {
         bindService(new Intent(HMCServerMainScreen.this, 
@@ -145,42 +167,50 @@ public class HMCServerMainScreen extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         doBindService();
+        DisplayMetrics dm = getResources().getDisplayMetrics();
         mHMCApplication = (HMCApplication)getApplication();
+        LayoutInflater inflater = getLayoutInflater();
+        LinearLayout myLayout = (LinearLayout) inflater.inflate(R.layout.hmc_server_main_screen,
+                                null);
 
         setContentView(R.layout.hmc_server_main_screen);
-
-        mListViewFlipper = ((ViewFlipper) this.findViewById(R.id.flipper));
-
-        mLocalDevicesListView = (ListView) findViewById(R.id.hmc_local_devices_list);
-        mLocalDeviceNamesAdapter = new DevicesListAdapter(this);
-        mLocalDevicesListView.setAdapter(mLocalDeviceNamesAdapter);
-        mLocalDevNames = new HashMap<String, String>();
-
-        mExternalDevicesListView = (ListView) findViewById(R.id.hmc_external_devices_list);
-        mExternalDeviceNamesAdapter = new DevicesListAdapter(this);
-        mExternalDevicesListView.setAdapter(mExternalDeviceNamesAdapter);
-        mExternalDevNames = new HashMap<String, String>();
-
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        REL_SWIPE_MIN_DISTANCE = (int) (120.0f * dm.densityDpi / 160.0f + 0.5);
-        REL_SWIPE_MAX_OFF_PATH = (int) (250.0f * dm.densityDpi / 160.0f + 0.5);
-        REL_SWIPE_THRESHOLD_VELOCITY = (int) (200.0f * dm.densityDpi / 160.0f + 0.5);
-
-        final GestureDetector gestureDetector = new GestureDetector(new MyGestureDetector());
-        View.OnTouchListener gestureListener = new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event);
-            }
-        };
-        mLocalDevicesListView.setOnTouchListener(gestureListener);
-        mExternalDevicesListView.setOnTouchListener(gestureListener);
-
         // make sure we ended up in this activity with the app connected to XMPP
         // server
         if (!mHMCApplication.isConnected()) {
             doUnbindService();
             finish();
         }
+
+        mListTitle = (TextView) this.findViewById(R.id.main_screen_list_title);
+        mListViewFlipper = ((ViewFlipper) this.findViewById(R.id.flipper));
+
+        // list of local devices
+        mLocalDevicesListView = (ListView) findViewById(R.id.hmc_local_devices_list);
+        mLocalDeviceNamesAdapter = new DevicesListAdapter(this);
+        mLocalDevicesListView.setAdapter(mLocalDeviceNamesAdapter);
+        mLocalDevNames = new HashMap<String, String>();
+
+        // list of external devices. For now support only a single external HMC
+        // interconnection
+        mExternalDevicesListView = (ListView) findViewById(R.id.hmc_external_devices_list);
+        mExternalDeviceNamesAdapter = new DevicesListAdapter(this);
+        mExternalDevicesListView.setAdapter(mExternalDeviceNamesAdapter);
+        mExternalDevNames = new HashMap<String, String>();
+
+        // compute constants used for swiping left and right
+        REL_SWIPE_MIN_DISTANCE = (int) (120.0f * dm.densityDpi / 160.0f + 0.5);
+        REL_SWIPE_MAX_OFF_PATH = (int) (250.0f * dm.densityDpi / 160.0f + 0.5);
+        REL_SWIPE_THRESHOLD_VELOCITY = (int) (200.0f * dm.densityDpi / 160.0f + 0.5);
+
+        mGestureDetector = new GestureDetector(new MyGestureDetector());
+        View.OnTouchListener gestureListener = new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                return mGestureDetector.onTouchEvent(event);
+            }
+        };
+        mLocalDevicesListView.setOnTouchListener(gestureListener);
+        mExternalDevicesListView.setOnTouchListener(gestureListener);
+        myLayout.setOnTouchListener(gestureListener);
     }
     
     public final boolean onCreateOptionsMenu(Menu menu) {
@@ -225,11 +255,6 @@ public class HMCServerMainScreen extends Activity {
     private class HMCDevicesListener extends IHMCDevicesListener.Stub {
         IDeviceDescriptor modifDeviceDescriptor = null;
         @Override
-        public void onDevicesListChanged(String whatChanged, IDeviceDescriptor devDesc)
-                                throws RemoteException {
-        }
-
-        @Override
         public void onDeviceAdded(IDeviceDescriptor devDesc) throws RemoteException {
             modifDeviceDescriptor = devDesc;
             // add the device in the list, inside ui thread
@@ -239,7 +264,6 @@ public class HMCServerMainScreen extends Activity {
                         String jid = modifDeviceDescriptor.getFullJID();
                         String name = modifDeviceDescriptor.getDeviceName();
                         mLocalDeviceNamesAdapter.add(jid, name);
-                        mExternalDeviceNamesAdapter.add(jid, name);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot retrieve the details about modified device");
                         e.printStackTrace();
@@ -261,25 +285,58 @@ public class HMCServerMainScreen extends Activity {
 
         }
 
+        @Override
+        public void onExternalDeviceAdded(String externalName, IDeviceDescriptor devDesc)
+                                throws RemoteException {
+            modifDeviceDescriptor = devDesc;
+            // add the device in the list of external devices, inside UI thread
+            HMCServerMainScreen.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    try {
+                        String jid = modifDeviceDescriptor.getFullJID();
+                        String name = modifDeviceDescriptor.getDeviceName();
+                        mExternalDeviceNamesAdapter.add(jid, name);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot retrieve the details about modified device");
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
     }
 
-    private void myOnItemClick(int position) {
+    private void onDeviceListClick(int position, ListView lv) {
         String str = MessageFormat.format("Item clicked = {0,number}", position);
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
     }
 
-    private void onLTRFling() {
+    private void onLeftToRightFling() {
         mListViewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.push_right_in));
         mListViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.push_right_out));
         mListViewFlipper.showPrevious();
-        Toast.makeText(this, "Left-to-right fling (prev)", Toast.LENGTH_SHORT).show();
+
+        // TODO: make this in a proper way
+        if (mListViewFlipper.getCurrentView().equals(mLocalDevicesListView)) {
+            mListTitle.setText("Local devices");
+        } else {
+            mListTitle.setText("External devices");
+        }
+
     }
 
-    private void onRTLFling() {
+    private void onRightToLeftFling() {
         mListViewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.push_left_in));
         mListViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.push_left_out));
         mListViewFlipper.showNext();
-        Toast.makeText(this, "Right-to-left fling (next)", Toast.LENGTH_SHORT).show();
+
+        // TODO: make this in a proper way
+        if (mListViewFlipper.getCurrentView().equals(mLocalDevicesListView)) {
+            mListTitle.setText("Local devices");
+        } else {
+            mListTitle.setText("External devices");
+        }
+
     }
 
     private ListView getCurrentListView() {
@@ -292,7 +349,7 @@ public class HMCServerMainScreen extends Activity {
         public boolean onSingleTapUp(MotionEvent e) {
             ListView lv = getCurrentListView();
             int pos = lv.pointToPosition((int) e.getX(), (int) e.getY());
-            myOnItemClick(pos);
+            onDeviceListClick(pos, lv);
             return false;
         }
 
@@ -302,10 +359,10 @@ public class HMCServerMainScreen extends Activity {
                 return false;
             if (e1.getX() - e2.getX() > REL_SWIPE_MIN_DISTANCE
                                     && Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) {
-                onRTLFling();
+                onRightToLeftFling();
             } else if (e2.getX() - e1.getX() > REL_SWIPE_MIN_DISTANCE
                                     && Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) {
-                onLTRFling();
+                onLeftToRightFling();
             }
             return false;
         }

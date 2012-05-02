@@ -7,9 +7,9 @@
 package com.hmc.project.hmc.aidl;
 import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 
-interface IHMCDevicesListener {
-    void onDevicesListChanged(String whatChanged, IDeviceDescriptor devDesc); 
+interface IHMCDevicesListener { 
     void onDeviceAdded(IDeviceDescriptor devDesc);
     void onDeviceRemoved(IDeviceDescriptor devDesc);
     void onPresenceChanged(String presence, IDeviceDescriptor devDesc);
+    void onExternalDeviceAdded(String externalName, IDeviceDescriptor devDesc);
 }

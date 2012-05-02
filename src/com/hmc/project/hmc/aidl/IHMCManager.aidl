@@ -24,5 +24,6 @@ interface IHMCManager {
 	// TODO: find something more elegant than this mechanism
 	void setUserReplyDeviceAddition(boolean val); 
 	void setUserReplyHMCInterconnection(boolean val);
+	Map getListOfExternalDevices();
 	
 }

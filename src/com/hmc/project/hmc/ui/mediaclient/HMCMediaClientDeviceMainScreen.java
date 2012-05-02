@@ -200,11 +200,6 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         IDeviceDescriptor modifDeviceDescriptor = null;
 
         @Override
-        public void onDevicesListChanged(String whatChanged, IDeviceDescriptor devDesc)
-                                throws RemoteException {
-        }
-
-        @Override
         public void onDeviceAdded(IDeviceDescriptor devDesc) throws RemoteException {
             // add the device in the list, inside ui thread
             modifDeviceDescriptor = devDesc;
@@ -231,6 +226,19 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         @Override
         public void onPresenceChanged(String presence, IDeviceDescriptor devDesc)
                 throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see
+         * com.hmc.project.hmc.aidl.IHMCDevicesListener#onExternalDeviceAdded
+         * (java.lang.String, com.hmc.project.hmc.aidl.IDeviceDescriptor)
+         */
+        @Override
+        public void onExternalDeviceAdded(String externalName, IDeviceDescriptor devDesc)
+                                throws RemoteException {
             // TODO Auto-generated method stub
 
         }

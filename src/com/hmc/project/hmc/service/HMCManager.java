@@ -453,4 +453,18 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
         mHMCDevicesStore.setLocalDevicesList(devList);
     }
+
+    @Override
+    public Map getListOfExternalDevices() throws RemoteException {
+        HashMap<String, String> retVal = new HashMap<String, String>();
+
+        Iterator<HMCDeviceProxy> iter = mHMCDevicesStore.getListOfExternalDevices().values()
+                                .iterator();
+        while (iter.hasNext()) {
+            HMCDeviceProxy devPrx = iter.next();
+            retVal.put(devPrx.getDeviceDescriptor().getFullJID(), devPrx.getDeviceDescriptor()
+                                    .getDeviceName());
+        }
+        return (Map) retVal;
+    }
 }

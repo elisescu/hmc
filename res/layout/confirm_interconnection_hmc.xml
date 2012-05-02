@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="Join HMC"
+        android:text="HMC Interconnect"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:text="Yes" />
+        android:text="Approve" />
 
     <Button
         android:id="@+id/confirm_join_button_no"
@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="No" />
+        android:text="Cancel" />
 
     <TextView
         android:id="@+id/textView_hmcserver_details"
@@ -50,7 +50,7 @@
         android:layout_below="@+id/textView_hmc_name"
         android:lines="3"
         android:maxLines="10"
-        android:text="Remote HMC Server details:\nName:%s\nFingerprint:%s"
+        android:text="Remote HMC Server details:\nName: %s\nFingerprint: %s"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

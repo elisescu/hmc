@@ -176,4 +176,8 @@ public class HMCDevicesList {
         }
         return retVal;
     }
+
+    public String getHMCName() {
+        return mName;
+    }
 }

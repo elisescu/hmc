@@ -21,7 +21,10 @@ public interface HMCServerItf {
 
     static final int CMD_INTERCONNECTION_REQUEST = HMC_SERVER_INITIAL_COMMAND + 2;
 
+    static final int CMD_EXCHANGE_HMC_INFO = HMC_SERVER_INITIAL_COMMAND + 3;
+
     static final int HMC_SERVER_LAST_COMMAND = CMD_INTERCONNECTION_REQUEST;
+
 
     /**
      * retrieves the list of HMC devices XMPP JIDs and their public keys from

@@ -13,6 +13,7 @@ import org.jivesoftware.smack.ChatManager;
 import android.util.Log;
 
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
+import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
@@ -56,5 +57,14 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
 
     public void interconnectionRequest(String hmcName, AsyncCommandReplyListener listener) {
         sendCommandAsync(HMCServerItf.CMD_INTERCONNECTION_REQUEST, hmcName, listener);
+    }
+
+    public HMCDevicesList exchangeHMCInfo(HMCDevicesList localHMCInfo) {
+        HMCDevicesList remoteInfo = null;
+
+        String retStr = sendCommandSync(HMCServerItf.CMD_EXCHANGE_HMC_INFO,
+                localHMCInfo.toXMLString());
+        remoteInfo = HMCDevicesList.fromXMLString(retStr);
+        return remoteInfo;
     }
 }

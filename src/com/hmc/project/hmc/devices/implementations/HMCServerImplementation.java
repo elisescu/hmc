@@ -18,6 +18,7 @@ import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
 import com.hmc.project.hmc.service.HMCInterconnectionConfirmationListener;
 import com.hmc.project.hmc.service.HMCManager;
+import com.hmc.project.hmc.ui.DevicesListAdapter;
 
 public class HMCServerImplementation extends HMCDeviceImplementation implements HMCServerItf {
 
@@ -25,24 +26,41 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     private HMCInterconnectionConfirmationListener mHMCInterconnectionConfirmationListener;
     private boolean addingSuccess = true;
     private boolean interconnectionSuccess = true;
+    private HMCDevicesList mLocalHMCInfo;
+    // TODO: make sure this is enough and we don't need a vector of pending
+    // remote info given that we anyway can interconnect with a single external
+    // HMC at a time
+    private HMCDevicesList mPendingHMCInfo = null;
 
     public HMCServerImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         super(hmcManager, thisDeviceDesc);
+
+        mLocalHMCInfo = new HMCDevicesList(mHMCManager.getHMCName(), false);
+        mLocalHMCInfo.addDevice(mDeviceDescriptor);
     }
 
     public boolean interconnectTo(String externalHMCServerAddress) {
 
         Log.d(TAG, "Going to intercoonecto to " + externalHMCServerAddress);
         boolean userConfirmation = false;
+        // TODO: for now use HMCDevicesList to exchange information about the
+        // two HMCs so the user can accept or reject the interconnection. Later
+        // change this and make it more nice
+        HMCDevicesList remoteHMCInfo = null;
         DeviceDescriptor remoteHMCServerDesc = null;
-        String remoteHMCName = "no-name :(";
+        String remoteHMCName = "";
 
         HMCAnonymousDeviceProxy newDevProxy = mHMCManager
                                 .createAnonymousProxy(externalHMCServerAddress);
         newDevProxy.setLocalImplementation(this);
         // send a hello message to remote anonymous device to negotiate OTR and
         // get information about device which will be approved by the user
-        remoteHMCServerDesc = newDevProxy.hello(mDeviceDescriptor);
+        remoteHMCInfo = newDevProxy.exchangeHMCInfo(mLocalHMCInfo);
+        remoteHMCName = remoteHMCInfo.getHMCName();
+        // we should have only one device in this "pseudo-list". this will be
+        // changed in future according with the previous TODO
+        remoteHMCServerDesc = remoteHMCInfo.getIterator().next();
+
         // check the descriptor received
         if (remoteHMCServerDesc == null) {
             mHMCManager.deleteAnonymousProxy(externalHMCServerAddress);
@@ -83,11 +101,11 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // if remote device accepted to join HMC, then send it the list of
         // devices
         if (addingSuccess) {
-            HMCMediaDeviceProxy specificDevPrxy = (HMCMediaDeviceProxy) mHMCManager
-                                    .promoteAnonymousProxy(newDevProxy);
-            // now that we have the specific proxy, added also in our list of
-            // devices
-            specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
+//            HMCMediaDeviceProxy specificDevPrxy = (HMCMediaDeviceProxy) mHMCManager
+//                                    .promoteAnonymousProxy(newDevProxy);
+//            // now that we have the specific proxy, added also in our list of
+//            // devices
+//            specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
         }
 
         return addingSuccess;
@@ -132,11 +150,24 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             case HMCServerItf.CMD_INTERCONNECTION_REQUEST:
                 retVal = _interconnectionRequest(params);
                 break;
+            case HMCServerItf.CMD_EXCHANGE_HMC_INFO:
+                retVal = _exchangeHMCInfo(params);
+                break;
             default:
                 retVal = super.localExecute(opCode, params);
                 break;
         }
         return retVal;
+    }
+
+    private String _exchangeHMCInfo(String params) {
+        HMCDevicesList localList = exchangeHMCInfo(HMCDevicesList.fromXMLString(params));
+        return localList.toXMLString();
+    }
+
+    private HMCDevicesList exchangeHMCInfo(HMCDevicesList remoteHMCInfo) {
+        mPendingHMCInfo = remoteHMCInfo;
+        return mLocalHMCInfo;
     }
 
     private String _interconnectionRequest(String params) {

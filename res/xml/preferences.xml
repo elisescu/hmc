@@ -43,6 +43,13 @@
                 android:summary="@string/hmc_devname_summary"
                 android:dialogTitle="@string/hmc_devname_dialog_title"
                 android:singleLine="true" />
+        
+        <EditTextPreference
+                android:key="hmc_hmcname_key"
+                android:title="@string/hmc_hmcname_title"
+                android:summary="@string/hmc_hmcname_summary"
+                android:dialogTitle="@string/hmc_hmcname_dialog_title"
+                android:singleLine="true" />
 
     </PreferenceCategory>
 

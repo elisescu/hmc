@@ -79,7 +79,7 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
             if (mHMCConnection != null) {
                 try {
                     mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(), "",
-                                            HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE);
+                            HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE, mHMCApplication.getHMCName());
 
                     mHMCConnection.getHMCManager().registerDevicesListener(mHMCDevicesListener);
 

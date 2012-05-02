@@ -68,7 +68,7 @@ public class HMCServerMainScreen extends Activity {
             if (mHMCConnection != null) {
                 try {
                     mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(), "",
-                                            HMCDeviceItf.TYPE.HMC_SERVER);
+                            HMCDeviceItf.TYPE.HMC_SERVER, mHMCApplication.getHMCName());
                     mHMCConnection.getHMCManager().registerDevicesListener(mHMCDevicesListener);
 
                     mLocalDevNames = (HashMap<String, String>) mHMCConnection.getHMCManager()

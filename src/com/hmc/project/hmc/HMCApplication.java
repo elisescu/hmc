@@ -25,6 +25,7 @@ public class HMCApplication extends Application {
     private String mPassword = "insert_something";
     private int mDeviceType = -1;
     private String mDeviceName = "no name";
+    private String mHMCName = "no name";
 
     @Override
     public void onCreate() {
@@ -34,6 +35,7 @@ public class HMCApplication extends Application {
         mUsername = mSettings.getString("hmc_jid_key", "");
         mPassword = mSettings.getString("hmc_pass_key", "");
         mDeviceName = mSettings.getString("hmc_devname_key", "");
+        mHMCName = mSettings.getString("hmc_hmcname_key", "");
 
         try {
             mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
@@ -82,6 +84,10 @@ public class HMCApplication extends Application {
         return mDeviceName;
     }
 
+    public String getHMCName() {
+        return mHMCName;
+    }
+
     private class HMCPreferenceListener implements SharedPreferences.OnSharedPreferenceChangeListener {
         public HMCPreferenceListener() {
         }
@@ -91,6 +97,7 @@ public class HMCApplication extends Application {
             mUsername = mSettings.getString("hmc_jid_key", "");
             mPassword = mSettings.getString("hmc_pass_key", "");
             mDeviceName = mSettings.getString("hmc_devname_key", "");
+            mHMCName = mSettings.getString("hmc_hmcname_key", "");
 
             try {
                 mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));

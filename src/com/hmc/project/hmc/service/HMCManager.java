@@ -142,7 +142,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     }
 
     @Override
-    public void init(String deviceName, String userName, int devType) throws RemoteException {
+    public void init(String deviceName, String userName, int devType, String hmcName)
+            throws RemoteException {
         if (mState == STATE_NOT_INITIALIZED) {
             Collection<RosterEntry> entries = mXMPPRoster.getEntries();
             Log.d(TAG, "We have " + entries.size() + "devices we can connect with");
@@ -158,7 +159,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             mLocalDeviceDescriptor.setFullJID(mXMPPConnection.getUser());
             // TODO: add a way to set the name nice only if the device is
             // HMCServer
-            mHMCName = "Popescus HMC";
+            mHMCName = hmcName;
             mLocalDeviceDescriptor.setFingerprint(HMCOTRManager.getInstance().getLocalFingerprint(
                                     mXMPPConnection.getUser()));
 

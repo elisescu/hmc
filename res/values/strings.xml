@@ -22,6 +22,10 @@
     	<string name="hmc_devname_title">HMC device name</string>
     	<string name="hmc_devname_summary">Tap to enter name</string>
     	<string name="hmc_devname_dialog_title">Enter device name here</string>
+    	<!-- Device name -->
+    	<string name="hmc_hmcname_title">HMC name</string>
+    	<string name="hmc_hmcname_summary">Tap to enter name</string>
+    	<string name="hmc_hmcname_dialog_title">Enter HMC name here (only if we are HMCServer!)</string>
     	<!-- User name != username -->
     	<string name="hmc_usrname_title">Name of the user</string>
     	<string name="hmc_usrname_summary">Tap to enter users name</string>

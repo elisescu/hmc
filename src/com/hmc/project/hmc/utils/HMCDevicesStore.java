@@ -35,16 +35,23 @@ public class HMCDevicesStore {
     private static HMCDevicesStore INSTANCE = null;
     XmlSerializer mSerializer;
     StringWriter mWriter;
-    private String mFilePath;
+    private String mLocalDevsFilePath;
+    private String mExtDevsFilePath;
     private int mNoDevice = 0;
     HashMap<String, HMCDeviceProxy> mListOfLocalDevices;
+    HashMap<String, HMCDeviceProxy> mListOfExternalDevices;
     private HMCManager mHMCManager;
     private IHMCDevicesListener mDevicesListener;
+    private String mExternalHMCName;
 
     public HMCDevicesStore(HMCManager mng, String filePath) {
         mListOfLocalDevices = new HashMap<String, HMCDeviceProxy>();
+        mListOfExternalDevices = new HashMap<String, HMCDeviceProxy>();
+
         mHMCManager = mng;
-        mFilePath = filePath;
+        mLocalDevsFilePath = filePath;
+        // TODO: build a proper HMC device store. For now we are in big hurry
+        mExtDevsFilePath = mLocalDevsFilePath + "_ext";
     }
 
     public void registerDevicesListener(IHMCDevicesListener devListener) {
@@ -66,6 +73,34 @@ public class HMCDevicesStore {
             // read from file the list of devices
         }
         return mListOfLocalDevices;
+    }
+
+    public HashMap<String, HMCDeviceProxy> getListOfExternalDevices() {
+        return mListOfExternalDevices;
+    }
+
+    public boolean addNewExternalDevice(String hmcName, HMCDeviceProxy dev) {
+        // TODO: fix this
+        mExternalHMCName = hmcName;
+
+        if (mListOfExternalDevices.containsKey(dev.getDeviceDescriptor().getFullJID())) {
+            Log.e(TAG, "Device " + dev.getDeviceDescriptor().getFullJID()
+                                    + " already exists in device store");
+            return false;
+        }
+        mListOfExternalDevices.put(dev.getDeviceDescriptor().getFullJID(), dev);
+
+        try {
+            if (mDevicesListener != null) {
+                mDevicesListener.onExternalDeviceAdded(hmcName, dev.getDeviceDescriptor());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't notify the remote device listener");
+            e.printStackTrace();
+        }
+
+        flushCache();
+        return true;
     }
 
     public boolean addNewLocalDevice(HMCDeviceProxy dev) {
@@ -116,17 +151,58 @@ public class HMCDevicesStore {
         return true;
     }
 
+    public boolean addNewExternalDevice(String hmcName, DeviceDescriptor devDesc) {
+        // TODO: fix this
+        mExternalHMCName = hmcName;
+
+        HMCDeviceProxy dev = mHMCManager.createNewDeviceProxy(devDesc);
+
+        if (dev == null) {
+            return false;
+        }
+
+        if (mListOfExternalDevices.containsKey(devDesc.getFullJID())) {
+            Log.e(TAG, "Device " + devDesc.getFullJID() + " already exists in device store");
+            return false;
+        }
+
+        mListOfExternalDevices.put(dev.getDeviceDescriptor().getFullJID(), dev);
+
+        try {
+            if (mDevicesListener != null) {
+                mDevicesListener.onExternalDeviceAdded(hmcName, devDesc);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't notify the remote device listener");
+            e.printStackTrace();
+        }
+
+        flushCache();
+        return true;
+    }
+
     private void flushCache() {
         // save the list of devices in our file
         HMCDevicesList devList = new HMCDevicesList(mHMCManager.getHMCName(), true,
                 getListOfLocalDevicesDescriptors());
 
         try {
-            writeStringToFile(mFilePath, devList.toXMLString());
+            writeStringToFile(mLocalDevsFilePath, devList.toXMLString());
         } catch (IOException e) {
-            Log.e(TAG, "Cannot save the current devices list to file: " + mFilePath);
+            Log.e(TAG, "Cannot save the current devices list to file: " + mLocalDevsFilePath);
             e.printStackTrace();
         }
+
+        devList = new HMCDevicesList(mExternalHMCName, false,
+                                getListOfExternalDevicesDescriptors(mExternalHMCName));
+
+        try {
+            writeStringToFile(mExtDevsFilePath, devList.toXMLString());
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot save the current devices list to file: " + mLocalDevsFilePath);
+            e.printStackTrace();
+        }
+
     }
 
     public boolean removeLocalDevice(String fullJID) {
@@ -174,20 +250,22 @@ public class HMCDevicesStore {
         // load devices from file and create the proxies. Notify also the
         // listeners about the devices we have in the local and external lists
         HMCDevicesList devicesList;
-        File devFile = new File(mFilePath);
+        File devFile = new File(mLocalDevsFilePath);
+        Iterator<DeviceDescriptor> devDescIter;
 
         // if it's the first time we call this method, then create the file to
         // store list of devices and add our device in this list
         if (!devFile.exists()) {
             HMCDevicesList devList = new HMCDevicesList(mHMCManager.getHMCName(), true);
             devList.addDevice(mHMCManager.getLocalDevDesc());
-            writeStringToFile(mFilePath, devList.toXMLString());
+            writeStringToFile(mLocalDevsFilePath, devList.toXMLString());
             Log.d(TAG, "The initialization file doesn't exist .. so create a new onew with "
                     + devList.toXMLString());
         }
 
-        devicesList = HMCDevicesList.fromXMLString(readStringFromFile(mFilePath));
-        Log.d(TAG, "Parsed " + readStringFromFile(mFilePath) + " and the result is " + devicesList);
+        devicesList = HMCDevicesList.fromXMLString(readStringFromFile(mLocalDevsFilePath));
+        Log.d(TAG, "Parsed " + readStringFromFile(mLocalDevsFilePath) + " and the result is "
+                                + devicesList);
 
         if (devicesList == null) {
             Log.e(TAG, "Error reading the devices file. Deleting the file..");
@@ -195,7 +273,7 @@ public class HMCDevicesStore {
             throw new IOException("Couldn't read or parse the devices input file");
         }
 
-        Iterator<DeviceDescriptor> devDescIter = devicesList.getIterator();
+        devDescIter = devicesList.getIterator();
 
         while (devDescIter.hasNext()) {
             DeviceDescriptor devDesc = devDescIter.next();
@@ -209,6 +287,42 @@ public class HMCDevicesStore {
             } catch (RemoteException e) {
                 Log.e(TAG, "Couldn't notify the remote device listener");
                 e.printStackTrace();
+            }
+        }
+
+        // TODO: fix this !
+        devFile = new File(mExtDevsFilePath);
+
+        // if it's the first time we call this method, then create the file to
+        // store list of devices and add our device in this list
+        if (devFile.exists()) {
+            devicesList = HMCDevicesList.fromXMLString(readStringFromFile(mExtDevsFilePath));
+            Log.d(TAG, "Parsed " + readStringFromFile(mExtDevsFilePath) + " and the result is "
+                                    + devicesList);
+
+
+
+            if (devicesList == null) {
+                Log.e(TAG, "Error reading the devices file. Deleting the file..");
+                devFile.delete();
+                throw new IOException("Couldn't read or parse the devices input file");
+            }
+
+            devDescIter = devicesList.getIterator();
+
+            while (devDescIter.hasNext()) {
+                DeviceDescriptor devDesc = devDescIter.next();
+                HMCDeviceProxy devPrxy = mHMCManager.createNewDeviceProxy(devDesc);
+                mListOfExternalDevices.put(devDesc.getFullJID(), devPrxy);
+
+                try {
+                    if (mDevicesListener != null) {
+                        mDevicesListener.onExternalDeviceAdded(mExternalHMCName, devDesc);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Couldn't notify the remote device listener");
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -236,9 +350,42 @@ public class HMCDevicesStore {
         flushCache();
     }
 
+    public void setExternalDevicesList(HMCDevicesList devList) {
+        // a list of devices was received from the HMCServer after we joined its
+        // HMC network
+        Iterator<DeviceDescriptor> devDescIter = devList.getIterator();
+
+        while (devDescIter.hasNext()) {
+            DeviceDescriptor devDesc = devDescIter.next();
+            HMCDeviceProxy devPrxy = mHMCManager.createNewDeviceProxy(devDesc);
+            mListOfExternalDevices.put(devDesc.getFullJID(), devPrxy);
+
+            try {
+                if (mDevicesListener != null) {
+                    mDevicesListener.onExternalDeviceAdded(mExternalHMCName, devDesc);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Couldn't notify the remote device listener");
+                e.printStackTrace();
+            }
+        }
+
+        flushCache();
+    }
+
     public HashMap<String, DeviceDescriptor> getListOfLocalDevicesDescriptors() {
         HashMap<String, DeviceDescriptor> retVal = new HashMap<String, DeviceDescriptor>();
         Iterator<HMCDeviceProxy> iter = getListOfLocalDevices().values().iterator();
+        while (iter.hasNext()) {
+            HMCDeviceProxy devPrx = iter.next();
+            retVal.put(devPrx.getDeviceDescriptor().getFullJID(), devPrx.getDeviceDescriptor());
+        }
+        return retVal;
+    }
+
+    public HashMap<String, DeviceDescriptor> getListOfExternalDevicesDescriptors(String hmcName) {
+        HashMap<String, DeviceDescriptor> retVal = new HashMap<String, DeviceDescriptor>();
+        Iterator<HMCDeviceProxy> iter = getListOfExternalDevices().values().iterator();
         while (iter.hasNext()) {
             HMCDeviceProxy devPrx = iter.next();
             retVal.put(devPrx.getDeviceDescriptor().getFullJID(), devPrx.getDeviceDescriptor());

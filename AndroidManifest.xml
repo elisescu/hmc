@@ -32,7 +32,11 @@
         <activity android:name=".ui.hmcserver.HMCInterconnectionWizzard" 
             android:launchMode="standard">
         </activity>
-
+        
+        <activity android:name=".ui.hmcserver.ConfirmHMCInterconnection" 
+            android:launchMode="standard">
+        </activity>
+       
         <activity android:name=".ui.mediaclient.HMCMediaClientDeviceMainScreen" 
             android:launchMode="standard">
         </activity>

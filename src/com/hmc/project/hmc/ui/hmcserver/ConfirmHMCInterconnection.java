@@ -90,7 +90,7 @@ public class ConfirmHMCInterconnection extends Activity {
         String hmcName = sender.getExtras().getString("hmc_name");
         String hmcServerName = sender.getExtras().getString("hmc_srv_name");
         String hmcServerFingerprint = sender.getExtras().getString("hmc_srv_fingerprint");
-        setContentView(R.layout.confirm_join_hmc);
+        setContentView(R.layout.confirm_interconnection_hmc);
 
         TextView textViewHMCName = (TextView) findViewById(R.id.textView_hmc_name);
         TextView textViewHMCServerDetails = (TextView) findViewById(R.id.textView_hmcserver_details);
@@ -119,7 +119,7 @@ public class ConfirmHMCInterconnection extends Activity {
                 case R.id.confirm_join_button_yes: {
                     Log.d(TAG, "User replied with YES");
                     try {
-                        mHMCManager.setUserReplyDeviceAddition(true);
+                        mHMCManager.setUserReplyHMCInterconnection(true);
                     } catch (RemoteException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -129,7 +129,7 @@ public class ConfirmHMCInterconnection extends Activity {
                 case R.id.confirm_join_button_no: {
                     Log.d(TAG, "User replied with NO");
                     try {
-                        mHMCManager.setUserReplyDeviceAddition(false);
+                        mHMCManager.setUserReplyHMCInterconnection(false);
                     } catch (RemoteException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();

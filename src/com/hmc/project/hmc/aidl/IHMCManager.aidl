@@ -23,5 +23,6 @@ interface IHMCManager {
 	IDeviceDescriptor getLocalDevDescriptor();
 	// TODO: find something more elegant than this mechanism
 	void setUserReplyDeviceAddition(boolean val); 
+	void setUserReplyHMCInterconnection(boolean val);
 	
 }

@@ -113,8 +113,23 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
 
     public boolean interconnectionRequest(String requesterName) {
         boolean retVal = true;
-        Log.d(TAG, "Received interconnection request. Replying with true");
 
+        // we have received an interconnection request from an external
+        // HMCServer so we send a notification to the user to confirm using the
+        // HMCInterconnectionConfirmationListener
+        if (mPendingHMCInfo != null && mHMCInterconnectionConfirmationListener != null) {
+            // TODO: improve this bad practice to send the "iterator.next()" as
+            // parameter
+            DeviceDescriptor remoteHMCServer = mPendingHMCInfo.getIterator().next();
+
+            // Log.d(TAG, "Ask the user to confirm joining with HMCServer: " +
+            // remoteHMCServer);
+            retVal = mHMCInterconnectionConfirmationListener.confirmHMCInterconnection(
+                    remoteHMCServer, mPendingHMCInfo.getHMCName());
+        } else {
+            Log.e(TAG, "Cannot ask the user for confirmation");
+            retVal = false;
+        }
         return retVal;
     }
 

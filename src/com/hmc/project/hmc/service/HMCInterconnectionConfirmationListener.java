@@ -52,9 +52,10 @@ public class HMCInterconnectionConfirmationListener {
 
         mHMCService.sendNotification(HMC_INTERCONNECTION_CONFIRMATION_ID, notification);
 
-        Log.d(TAG, "Notification seeeent ");
         // now wait for the user to press one of the buttons in the confirmation
         // activity
+
+        // generate some string from current time to have an object to wait for
         mWaitLock = System.currentTimeMillis() + "";
 
         try {

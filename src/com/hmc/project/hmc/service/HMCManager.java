@@ -100,6 +100,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         mHMCDevicesStore = new HMCDevicesStore(this, DEVICES_STORE_PATH);
 
         mDeviceAdditionListener = new DeviceAditionConfirmationListener(mHMCService);
+        mInterconnectionHMCListener = new HMCInterconnectionConfirmationListener(mHMCService);
 
         Log.d(TAG, "Constructed the HMCManager for " + mXMPPConnection.getUser());
         // set the subscription mode to manually
@@ -438,6 +439,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     @Override
     public void setUserReplyDeviceAddition(boolean val) throws RemoteException {
         mDeviceAdditionListener.setUserReply(val);
+    }
+
+    @Override
+    public void setUserReplyHMCInterconnection(boolean val) throws RemoteException {
+        mInterconnectionHMCListener.setUserReply(val);
     }
 
     public void updateListOfLocalDevices(HMCDevicesList devList) {

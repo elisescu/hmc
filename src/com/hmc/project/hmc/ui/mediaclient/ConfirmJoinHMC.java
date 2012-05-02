@@ -90,21 +90,22 @@ public class ConfirmJoinHMC extends Activity {
         String hmcName = sender.getExtras().getString("hmc_name");
         String hmcServerName = sender.getExtras().getString("hmc_srv_name");
         String hmcServerFingerprint = sender.getExtras().getString("hmc_srv_fingerprint");
+        String myFingerprint = sender.getExtras().getString("my_fingerprint");
         setContentView(R.layout.confirm_join_hmc);
 
         TextView textViewHMCName = (TextView) findViewById(R.id.textView_hmc_name);
-        TextView textViewHMCServerDetails = (TextView) findViewById(R.id.textView_hmcserver_details);
+        TextView textViewHMCServerName = (TextView) findViewById(R.id.textView_confirmadd_hmcserver_name);
+        TextView textViewHMCSrvFingerprint = (TextView) findViewById(R.id.textView_confirmadd_fingerprint);
+        TextView textViewMyFingerprint = (TextView) findViewById(R.id.textView_confirmadd_my_fingerprint);
 
         String temp;
-
         temp = String.format(textViewHMCName.getText().toString(), hmcName);
         textViewHMCName.setText(temp);
 
-        temp = String.format(textViewHMCServerDetails.getText().toString(), hmcServerName,
-                                hmcServerFingerprint);
-
         Log.d(TAG, "Fingerprint of remote device: " + hmcServerFingerprint);
-        textViewHMCServerDetails.setText(temp);
+        textViewHMCServerName.setText(hmcServerName);
+        textViewHMCSrvFingerprint.setText(hmcServerFingerprint);
+        textViewMyFingerprint.setText(myFingerprint);
 
         Button yesButt = (Button) findViewById(R.id.confirm_join_button_yes);
         Button noButt = (Button) findViewById(R.id.confirm_join_button_no);

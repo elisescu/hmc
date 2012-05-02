@@ -30,7 +30,8 @@ public class DeviceAditionConfirmationListener {
         mHMCService = serv;
     }
 
-    public boolean confirmDeviceAddition(DeviceDescriptor newDevice, String hmcName) {
+    public boolean confirmDeviceAddition(DeviceDescriptor newDevice, String hmcName,
+                            String myFingerprint) {
         boolean retVal = false;
         Log.d(TAG, "Notification to be send");
         Notification notification = new Notification(android.R.drawable.stat_notify_more,
@@ -42,6 +43,8 @@ public class DeviceAditionConfirmationListener {
         intent.putExtra("hmc_name", hmcName);
         intent.putExtra("hmc_srv_name", newDevice.getDeviceName());
         intent.putExtra("hmc_srv_fingerprint", newDevice.getFingerprint());
+        intent.putExtra("my_fingerprint", myFingerprint);
+
         Log.d(TAG, "Sending the fingerprint: " + newDevice.getFingerprint());
 
         // TODO: improve the way of setting the info text

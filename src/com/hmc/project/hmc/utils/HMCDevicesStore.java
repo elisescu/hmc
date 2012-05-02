@@ -121,12 +121,12 @@ public class HMCDevicesStore {
         HMCDevicesList devList = new HMCDevicesList(mHMCManager.getHMCName(), true,
                 getListOfLocalDevicesDescriptors());
 
-        try {
-            writeStringToFile(mFilePath, devList.toXMLString());
-        } catch (IOException e) {
-            Log.e(TAG, "Cannot save the current devices list to file: " + mFilePath);
-            e.printStackTrace();
-        }
+//        try {
+//            writeStringToFile(mFilePath, devList.toXMLString());
+//        } catch (IOException e) {
+//            Log.e(TAG, "Cannot save the current devices list to file: " + mFilePath);
+//            e.printStackTrace();
+//        }
     }
 
     public boolean removeLocalDevice(String fullJID) {

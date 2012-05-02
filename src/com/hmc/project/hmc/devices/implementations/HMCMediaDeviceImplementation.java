@@ -132,7 +132,7 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
                                 + mDeviceAditionConfirmationListener);
         if (mPendingDevDesc != null && mDeviceAditionConfirmationListener != null) {
             retVal = mDeviceAditionConfirmationListener.confirmDeviceAddition(mPendingDevDesc,
-                                    remoteHMCName);
+                                    remoteHMCName, mDeviceDescriptor.getFingerprint());
         } else {
             Log.e(TAG, "Cannot ask the user for confirmation");
             retVal = false;

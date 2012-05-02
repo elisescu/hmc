@@ -20,7 +20,6 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
     protected DeviceDescriptor mDeviceDescriptor;
     protected HMCManager mHMCManager;
     protected IUserRequestsListener mUserRequestsListener;
-    protected DeviceAditionConfirmationListener mDeviceAditionConfirmationListener;
 
     public HMCDeviceImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         mHMCManager = hmcManager;
@@ -87,23 +86,6 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
             mUserRequestsListener = null;
         } else {
             Log.e(TAG, "Unknown listerner for de-registration (mUserRequestsListener)");
-        }
-    }
-
-    // TODO: this is use only if the implementation is instance of
-    // HMCMediaDeviceImplementation. In future maybe fix this, but now since we
-    // use the same code for different devices, we have to deal with it
-    public void registerDeviceAditionConfirmationListener(
-                            DeviceAditionConfirmationListener deviceAdditionListener) {
-        mDeviceAditionConfirmationListener = deviceAdditionListener;
-    }
-
-    public void unregisterDeviceAditionConfirmationListener(
-                            DeviceAditionConfirmationListener deviceAdditionListener) {
-        if (mDeviceAditionConfirmationListener == deviceAdditionListener) {
-            mDeviceAditionConfirmationListener = null;
-        } else {
-            Log.e(TAG, "Unknown listerner for de-registration (mDeviceAditionConfirmationListener)");
         }
     }
 

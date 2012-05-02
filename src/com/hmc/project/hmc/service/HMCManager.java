@@ -179,7 +179,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                         mLocalDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE);
                         mLocalImplementation = new HMCMediaClientDeviceImplementation(this,
                                                 mLocalDeviceDescriptor);
-                        mLocalImplementation.registerDeviceAditionConfirmationListener(mDeviceAdditionListener);
+                        ((HMCMediaDeviceImplementation) mLocalImplementation)
+                                .registerDeviceAditionConfirmationListener(mDeviceAdditionListener);
                     }
                 }
                 break;

@@ -93,18 +93,17 @@ public class ConfirmHMCInterconnection extends Activity {
         setContentView(R.layout.confirm_interconnection_hmc);
 
         TextView textViewHMCName = (TextView) findViewById(R.id.textView_hmc_name);
-        TextView textViewHMCServerDetails = (TextView) findViewById(R.id.textView_hmcserver_details);
+        TextView textViewHMCServerName = (TextView) findViewById(R.id.textView_confirmjoin_hmcserver_name);
+        TextView textViewHMCSrvFingerprint = (TextView) findViewById(R.id.textView_confirmjoin_fingerprint);
 
         String temp;
 
         temp = String.format(textViewHMCName.getText().toString(), hmcName);
         textViewHMCName.setText(temp);
 
-        temp = String.format(textViewHMCServerDetails.getText().toString(), hmcServerName,
-                                hmcServerFingerprint);
-
         Log.d(TAG, "Fingerprint of remote device: " + hmcServerFingerprint);
-        textViewHMCServerDetails.setText(temp);
+        textViewHMCServerName.setText(hmcServerName);
+        textViewHMCSrvFingerprint.setText(hmcServerFingerprint);
 
         Button yesButt = (Button) findViewById(R.id.confirm_join_button_yes);
         Button noButt = (Button) findViewById(R.id.confirm_join_button_no);

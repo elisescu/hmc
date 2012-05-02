@@ -3,6 +3,7 @@
     android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#50202020"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="4dip" >
@@ -42,15 +43,64 @@
         android:layout_alignParentRight="true"
         android:text="Cancel" />
 
-    <TextView
-        android:id="@+id/textView_hmcserver_details"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/textView_hmc_name"
-        android:lines="3"
-        android:maxLines="10"
-        android:text="Remote HMC Server details:\nName: %s\nFingerprint: %s"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:stretchColumns="1"
+    android:layout_below="@+id/textView_hmc_name">
+       
+	<TableRow>
+		 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/RelativeLayout1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_hmcserver_name_title"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:lines="1"
+			        android:text="Name:"
+			        android:textAppearance="?android:attr/textAppearanceSmall" />
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_hmcserver_name"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_below="@+id/textView_confirmjoin_hmcserver_name_title"
+			        android:lines="1"
+			        android:text="set here the name"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+    	</RelativeLayout>
+    </TableRow>
+    
+		<TableRow>
+		 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/RelativeLayout1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_hmcserver_fingerprint_title"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:lines="1"
+			        android:text="Fingerprint:"
+			        android:textAppearance="?android:attr/textAppearanceSmall" />
+		    <TextView
+			        android:id="@+id/textView_confirmjoin_fingerprint"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_below="@+id/textView_confirmjoin_hmcserver_fingerprint_title"
+			        android:lines="2"
+			        android:layout_weight="0"
+			        android:text="set fingerprint here"
+			        android:textAppearance="?android:attr/textAppearanceMedium" />
+    	</RelativeLayout>
+    </TableRow>
+
+
+
+</TableLayout>
+
 
 </RelativeLayout>

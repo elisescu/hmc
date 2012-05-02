@@ -22,22 +22,31 @@
     android:layout_width="match_parent" android:layout_height="match_parent">
        
    <TextView
-        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:id="@+id/main_screen_list_title"
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content"
         android:layout_weight="0"
         android:paddingBottom="4dip"
-        android:text="@string/test_method_description"/>
-        
-    <Button android:id="@+id/test_method"
-        android:layout_width="wrap_content" android:layout_height="wrap_content" 
-        android:text="@string/test_method_button_name">
-        <requestFocus />
-    </Button>
+        android:text="Local devices"/>
 
-    <ListView
-        android:id="@+id/hmc_devices_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </ListView>
-
+	
+	<ViewFlipper android:id="@+id/flipper"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:flipInterval="2000"
+	android:layout_marginBottom="20dip" >
+	    <ListView
+	        android:id="@+id/hmc_local_devices_list"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	    </ListView>
+	    
+	    <ListView
+	        android:id="@+id/hmc_external_devices_list"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	    </ListView>
+	</ViewFlipper>
+	    
 </LinearLayout>
 

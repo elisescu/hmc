@@ -7,6 +7,7 @@
 
 package com.hmc.project.hmc.ui.hmcserver;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,15 +21,21 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
@@ -43,22 +50,25 @@ import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 
 public class HMCServerMainScreen extends Activity {
     protected static final String TAG = "DeviceMainScreen";
+    private int REL_SWIPE_MIN_DISTANCE;
+    private int REL_SWIPE_MAX_OFF_PATH;
+    private int REL_SWIPE_THRESHOLD_VELOCITY;
+
     private boolean mIsBound;
     private HMCService mBoundService;
     private IHMCConnection mHMCConnection;
     private HMCApplication mHMCApplication;
-    private ListView mDevicesListView;
-    private DevicesListAdapter mDeviceNamesAdapter;
-    HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
+    private ListView mLocalDevicesListView;
+    private DevicesListAdapter mLocalDeviceNamesAdapter;
     HashMap<String, String> mLocalDevNames;
 
-    private OnClickListener mTestMethodListener = new OnClickListener() {
-        public void onClick(View v) {
-            if (mHMCConnection != null) {
-                // mDeviceNamesAdapter.add("New device");
-            }
-        }
-    };;
+    private ViewFlipper mListViewFlipper;
+    private ListView mExternalDevicesListView;
+    private DevicesListAdapter mExternalDeviceNamesAdapter;
+    private HashMap<String, String> mExternalDevNames;
+
+
+    HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -72,6 +82,9 @@ public class HMCServerMainScreen extends Activity {
                     mHMCConnection.getHMCManager().registerDevicesListener(mHMCDevicesListener);
 
                     mLocalDevNames = (HashMap<String, String>) mHMCConnection.getHMCManager()
+                                            .getListOfLocalDevices();
+
+                    mExternalDevNames = (HashMap<String, String>) mHMCConnection.getHMCManager()
                                             .getListOfLocalDevices();
 
                     updateListOfLocalDevicesUIThread();
@@ -95,7 +108,8 @@ public class HMCServerMainScreen extends Activity {
                 Iterator<String> iter = mLocalDevNames.keySet().iterator();
                 while (iter.hasNext()) {
                     String jid = iter.next();
-                    mDeviceNamesAdapter.add(jid, mLocalDevNames.get(jid));
+                    mLocalDeviceNamesAdapter.add(jid, mLocalDevNames.get(jid));
+                    mExternalDeviceNamesAdapter.add(jid, mExternalDevNames.get(jid));
                 }
             }
         });
@@ -135,14 +149,31 @@ public class HMCServerMainScreen extends Activity {
 
         setContentView(R.layout.hmc_server_main_screen);
 
-        // Watch for button clicks.
-        Button button = (Button) findViewById(R.id.test_method);
-        button.setOnClickListener(mTestMethodListener);
+        mListViewFlipper = ((ViewFlipper) this.findViewById(R.id.flipper));
 
-        mDevicesListView = (ListView) findViewById(R.id.hmc_devices_list);
-        mDeviceNamesAdapter = new DevicesListAdapter(this);
-        mDevicesListView.setAdapter(mDeviceNamesAdapter);
+        mLocalDevicesListView = (ListView) findViewById(R.id.hmc_local_devices_list);
+        mLocalDeviceNamesAdapter = new DevicesListAdapter(this);
+        mLocalDevicesListView.setAdapter(mLocalDeviceNamesAdapter);
         mLocalDevNames = new HashMap<String, String>();
+
+        mExternalDevicesListView = (ListView) findViewById(R.id.hmc_external_devices_list);
+        mExternalDeviceNamesAdapter = new DevicesListAdapter(this);
+        mExternalDevicesListView.setAdapter(mExternalDeviceNamesAdapter);
+        mExternalDevNames = new HashMap<String, String>();
+
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        REL_SWIPE_MIN_DISTANCE = (int) (120.0f * dm.densityDpi / 160.0f + 0.5);
+        REL_SWIPE_MAX_OFF_PATH = (int) (250.0f * dm.densityDpi / 160.0f + 0.5);
+        REL_SWIPE_THRESHOLD_VELOCITY = (int) (200.0f * dm.densityDpi / 160.0f + 0.5);
+
+        final GestureDetector gestureDetector = new GestureDetector(new MyGestureDetector());
+        View.OnTouchListener gestureListener = new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+        };
+        mLocalDevicesListView.setOnTouchListener(gestureListener);
+        mExternalDevicesListView.setOnTouchListener(gestureListener);
 
         // make sure we ended up in this activity with the app connected to XMPP
         // server
@@ -207,7 +238,8 @@ public class HMCServerMainScreen extends Activity {
                     try {
                         String jid = modifDeviceDescriptor.getFullJID();
                         String name = modifDeviceDescriptor.getDeviceName();
-                        mDeviceNamesAdapter.add(jid, name);
+                        mLocalDeviceNamesAdapter.add(jid, name);
+                        mExternalDeviceNamesAdapter.add(jid, name);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Cannot retrieve the details about modified device");
                         e.printStackTrace();
@@ -230,5 +262,55 @@ public class HMCServerMainScreen extends Activity {
         }
 
     }
+
+    private void myOnItemClick(int position) {
+        String str = MessageFormat.format("Item clicked = {0,number}", position);
+        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+    }
+
+    private void onLTRFling() {
+        mListViewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.push_right_in));
+        mListViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.push_right_out));
+        mListViewFlipper.showPrevious();
+        Toast.makeText(this, "Left-to-right fling (prev)", Toast.LENGTH_SHORT).show();
+    }
+
+    private void onRTLFling() {
+        mListViewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.push_left_in));
+        mListViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.push_left_out));
+        mListViewFlipper.showNext();
+        Toast.makeText(this, "Right-to-left fling (next)", Toast.LENGTH_SHORT).show();
+    }
+
+    private ListView getCurrentListView() {
+        return (ListView) mListViewFlipper.getCurrentView();
+    }
+    
+    private class MyGestureDetector extends SimpleOnGestureListener {
+        // Detect a single-click and call my own handler.
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            ListView lv = getCurrentListView();
+            int pos = lv.pointToPosition((int) e.getX(), (int) e.getY());
+            myOnItemClick(pos);
+            return false;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if (Math.abs(e1.getY() - e2.getY()) > REL_SWIPE_MAX_OFF_PATH)
+                return false;
+            if (e1.getX() - e2.getX() > REL_SWIPE_MIN_DISTANCE
+                                    && Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) {
+                onRTLFling();
+            } else if (e2.getX() - e1.getX() > REL_SWIPE_MIN_DISTANCE
+                                    && Math.abs(velocityX) > REL_SWIPE_THRESHOLD_VELOCITY) {
+                onLTRFling();
+            }
+            return false;
+        }
+
+    }
+
 }
 

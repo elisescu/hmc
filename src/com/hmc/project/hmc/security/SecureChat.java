@@ -8,6 +8,7 @@
 package com.hmc.project.hmc.security;
 
 import net.java.otr4j.OtrException;
+import net.java.otr4j.io.messages.MysteriousT;
 import net.java.otr4j.session.Session;
 import net.java.otr4j.session.SessionID;
 import net.java.otr4j.session.SessionStatus;
@@ -237,5 +238,9 @@ public class SecureChat implements MessageListener {
 
     public void addMessageListener(SecuredMessageListener msgListener) {
         mSecureMessageListener = msgListener;
+    }
+
+    public SessionID getSessionID() {
+        return mOtrSessionId;
     }
 }

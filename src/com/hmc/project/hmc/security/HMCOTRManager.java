@@ -10,6 +10,7 @@ package com.hmc.project.hmc.security;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import net.java.otr4j.OtrEngineHost;
 import net.java.otr4j.OtrEngineImpl;
@@ -106,6 +107,14 @@ public class HMCOTRManager implements OtrEngineHost {
         getKeyPair(dummySess);
         return mOtrKeyManager.getLocalFingerprint(dummySess);
     }
+
+    public String getRemoteFingerprint(String remoteFullJID) {
+        // TODO: create a proper way to generate and get the key-pair
+        SessionID sessId = new SessionID("dummy_JID_doesnt_matter", remoteFullJID, "xmpp");
+        getKeyPair(sessId);
+        return mOtrKeyManager.getRemoteFingerprint(sessId);
+    }
+
     private class HMCOtrListener implements OtrEngineListener {
         @Override
         public void sessionStatusChanged(final SessionID sessionID) {

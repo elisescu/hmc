@@ -16,6 +16,7 @@ import com.hmc.project.hmc.devices.proxy.AsyncCommandReplyListener;
 import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
+import com.hmc.project.hmc.security.HMCOTRManager;
 import com.hmc.project.hmc.service.HMCInterconnectionConfirmationListener;
 import com.hmc.project.hmc.service.HMCManager;
 import com.hmc.project.hmc.ui.DevicesListAdapter;
@@ -66,6 +67,18 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             mHMCManager.deleteAnonymousProxy(externalHMCServerAddress);
             return false;
         }
+
+        String remoteRealFingerprint = HMCOTRManager.getInstance().getRemoteFingerprint(
+                                externalHMCServerAddress);
+        if (!remoteRealFingerprint.equals(remoteHMCServerDesc.getFingerprint())) {
+            Log.e(TAG, "The fingerprint received from remote "
+                       + remoteHMCServerDesc.getFingerprint()
+                       + " doesn't match the one he uses("
+                       + remoteRealFingerprint + ")");
+            mHMCManager.deleteAnonymousProxy(externalHMCServerAddress);
+            return false;
+        }
+
         newDevProxy.setDeviceDescriptor(remoteHMCServerDesc);
 
         Log.d(TAG, "Got remote dev desc: " + remoteHMCServerDesc.toString()
@@ -210,6 +223,15 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             mHMCManager.deleteAnonymousProxy(fullJID);
             return false;
         }
+        String remoteRealFingerprint = HMCOTRManager.getInstance().getRemoteFingerprint(fullJID);
+        if (!remoteRealFingerprint.equals(remoteDevDesc.getFingerprint())) {
+            Log.e(TAG, "The fingerprint received from remote " + remoteDevDesc.getFingerprint()
+                                    + " doesn't match the one he uses(" + remoteRealFingerprint
+                                    + ")");
+            mHMCManager.deleteAnonymousProxy(fullJID);
+            return false;
+        }
+        
         newDevProxy.setDeviceDescriptor(remoteDevDesc);
 
         Log.d(TAG, "Got remote dev desc: " + remoteDevDesc.toString()

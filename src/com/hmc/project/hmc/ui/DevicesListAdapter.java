@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import com.hmc.project.hmc.R;
 
 public class DevicesListAdapter extends ArrayAdapter<String> {
+    private static final String TAG = "DevicesListAdapter";
     private final Context context;
     //private List<String> mDeviceNames;
     private LinkedHashMap<String, String> mDevices;
@@ -48,9 +50,18 @@ public class DevicesListAdapter extends ArrayAdapter<String> {
         View rowView = inflater.inflate(R.layout.list_item, parent, false);
         TextView textView = (TextView) rowView.findViewById(R.id.label);
         ImageView imageView = (ImageView) rowView.findViewById(R.id.logo);
-        textView.setText(mDevices.values().toArray()[position].toString());
 
-        imageView.setImageResource(R.drawable.device_icon);
+        imageView.setImageResource(R.drawable.no_device_icon);
+        textView.setText("no device");
+
+        if (mDevices.size() > position) {
+            String deviceName = (String) mDevices.values().toArray()[position];
+            if (deviceName != null) {
+                textView.setText(deviceName);
+                imageView.setImageResource(R.drawable.device_icon);
+            }
+        }
+
 
         return rowView;
     }

@@ -467,4 +467,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         }
         return (Map) retVal;
     }
+
+    public void updateListOfExternalDevices(HMCDevicesList devList) {
+        if (devList == null) {
+            Log.e(TAG, "Received corrupted list of devices");
+        }
+        mHMCDevicesStore.setExternalDevicesList(devList);
+    }
 }

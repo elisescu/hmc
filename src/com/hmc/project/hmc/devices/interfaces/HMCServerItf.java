@@ -23,6 +23,8 @@ public interface HMCServerItf {
 
     static final int CMD_EXCHANGE_HMC_INFO = HMC_SERVER_INITIAL_COMMAND + 3;
 
+    static final int CMD_SEND_LIST_DEVICES = HMC_SERVER_INITIAL_COMMAND + 4;
+
     static final int HMC_SERVER_LAST_COMMAND = CMD_INTERCONNECTION_REQUEST;
 
 

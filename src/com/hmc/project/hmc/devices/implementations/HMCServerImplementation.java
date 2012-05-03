@@ -11,11 +11,13 @@ import java.util.HashMap;
 import android.os.RemoteException;
 import android.util.Log;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
+import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.devices.proxy.AsyncCommandReplyListener;
 import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
+import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCOTRManager;
 import com.hmc.project.hmc.service.HMCInterconnectionConfirmationListener;
 import com.hmc.project.hmc.service.HMCManager;
@@ -114,11 +116,11 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // if remote device accepted to join HMC, then send it the list of
         // devices
         if (addingSuccess) {
-//            HMCMediaDeviceProxy specificDevPrxy = (HMCMediaDeviceProxy) mHMCManager
-//                                    .promoteAnonymousProxy(newDevProxy);
-//            // now that we have the specific proxy, added also in our list of
-//            // devices
-//            specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
+            HMCServerProxy specificDevPrxy = (HMCServerProxy) mHMCManager
+                    .promoteAnonymousProxy(newDevProxy);
+            // now that we have the specific proxy, added also in our list of
+            // devices
+            specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
         }
 
         return addingSuccess;
@@ -173,13 +175,13 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     public String localExecute(int opCode, String params) {
         String retVal = null;
         switch (opCode) {
-            case HMCServerItf.CMD_GET_LIST_OF_LOCAL_HMC_DEVICES:
+            case CMD_GET_LIST_OF_LOCAL_HMC_DEVICES:
                 retVal = _getListOfLocalHMCDevices();
                 break;
-            case HMCServerItf.CMD_INTERCONNECTION_REQUEST:
+            case CMD_INTERCONNECTION_REQUEST:
                 retVal = _interconnectionRequest(params);
                 break;
-            case HMCServerItf.CMD_EXCHANGE_HMC_INFO:
+            case CMD_EXCHANGE_HMC_INFO:
                 retVal = _exchangeHMCInfo(params);
                 break;
             default:
@@ -187,6 +189,24 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
                 break;
         }
         return retVal;
+    }
+
+    @Override
+    public void onNotificationReceived(int opCode, String params) {
+        switch (opCode) {
+            case CMD_SEND_LIST_DEVICES:
+                _sendListOfDevices(params);
+                break;
+            default:
+                super.onNotificationReceived(opCode, params);
+                break;
+        }
+    }
+
+    private void _sendListOfDevices(String params) {
+        HMCDevicesList devList = HMCDevicesList.fromXMLString(params);
+        // update the HMCManager about the new list of devices
+        mHMCManager.updateListOfExternalDevices(devList);
     }
 
     private String _exchangeHMCInfo(String params) {

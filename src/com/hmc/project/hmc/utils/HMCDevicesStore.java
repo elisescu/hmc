@@ -193,14 +193,21 @@ public class HMCDevicesStore {
             e.printStackTrace();
         }
 
-        devList = new HMCDevicesList(mExternalHMCName, false,
-                                getListOfExternalDevicesDescriptors(mExternalHMCName));
+        // TODO: implement a proper fix for this temporary one
+        // if the external devices list is empty, then don't try to transform it
+        // to XML and to save it. Unlike the local devices list, the external
+        // one can be empty
+        Log.d(TAG, "size of external devicess: " + getListOfExternalDevices().size());
+        if (getListOfExternalDevices().size() > 0) {
+            devList = new HMCDevicesList(mExternalHMCName, false,
+                    getListOfExternalDevicesDescriptors(mExternalHMCName));
 
-        try {
-            writeStringToFile(mExtDevsFilePath, devList.toXMLString());
-        } catch (IOException e) {
-            Log.e(TAG, "Cannot save the current devices list to file: " + mLocalDevsFilePath);
-            e.printStackTrace();
+            try {
+                writeStringToFile(mExtDevsFilePath, devList.toXMLString());
+            } catch (IOException e) {
+                Log.e(TAG, "Cannot save the current devices list to file: " + mLocalDevsFilePath);
+                e.printStackTrace();
+            }
         }
 
     }

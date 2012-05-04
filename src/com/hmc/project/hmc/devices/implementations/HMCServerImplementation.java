@@ -174,9 +174,6 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
         String retVal = null;
         switch (opCode) {
-            case CMD_GET_LIST_OF_LOCAL_HMC_DEVICES:
-                retVal = _getListOfLocalHMCDevices();
-                break;
             case CMD_INTERCONNECTION_REQUEST:
                 retVal = _interconnectionRequest(params);
                 break;
@@ -220,13 +217,6 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
 
     private String _interconnectionRequest(String params) {
         return interconnectionRequest(params) + "";
-    }
-
-    private String _getListOfLocalHMCDevices() {
-        String retVal = null;
-        HMCDevicesList list = getListOfLocalHMCDevices();
-        retVal = list.toXMLString();
-        return retVal;
     }
 
     public boolean addNewDevice(String fullJID) {

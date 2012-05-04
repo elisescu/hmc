@@ -32,7 +32,6 @@ public class SecureChat implements MessageListener {
     private static final String TAG = "SecureChat";
     private static final long MAX_OTR_TIMEOUT = 15000;
     private Chat mXMPPChat;
-    HMCFingerprintsVerifier mHMCFingerprintsVerifier;
     SecuredMessageListener mSecureMessageListener;
     private String mRemoteFullJID;
     private SessionID mOtrSessionId = null;
@@ -44,13 +43,11 @@ public class SecureChat implements MessageListener {
         PLAINTEXT, ENCRYPTED, AUTHENTICATED, NEGOTIATING
     }
 
-    public SecureChat(ChatManager manager, String localFullJID, String remoteFullJid,
-            HMCFingerprintsVerifier ver) {
+    public SecureChat(ChatManager manager, String localFullJID, String remoteFullJid) {
 
         mXMPPChat = manager.createChat(remoteFullJid, this);
         mRemoteFullJID = remoteFullJid;
         mLocalFullJID = localFullJID;
-        mHMCFingerprintsVerifier = ver;
         Log.d(TAG, "Created a LOCAL secure chat with " + mRemoteFullJID);
         mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
         mOTRStatus = toChatState(HMCOTRManager.getInstance().getOtrEngine()
@@ -68,8 +65,6 @@ public class SecureChat implements MessageListener {
     public SecureChat(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
         mXMPPChat = chat;
         chat.addMessageListener(this);
-        mHMCFingerprintsVerifier = ver;
-        // TODO: make sure to fix this and get the correct fullJIDs
         mRemoteFullJID = chat.getParticipant();
         mLocalFullJID = localFullJID;
         mOTRStatus = SecureChatState.PLAINTEXT;
@@ -205,8 +200,6 @@ public class SecureChat implements MessageListener {
                 mOtrSessionId.notify();
             }
             Log.e(TAG, "We need to authenticate now and verify the fingerprints");
-                                    
-            mHMCFingerprintsVerifier.verifyFingerprints("bla bla", "bla bla", mRemoteFullJID);
         }
     }
 

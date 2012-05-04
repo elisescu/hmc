@@ -57,7 +57,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     public HMCDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
-        mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid, ver);
+        mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid);
 
         mSecureChat.addMessageListener(this);
         mFullJID = remoteFullJid;

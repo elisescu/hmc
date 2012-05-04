@@ -283,6 +283,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // if remote device accepted to join HMC, then send it the list of
         // devices
         if (addingSuccess) {
+            // TODO: maybe do all this in a separate thread
             HMCMediaDeviceProxy specificDevPrxy = (HMCMediaDeviceProxy)mHMCManager
                                     .promoteAnonymousProxyToLocal(newDevProxy, true);
             // now that we have the specific proxy, added also in our list of

@@ -40,7 +40,7 @@ public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDevic
 
 	@Override
 	public void localDeviceAddedNotification(DeviceDescriptor newDev) {
-        sendNotification(CMD_DEVICE_ADDED_NOTIFICATION, newDev.toXMLString());
+        sendNotification(CMD_LOCAL_DEVICE_ADDED_NOTIFICATION, newDev.toXMLString());
 	}
 
     public void sendListOfDevices(HMCDevicesList list) {
@@ -48,5 +48,12 @@ public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDevic
         // notification RPC mechanism
         Log.d(TAG, "Send the list to remote: " + list.toXMLString());
         sendNotification(CMD_SEND_LIST_DEVICES, list.toXMLString());
+    }
+
+    /**
+     * @param deviceDescriptor
+     */
+    public void externalDeviceAddedNotification(DeviceDescriptor deviceDescriptor) {
+        sendNotification(CMD_EXTERNAL_DEVICE_ADDED_NOTIFICATION, deviceDescriptor.toXMLString());
     }
 }

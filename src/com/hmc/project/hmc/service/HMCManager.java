@@ -327,17 +327,38 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             // let know also the rest of devices about this addition
             // local devices
             if (notifyRestOfDevices) {
-                Iterator<HMCDeviceProxy> localDevicesIter = mHMCDevicesStore
+                // notify the local devices about the addition
+                Iterator<HMCDeviceProxy> devicesIter = mHMCDevicesStore
                                         .getListOfLocalDevices().values().iterator();
 
-                while (localDevicesIter.hasNext()) {
-                    HMCDeviceProxy localDev = localDevicesIter.next();
+                while (devicesIter.hasNext()) {
+                    HMCDeviceProxy localDev = devicesIter.next();
 
                     // TODO: fix this bad approach
                     if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
                         HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
                         mediaDev.localDeviceAddedNotification(knownDevice.getDeviceDescriptor());
                     }
+                }
+
+                // notify the external devices as well
+                HashMap<String, HMCDeviceProxy> extDevLit = mHMCDevicesStore
+                                        .getListOfExternalDevices();
+                if (extDevLit != null) {
+                    devicesIter = extDevLit.values().iterator();
+
+                    while (devicesIter.hasNext()) {
+                        HMCDeviceProxy localDev = devicesIter.next();
+
+                        // TODO: fix this bad approach
+                        if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
+                            HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                            mediaDev.externalDeviceAddedNotification(knownDevice
+                                                    .getDeviceDescriptor());
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "No external devices to notify about this addition");
                 }
             }
         } else {
@@ -482,5 +503,12 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             Log.e(TAG, "Received corrupted list of devices");
         }
         mHMCDevicesStore.setExternalDevicesList(devList);
+    }
+
+    /**
+     * @param newDev
+     */
+    public void externalDeviceAddedNotification(DeviceDescriptor newDev) {
+        mHMCDevicesStore.addNewExternalDevice("fix-me", newDev);
     }
 }

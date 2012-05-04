@@ -36,13 +36,32 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
                 case HMCMediaDeviceItf.CMD_SEND_LIST_DEVICES:
                     _sendListOfDevices(params);
                     break;
-                case HMCMediaDeviceItf.CMD_DEVICE_ADDED_NOTIFICATION:
+                case HMCMediaDeviceItf.CMD_LOCAL_DEVICE_ADDED_NOTIFICATION:
                     _localDeviceAddedNotification(params);
+                    break;
+                case HMCMediaDeviceItf.CMD_EXTERNAL_DEVICE_ADDED_NOTIFICATION:
+                    _externalDeviceAddedNotification(params);
                     break;
                 default:
                     super.onNotificationReceived(opCode, params, fromDev);
             }
         }
+    }
+
+    /**
+     * @param params
+     *            the parameters received from remote
+     */
+    private void _externalDeviceAddedNotification(String params) {
+        DeviceDescriptor newDev = DeviceDescriptor.fromXMLString(params);
+        externalDeviceAddedNotification(newDev);
+    }
+
+    /**
+     * @param newDev
+     */
+    private void externalDeviceAddedNotification(DeviceDescriptor newDev) {
+        mHMCManager.externalDeviceAddedNotification(newDev);
     }
 
     private void _localDeviceAddedNotification(String params) {

@@ -27,13 +27,6 @@ public interface HMCServerItf {
 
     static final int HMC_SERVER_LAST_COMMAND = CMD_INTERCONNECTION_REQUEST;
 
-
-    /**
-     * retrieves the list of HMC devices XMPP JIDs and their public keys from
-     * HMC
-     */
-    HMCDevicesList getListOfLocalHMCDevices();
-
   /**
    * Get the new devices that were added to HMC while local device was offline. 
    * The parameter contains the hash of all devices that we have in the list now.

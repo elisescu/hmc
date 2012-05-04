@@ -149,8 +149,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return retVal;
     }
 
-    @Override
-    public HMCDevicesList getListOfLocalHMCDevices() {
+    private HMCDevicesList getListOfLocalHMCDevices() {
         HashMap<String, DeviceDescriptor> ourLocalDevices = mHMCManager
                                 .getListOfLocalDevicesDescriptors();
         HMCDevicesList locDevsList = new HMCDevicesList(mHMCManager.getHMCName(), true,

@@ -34,15 +34,6 @@ public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
         super(secureChat);
     }
 
-    @Override
-    public HMCDevicesList getListOfLocalHMCDevices() {
-        String returnedString;
-
-        returnedString = sendCommandSync(CMD_GET_LIST_OF_LOCAL_HMC_DEVICES, "void-param");
-
-        return HMCDevicesList.fromXMLString(returnedString);
-	}
-
 	@Override
 	public void getListOfNewHMCDevices(String hashOfMyListOfDevices) {
 		// TODO Auto-generated method stub

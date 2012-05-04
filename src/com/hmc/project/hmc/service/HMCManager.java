@@ -120,7 +120,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     }
 
     @Override
-    public boolean authenticateDevice(DeviceDescriptor remoteDevice) {
+    public synchronized boolean authenticateDevice(DeviceDescriptor remoteDevice) {
         switch (HMCSecurityPolicy.getInstance().getHMCSecurityPolicy()) {
             case HMCSecurityPolicy.TRUST_EVERYBODY_ALWAYS:
                 return true;
@@ -314,12 +314,15 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         mHMCName = name;
     }
 
-    public HMCDeviceProxy promoteAnonymousProxyToLocal(HMCAnonymousDeviceProxy newDevProxy, boolean notifyRestOfDevices) {
+    public synchronized HMCDeviceProxy promoteAnonymousProxyToLocal(
+                            HMCAnonymousDeviceProxy newDevProxy, boolean notifyRestOfDevices) {
         // create a specific proxy for the newly added device and add it to the
         // devices list
         HMCDeviceProxy knownDevice = null;
         knownDevice = newDevProxy.promoteToSpecificProxy();
         if (knownDevice != null ) {
+            // add the new device in local store
+            mHMCDevicesStore.addNewLocalDevice(knownDevice);
 
             // let know also the rest of devices about this addition
             // local devices
@@ -337,8 +340,6 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                     }
                 }
             }
-            // add the new device in local store
-            mHMCDevicesStore.addNewLocalDevice(knownDevice);
         } else {
             Log.e(TAG, "Couldn't promote the anonymous device");
         }

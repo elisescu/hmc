@@ -17,11 +17,11 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
     }
 
     @Override
-    public String localExecute(int opCode, String params) {
+    public String localExecute(int opCode, String params, DeviceDescriptor fromDevDesc) {
         String retVal = null;
         switch (opCode) {
             default:
-                retVal = super.localExecute(opCode, params);
+                retVal = super.localExecute(opCode, params, fromDevDesc);
                 break;
         }
         return retVal;

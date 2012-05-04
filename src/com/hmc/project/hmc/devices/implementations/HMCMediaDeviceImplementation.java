@@ -27,7 +27,7 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
     }
 
     @Override
-    public void onNotificationReceived(int opCode, String params) {
+    public void onNotificationReceived(int opCode, String params, DeviceDescriptor fromDevDesc) {
         switch (opCode) {
             case HMCMediaDeviceItf.CMD_SEND_LIST_DEVICES:
                 _sendListOfDevices(params);
@@ -52,7 +52,7 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
     }
 
     @Override
-    public String localExecute(int opCode, String params) {
+    public String localExecute(int opCode, String params, DeviceDescriptor fromDevDesc) {
         String retVal = null;
         switch (opCode) {
             case HMCMediaDeviceItf.CMD_HELLO:
@@ -62,7 +62,7 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
                 retVal = _joinHMC(params);
                 break;
             default:
-                retVal = super.localExecute(opCode, params);
+                retVal = super.localExecute(opCode, params, fromDevDesc);
                 break;
         }
         return retVal;

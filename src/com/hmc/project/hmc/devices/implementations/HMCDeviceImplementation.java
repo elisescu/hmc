@@ -27,7 +27,7 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
     }
 
     // this method has to be overriden by subclasses
-    public String localExecute(int opCode, String params) {
+    public String localExecute(int opCode, String params, DeviceDescriptor fromDevDesc) {
         String retVal = null;
         switch (opCode) {
             case HMCDeviceItf.CMD_REMOTE_INCREMENT:
@@ -61,7 +61,7 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
 
     // this method should be implemented by the subclasses of device
     // implementation
-    public void onNotificationReceived(int opCode, String params) {
+    public void onNotificationReceived(int opCode, String params, DeviceDescriptor fromDevDesc) {
         switch (opCode) {
             case HMCDeviceItf.CMD_TEST_NOTIFICATION:
                 testNotification(params);

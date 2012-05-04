@@ -172,7 +172,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     }
 
     @Override
-    public String localExecute(int opCode, String params) {
+    public String localExecute(int opCode, String params, DeviceDescriptor fromDevDesc) {
         String retVal = null;
         switch (opCode) {
             case CMD_GET_LIST_OF_LOCAL_HMC_DEVICES:
@@ -185,20 +185,20 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
                 retVal = _exchangeHMCInfo(params);
                 break;
             default:
-                retVal = super.localExecute(opCode, params);
+                retVal = super.localExecute(opCode, params, fromDevDesc);
                 break;
         }
         return retVal;
     }
 
     @Override
-    public void onNotificationReceived(int opCode, String params) {
+    public void onNotificationReceived(int opCode, String params, DeviceDescriptor fromDevDesc) {
         switch (opCode) {
             case CMD_SEND_LIST_DEVICES:
                 _sendListOfDevices(params);
                 break;
             default:
-                super.onNotificationReceived(opCode, params);
+                super.onNotificationReceived(opCode, params, fromDevDesc);
                 break;
         }
     }

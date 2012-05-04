@@ -117,7 +117,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // devices
         if (addingSuccess) {
             HMCServerProxy specificDevPrxy = (HMCServerProxy) mHMCManager
-                    .promoteAnonymousProxy(newDevProxy);
+                    .promoteAnonymousProxyToLocal(newDevProxy);
             // now that we have the specific proxy, added also in our list of
             // devices
             specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
@@ -285,7 +285,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // devices
         if (addingSuccess) {
             HMCMediaDeviceProxy specificDevPrxy = (HMCMediaDeviceProxy)mHMCManager
-                                    .promoteAnonymousProxy(newDevProxy);
+                                    .promoteAnonymousProxyToLocal(newDevProxy);
             // now that we have the specific proxy, added also in our list of
             // devices
             specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());

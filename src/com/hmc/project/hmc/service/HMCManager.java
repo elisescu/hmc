@@ -307,7 +307,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         mHMCName = name;
     }
 
-    public HMCDeviceProxy promoteAnonymousProxy(HMCAnonymousDeviceProxy newDevProxy) {
+    public HMCDeviceProxy promoteAnonymousProxyToLocal(HMCAnonymousDeviceProxy newDevProxy) {
         // create a specific proxy for the newly added device and add it to the
         // devices list
         HMCDeviceProxy knownDevice = null;

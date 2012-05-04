@@ -73,6 +73,12 @@ public class HMCDevicesList {
         HMCDevicesList retList = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
+
+        if (input == null) {
+            Log.e(TAG, "Trying to parse null input");
+            return null;
+        }
+
         try {
             db = dbf.newDocumentBuilder();
             Document doc = db.parse(new InputSource(new StringReader(input)));

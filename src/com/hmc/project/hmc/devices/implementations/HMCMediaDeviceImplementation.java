@@ -13,6 +13,9 @@ import android.util.Log;
 
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
+import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
+import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
+import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
 import com.hmc.project.hmc.service.DeviceAditionConfirmationListener;
 import com.hmc.project.hmc.service.HMCManager;
 
@@ -27,16 +30,18 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
     }
 
     @Override
-    public void onNotificationReceived(int opCode, String params, DeviceDescriptor fromDevDesc) {
-        switch (opCode) {
-            case HMCMediaDeviceItf.CMD_SEND_LIST_DEVICES:
-                _sendListOfDevices(params);
-                break;
-            case HMCMediaDeviceItf.CMD_DEVICE_ADDED_NOTIFICATION:
-                _localDeviceAddedNotification(params);
-                break;
-            default:
-                break;
+    public void onNotificationReceived(int opCode, String params, HMCDeviceProxy fromDev) {
+        if (authenticateRemoteDevice(opCode, fromDev.getDeviceDescriptor())) {
+            switch (opCode) {
+                case HMCMediaDeviceItf.CMD_SEND_LIST_DEVICES:
+                    _sendListOfDevices(params);
+                    break;
+                case HMCMediaDeviceItf.CMD_DEVICE_ADDED_NOTIFICATION:
+                    _localDeviceAddedNotification(params);
+                    break;
+                default:
+                    super.onNotificationReceived(opCode, params, fromDev);
+            }
         }
     }
 
@@ -52,34 +57,64 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
     }
 
     @Override
-    public String localExecute(int opCode, String params, DeviceDescriptor fromDevDesc) {
-        String retVal = null;
+    public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
+        Log.d(TAG, "Local execute: " + opCode + "  " + params + "from ");
+
+        if (authenticateRemoteDevice(opCode, fromDev.getDeviceDescriptor())) {
+            switch (opCode) {
+                case HMCMediaDeviceItf.CMD_HELLO:
+                    return _hello(params, fromDev);
+                case HMCMediaDeviceItf.CMD_JOIN_HMC:
+                    return _joinHMC(params, fromDev);
+            }
+        }
+        // if there's no operation on this class, maybe there's one on the super
+        // class (the super class is responsible with authenticate the remote
+        // for its operations
+        return super.localExecute(opCode, params, fromDev);
+    }
+
+    @Override
+    protected boolean authenticateRemoteDevice(int opCode, DeviceDescriptor fromDevDesc) {
+        boolean remoteAuthenticated = false;
+        // authenticate the remote device requesting calling the local methods
         switch (opCode) {
             case HMCMediaDeviceItf.CMD_HELLO:
-                retVal = _hello(params);
+                // we can send/receive hello messages with unknown devices
+                remoteAuthenticated = true;
                 break;
             case HMCMediaDeviceItf.CMD_JOIN_HMC:
-                retVal = _joinHMC(params);
+                // allow unknown devices to call these two methods (used for
+                // new device)
+                if (mPendingDevDesc.getFullJID().equals(fromDevDesc.getFullJID()) &&
+                    mPendingDevDesc.getFingerprint().equals(fromDevDesc.getFingerprint())) {
+                    Log.v(TAG, "Authenticated for join HMC true");
+                    remoteAuthenticated = true;
+                } else {
+                    remoteAuthenticated = false;
+                    Log.v(TAG, "Authenticated for join HMC false");
+                }
                 break;
+            case HMCMediaDeviceItf.CMD_SEND_LIST_DEVICES:
             default:
-                retVal = super.localExecute(opCode, params, fromDevDesc);
-                break;
+                remoteAuthenticated = super.authenticateRemoteDevice(opCode, fromDevDesc);
         }
-        return retVal;
+        Log.d(TAG, "Remote devices authenticated = " + remoteAuthenticated);
+        return remoteAuthenticated;
     }
 
-    private String _joinHMC(String params) {
+    private String _joinHMC(String params, HMCDeviceProxy fromDev) {
         String retVal = null;
 
-        retVal = joinHMC(params) + "";
+        retVal = joinHMC(params, fromDev) + "";
 
         return retVal;
     }
 
-    private String _hello(String params) {
+    private String _hello(String params, HMCDeviceProxy fromDev) {
         String retVal = null;
         DeviceDescriptor recvDevDesc = DeviceDescriptor.fromXMLString(params);
-        DeviceDescriptor ourDevDesc = hello(recvDevDesc);
+        DeviceDescriptor ourDevDesc = hello(recvDevDesc, fromDev);
 
         if (ourDevDesc != null) {
             retVal = ourDevDesc.toXMLString();
@@ -88,11 +123,12 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         return retVal;
     }
 
-    private DeviceDescriptor hello(DeviceDescriptor recvDevDesc) {
+    private DeviceDescriptor hello(DeviceDescriptor recvDevDesc, HMCDeviceProxy fromDev) {
         if (recvDevDesc != null) {
             Log.d(TAG, "Received devive descriptor from remote in hello msg: "
                                                             + recvDevDesc.toString());
             mPendingDevDesc = recvDevDesc;
+            fromDev.setDeviceDescriptor(recvDevDesc);
         } else {
             Log.e(TAG, "Didn't recieve descriptor from remote in hello: " + recvDevDesc);
         }
@@ -124,7 +160,7 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         }
     }
 
-    public boolean joinHMC(String remoteHMCName) {
+    public boolean joinHMC(String remoteHMCName, HMCDeviceProxy fromDev) {
         boolean retVal = false;
 
         Log.d(TAG, "Received call from " + remoteHMCName + "to join the HMC");
@@ -133,6 +169,20 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         if (mPendingDevDesc != null && mDeviceAditionConfirmationListener != null) {
             retVal = mDeviceAditionConfirmationListener.confirmDeviceAddition(mPendingDevDesc,
                                     remoteHMCName, mDeviceDescriptor.getFingerprint());
+            // if the user accepted addition, then add the remote device to our
+            // list of devices
+            if (retVal) {
+                try {
+                    Log.d(TAG, "The user confirmed addition so add the device to the list");
+                    mHMCManager.promoteAnonymousProxyToLocal((HMCAnonymousDeviceProxy) fromDev,
+                                            false);
+                    Log.d(TAG, "The device was promoted");
+                } catch (ClassCastException e) {
+                    e.printStackTrace();
+                    // this shouldn't happen
+                    Log.e(TAG, "FATAL: Received joinHMC from non-anonymous device");
+                }
+            }
         } else {
             Log.e(TAG, "Cannot ask the user for confirmation");
             retVal = false;

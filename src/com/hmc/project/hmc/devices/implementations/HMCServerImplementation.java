@@ -117,7 +117,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // devices
         if (addingSuccess) {
             HMCServerProxy specificDevPrxy = (HMCServerProxy) mHMCManager
-                    .promoteAnonymousProxyToLocal(newDevProxy);
+                    .promoteAnonymousProxyToLocal(newDevProxy, true);
             // now that we have the specific proxy, added also in our list of
             // devices
             specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
@@ -172,7 +172,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     }
 
     @Override
-    public String localExecute(int opCode, String params, DeviceDescriptor fromDevDesc) {
+    public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
         String retVal = null;
         switch (opCode) {
             case CMD_GET_LIST_OF_LOCAL_HMC_DEVICES:
@@ -185,20 +185,20 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
                 retVal = _exchangeHMCInfo(params);
                 break;
             default:
-                retVal = super.localExecute(opCode, params, fromDevDesc);
+                retVal = super.localExecute(opCode, params, fromDev);
                 break;
         }
         return retVal;
     }
 
     @Override
-    public void onNotificationReceived(int opCode, String params, DeviceDescriptor fromDevDesc) {
+    public void onNotificationReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         switch (opCode) {
             case CMD_SEND_LIST_DEVICES:
                 _sendListOfDevices(params);
                 break;
             default:
-                super.onNotificationReceived(opCode, params, fromDevDesc);
+                super.onNotificationReceived(opCode, params, fromDev);
                 break;
         }
     }
@@ -285,7 +285,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // devices
         if (addingSuccess) {
             HMCMediaDeviceProxy specificDevPrxy = (HMCMediaDeviceProxy)mHMCManager
-                                    .promoteAnonymousProxyToLocal(newDevProxy);
+                                    .promoteAnonymousProxyToLocal(newDevProxy, true);
             // now that we have the specific proxy, added also in our list of
             // devices
             specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());

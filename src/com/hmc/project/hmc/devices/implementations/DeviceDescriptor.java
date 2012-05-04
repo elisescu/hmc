@@ -44,7 +44,7 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
     public static final String TAG_FULLJID = "dd_flj";
     public static final String TAG_FINGERPRINT = "dd_fgp";
     public static final String TAG_DEVICE_ELEMENT = "dd_dvel";
-    private String mDeviceName;
+    private String mDeviceName = "";
     private String mUserName = "";
     private int mDeviceType;
     private String mFullJID;
@@ -167,6 +167,7 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
     public String toString() {
         String retStr = "";
         retStr = "\ndevice name: " + getDeviceName();
+        retStr += "\nfullJID: " + getFullJID();
         if (getUserName() != "")
             retStr += "\nuser name: " + getUserName();
         retStr += "\ndevice type: " + getDeviceType() + "\nfingerprint: " + getFingerprint();

@@ -110,7 +110,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     }
 
     @Override
-    public void chatCreated(Chat chat, boolean createdLocally) {
+    public synchronized void chatCreated(Chat chat, boolean createdLocally) {
         if (!createdLocally) {
             HMCDeviceProxy devProxy = new HMCAnonymousDeviceProxy(chat, mXMPPConnection.getUser(),
                                     this);
@@ -120,30 +120,34 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     }
 
     @Override
-    public boolean verifyFingerprints(String localFingerprint, String remoteFingerprint,
-            String remoteJID) {
-        boolean lVerified = false;
-
-        // TODO: make sure this makes sense... it feels like is not really right
-        // the way I decide how to verify the fingerprints based o the policy of
-        // the network
+    public boolean authenticateDevice(DeviceDescriptor remoteDevice) {
         switch (HMCSecurityPolicy.getInstance().getHMCSecurityPolicy()) {
             case HMCSecurityPolicy.TRUST_EVERYBODY_ALWAYS:
-                lVerified = true;
-                break;
-            case HMCSecurityPolicy.TRUST_HMC_ALWAYS:
+                return true;
+            case HMCSecurityPolicy.TRUST_HMC_ALWAYS: {
+                // search in the list of local or remote devices and see whether
+                // the fingerprints match
+                HashMap<String, DeviceDescriptor> localDevs = getListOfLocalDevicesDescriptors();
+                DeviceDescriptor dev = localDevs.get(remoteDevice.getFullJID());
+
+                if (dev != null && dev.getFullJID().equals(remoteDevice.getFullJID()) && 
+                                   dev.getFingerprint().equals(remoteDevice.getFingerprint())) {
+                    Log.d(TAG, "Successfuly authenticated device: " + remoteDevice);
+                    return true;
+                }
+                return false;
+            }
+            // TODO: implement the below policies
             case HMCSecurityPolicy.TRUST_HMC_VALID:
             case HMCSecurityPolicy.TRUST_HMC_SERVER:
-                lVerified = false;
-                break;
+                return false;
             default:
-                lVerified = false;
+                return false;
         }
-        return lVerified;
     }
 
     @Override
-    public void init(String deviceName, String userName, int devType, String hmcName)
+    public synchronized void init(String deviceName, String userName, int devType, String hmcName)
             throws RemoteException {
         if (mState == STATE_NOT_INITIALIZED) {
             Collection<RosterEntry> entries = mXMPPRoster.getEntries();
@@ -197,6 +201,9 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                 Log.e(TAG, "Problem with parsing the input devices file");
                 e.printStackTrace();
             }
+
+            HMCSecurityPolicy.getInstance()
+                                    .setHMCSecurityPolicy(HMCSecurityPolicy.TRUST_HMC_ALWAYS);
 
             mState = STATE_INITIALIZED;
         } else {
@@ -307,7 +314,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         mHMCName = name;
     }
 
-    public HMCDeviceProxy promoteAnonymousProxyToLocal(HMCAnonymousDeviceProxy newDevProxy) {
+    public HMCDeviceProxy promoteAnonymousProxyToLocal(HMCAnonymousDeviceProxy newDevProxy, boolean notifyRestOfDevices) {
         // create a specific proxy for the newly added device and add it to the
         // devices list
         HMCDeviceProxy knownDevice = null;
@@ -316,23 +323,24 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
             // let know also the rest of devices about this addition
             // local devices
-            Iterator<HMCDeviceProxy> localDevicesIter = mHMCDevicesStore.getListOfLocalDevices()
-                                    .values().iterator();
-            
-            while (localDevicesIter.hasNext()) {
-                HMCDeviceProxy localDev = localDevicesIter.next();
-                
-                // TODO: fix this bad approach
-                if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
-                    HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
-                    mediaDev.localDeviceAddedNotification(knownDevice.getDeviceDescriptor());
+            if (notifyRestOfDevices) {
+                Iterator<HMCDeviceProxy> localDevicesIter = mHMCDevicesStore
+                                        .getListOfLocalDevices().values().iterator();
+
+                while (localDevicesIter.hasNext()) {
+                    HMCDeviceProxy localDev = localDevicesIter.next();
+
+                    // TODO: fix this bad approach
+                    if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
+                        HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                        mediaDev.localDeviceAddedNotification(knownDevice.getDeviceDescriptor());
+                    }
                 }
             }
-
             // add the new device in local store
             mHMCDevicesStore.addNewLocalDevice(knownDevice);
         } else {
-            Log.e(TAG, "Couldn't promote the anonimous device");
+            Log.e(TAG, "Couldn't promote the anonymous device");
         }
         Log.d(TAG, knownDevice.getDeviceDescriptor().getDeviceName() + "("
                                 + knownDevice.getDeviceDescriptor().getFullJID()

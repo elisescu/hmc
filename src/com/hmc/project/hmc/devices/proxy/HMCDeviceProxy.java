@@ -63,6 +63,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mFullJID = remoteFullJid;
         mSyncResults = new SyncResults();
         mAsyncResults = new ASyncResults();
+        mDeviceDescriptor = new DeviceDescriptor();
+        mDeviceDescriptor.setFullJID(remoteFullJid);
 	}
 
     public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
@@ -71,6 +73,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mFullJID = chat.getParticipant();
         mSyncResults = new SyncResults();
         mAsyncResults = new ASyncResults();
+        mDeviceDescriptor = new DeviceDescriptor();
+        mDeviceDescriptor.setFullJID(chat.getParticipant());
     }
 
     public HMCDeviceProxy(SecureChat secureChat) {
@@ -79,6 +83,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         mFullJID = secureChat.getParticipant();
         mSyncResults = new SyncResults();
         mAsyncResults = new ASyncResults();
+        mDeviceDescriptor = new DeviceDescriptor();
+        mDeviceDescriptor.setFullJID(secureChat.getParticipant());
     }
 
     public void setDeviceDescriptor(DeviceDescriptor desc) {
@@ -310,7 +316,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     private void onNotificationReceived(int opCode, int opId, String params) {
         if (mLocalImplementation != null) {
-            mLocalImplementation.onNotificationReceived(opCode, params, mDeviceDescriptor);
+            mLocalImplementation.onNotificationReceived(opCode, params, this);
         } else {
             Log.e(TAG, "Don't have local implementation to execute request!");
         }
@@ -361,7 +367,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     // care of executing the local method and return back the proper value
     protected String executeLocalCommand(int opCode, String params) {
         if (mLocalImplementation != null) {
-            return mLocalImplementation.localExecute(opCode, params, null);
+            return mLocalImplementation.localExecute(opCode, params, this);
         } else {
             Log.e(TAG, "Don't have local implementation to execute request!");
             return "not-having-local-implementation";

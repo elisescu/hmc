@@ -11,8 +11,10 @@ import android.util.Log;
 
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
+import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.service.DeviceAditionConfirmationListener;
 import com.hmc.project.hmc.devices.proxy.AsyncCommandReplyListener;
+import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.service.HMCManager;
 
 public class HMCDeviceImplementation implements HMCDeviceItf {
@@ -26,21 +28,28 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         mDeviceDescriptor = thisDeviceDesc;
     }
 
-    // this method has to be overriden by subclasses
-    public String localExecute(int opCode, String params, DeviceDescriptor fromDevDesc) {
-        String retVal = null;
-        switch (opCode) {
-            case HMCDeviceItf.CMD_REMOTE_INCREMENT:
-                retVal = _remoteIncrement(params);
-                break;
-            case HMCDeviceItf.CMD_TEST_ASYNC_COMMAND:
-                retVal = testAsyncCommand(params, null);
-                break;
-            default:
-                retVal = "invalid-operation";
-                break;
+    // this method has to be overridden by subclasses
+    public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
+        if (authenticateRemoteDevice(opCode, fromDev.getDeviceDescriptor())) {
+            switch (opCode) {
+                case HMCDeviceItf.CMD_REMOTE_INCREMENT:
+                    return _remoteIncrement(params);
+                case HMCDeviceItf.CMD_TEST_ASYNC_COMMAND:
+                    return testAsyncCommand(params, null);
+                default:
+                    return "invalid-operation";
+            }
         }
-        return retVal;
+        return "not-authenticated";
+    }
+
+    // this method should be overridden by subclasses if the operations they
+    // provide are special (i.e. the media devices can receive addition requests
+    // from any device)
+    protected boolean authenticateRemoteDevice(int opCode, DeviceDescriptor fromDevDesc) {
+        // allow these generic test operations only for devices in our or
+        // external HMC
+        return mHMCManager.authenticateDevice(fromDevDesc);
     }
 
     public String _remoteIncrement(String params) {
@@ -61,7 +70,7 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
 
     // this method should be implemented by the subclasses of device
     // implementation
-    public void onNotificationReceived(int opCode, String params, DeviceDescriptor fromDevDesc) {
+    public void onNotificationReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         switch (opCode) {
             case HMCDeviceItf.CMD_TEST_NOTIFICATION:
                 testNotification(params);

@@ -369,8 +369,13 @@ public class HMCDevicesStore {
 
         while (devDescIter.hasNext()) {
             DeviceDescriptor devDesc = devDescIter.next();
-            HMCDeviceProxy devPrxy = mHMCManager.createNewDeviceProxy(devDesc);
-            mListOfExternalDevices.put(devDesc.getFullJID(), devPrxy);
+
+            if (!mListOfExternalDevices.containsKey(devDesc.getFullJID())) {
+                HMCDeviceProxy devPrxy = mHMCManager.createNewDeviceProxy(devDesc);
+                mListOfExternalDevices.put(devDesc.getFullJID(), devPrxy);
+            } else {
+                Log.w(TAG, "Device already existing in the local devices list");
+            }
 
             try {
                 if (mDevicesListener != null) {

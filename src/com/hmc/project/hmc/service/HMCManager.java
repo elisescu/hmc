@@ -354,7 +354,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                         if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
                             HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
                             mediaDev.externalDeviceAddedNotification(knownDevice
-                                                    .getDeviceDescriptor());
+                                                    .getDeviceDescriptor(), mHMCName);
                         }
                     }
                 } else {
@@ -498,11 +498,26 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         return (Map) retVal;
     }
 
-    public void updateListOfExternalDevices(HMCDevicesList devList) {
+    public void updateListOfExternalDevices(HMCDevicesList devList, boolean updateRestOfDevices) {
         if (devList == null) {
             Log.e(TAG, "Received corrupted list of devices");
         }
         mHMCDevicesStore.setExternalDevicesList(devList);
+
+        if (updateRestOfDevices) {
+            // notify our local devices about the new list of external devices
+            Iterator<HMCDeviceProxy> devicesIter = mHMCDevicesStore.getListOfLocalDevices()
+                                    .values().iterator();
+            while (devicesIter.hasNext()) {
+                HMCDeviceProxy localDev = devicesIter.next();
+
+                // TODO: fix this bad approach
+                if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
+                    HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                    mediaDev.setExternalDevicesList(devList);
+                }
+            }
+        }
     }
 
     /**
@@ -510,5 +525,46 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
      */
     public void externalDeviceAddedNotification(DeviceDescriptor newDev) {
         mHMCDevicesStore.addNewExternalDevice("fix-me", newDev);
+    }
+
+    /**
+     * @param newDevProxy
+     * @param b
+     * @return
+     */
+    public HMCDeviceProxy promoteAnonymousProxyToExternal(HMCAnonymousDeviceProxy newDevProxy,
+                            String hmcName, boolean notifyRestOfDevices) {
+        // create a specific proxy for the newly added device and add it to the
+        // devices list
+        HMCDeviceProxy knownDevice = null;
+        knownDevice = newDevProxy.promoteToSpecificProxy();
+        if (knownDevice != null) {
+            // add the new device in local store
+            mHMCDevicesStore.addNewExternalDevice(hmcName, knownDevice);
+
+            // let know also the rest of devices about this addition
+            // local devices
+            if (notifyRestOfDevices) {
+                // notify the local devices about the addition
+                Iterator<HMCDeviceProxy> devicesIter = mHMCDevicesStore.getListOfLocalDevices()
+                                        .values().iterator();
+                while (devicesIter.hasNext()) {
+                    HMCDeviceProxy localDev = devicesIter.next();
+
+                    // TODO: fix this bad approach
+                    if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
+                        HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                        mediaDev.externalDeviceAddedNotification(knownDevice.getDeviceDescriptor(),
+                                                hmcName);
+                    }
+                }
+            }
+        } else {
+            Log.e(TAG, "Couldn't promote the anonymous device");
+        }
+        Log.d(TAG, knownDevice.getDeviceDescriptor().getDeviceName() + "("
+                                + knownDevice.getDeviceDescriptor().getFullJID()
+                                + ") was promoted and added to our list of devices");
+        return knownDevice;
     }
 }

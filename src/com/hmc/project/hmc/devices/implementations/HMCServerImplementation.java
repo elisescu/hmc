@@ -11,6 +11,7 @@ import java.util.HashMap;
 import android.os.RemoteException;
 import android.util.Log;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
+import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.devices.proxy.AsyncCommandReplyListener;
@@ -43,7 +44,6 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     }
 
     public boolean interconnectTo(String externalHMCServerAddress) {
-
         Log.d(TAG, "Going to intercoonecto to " + externalHMCServerAddress);
         boolean userConfirmation = false;
         // TODO: for now use HMCDevicesList to exchange information about the
@@ -65,7 +65,8 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         remoteHMCServerDesc = remoteHMCInfo.getIterator().next();
 
         // check the descriptor received
-        if (remoteHMCServerDesc == null) {
+        if (remoteHMCServerDesc == null
+                                || remoteHMCServerDesc.getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
             mHMCManager.deleteAnonymousProxy(externalHMCServerAddress);
             return false;
         }
@@ -117,7 +118,8 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // devices
         if (addingSuccess) {
             HMCServerProxy specificDevPrxy = (HMCServerProxy) mHMCManager
-                    .promoteAnonymousProxyToLocal(newDevProxy, true);
+                                    .promoteAnonymousProxyToExternal(newDevProxy, remoteHMCName,
+                                                            false);
             // now that we have the specific proxy, added also in our list of
             // devices
             specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
@@ -202,7 +204,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     private void _sendListOfDevices(String params) {
         HMCDevicesList devList = HMCDevicesList.fromXMLString(params);
         // update the HMCManager about the new list of devices
-        mHMCManager.updateListOfExternalDevices(devList);
+        mHMCManager.updateListOfExternalDevices(devList, true);
     }
 
     private String _exchangeHMCInfo(String params) {

@@ -27,6 +27,8 @@ public interface HMCMediaDeviceItf {
 
     static final int CMD_EXTERNAL_DEVICE_ADDED_NOTIFICATION = HMC_MEDIA_DEVICE_INITIAL_COMMAND + 5;
 
+    static final int CMD_SET_EXTERNAL_DEVICES_LIST_NOTIFICATION = HMC_MEDIA_DEVICE_INITIAL_COMMAND + 6;
+
     void localDeviceRemovedNotification();
 
     void localDeviceAddedNotification(DeviceDescriptor newDev);

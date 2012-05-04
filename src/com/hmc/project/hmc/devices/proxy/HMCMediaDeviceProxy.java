@@ -53,7 +53,16 @@ public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDevic
     /**
      * @param deviceDescriptor
      */
-    public void externalDeviceAddedNotification(DeviceDescriptor deviceDescriptor) {
+    public void externalDeviceAddedNotification(DeviceDescriptor deviceDescriptor, String hmcName) {
+        // TODO: add also the hmcName to the parameters. For now we support only
+        // one external HMC so it works for now
         sendNotification(CMD_EXTERNAL_DEVICE_ADDED_NOTIFICATION, deviceDescriptor.toXMLString());
+    }
+
+    /**
+     * @param devList
+     */
+    public void setExternalDevicesList(HMCDevicesList devList) {
+        sendNotification(CMD_SET_EXTERNAL_DEVICES_LIST_NOTIFICATION, devList.toXMLString());
     }
 }

@@ -89,6 +89,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private HMCInterconnectionConfirmationListener mInterconnectionHMCListener;
     private HMCDevicesStore mHMCDevicesStore;
 
+    private HMCDevicesList mTempDevicesList;
+
     public HMCManager(Connection xmppConnection, HMCService service) {
         mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
         mAnonymousDevices = new HashMap<String, HMCDeviceProxy>();
@@ -501,22 +503,36 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     public void updateListOfExternalDevices(HMCDevicesList devList, boolean updateRestOfDevices) {
         if (devList == null) {
             Log.e(TAG, "Received corrupted list of devices");
+            return;
+        } else {
+            Log.i(TAG, "__________________________________Received list of external devices: "
+                                    + devList.toXMLString());
         }
         mHMCDevicesStore.setExternalDevicesList(devList);
 
         if (updateRestOfDevices) {
-            // notify our local devices about the new list of external devices
-            Iterator<HMCDeviceProxy> devicesIter = mHMCDevicesStore.getListOfLocalDevices()
-                                    .values().iterator();
-            while (devicesIter.hasNext()) {
-                HMCDeviceProxy localDev = devicesIter.next();
+            // TODO: maybe use a more elegant way of running it in a separate
+            // thread
+            mTempDevicesList = devList;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // notify our local devices about the new list of external
+                    // devices
+                    Iterator<HMCDeviceProxy> devicesIter = mHMCDevicesStore.getListOfLocalDevices()
+                                            .values().iterator();
+                    while (devicesIter.hasNext()) {
+                        HMCDeviceProxy localDev = devicesIter.next();
 
-                // TODO: fix this bad approach
-                if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
-                    HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
-                    mediaDev.setExternalDevicesList(devList);
+                        // TODO: fix this bad approach
+                        if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
+                            HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                            mediaDev.setExternalDevicesList(mTempDevicesList);
+                        }
+                    }
+                    Log.i(TAG, "Local devices updated about the new list of external devices");
                 }
-            }
+            }).start();
         }
     }
 
@@ -544,10 +560,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             // add the new device in local store
             mHMCDevicesStore.addNewExternalDevice(hmcName, knownDevice);
 
-            // let know also the rest of devices about this addition
-            // local devices
+            // TODO: make sure we still need the bellow code (the local devices
+            // will be notified anyway about the interconnection when they will
+            // receive the complete list of devices in the external HMC
             if (notifyRestOfDevices) {
-                // notify the local devices about the addition
+                // notify the local devices about the interconnection
                 Iterator<HMCDeviceProxy> devicesIter = mHMCDevicesStore.getListOfLocalDevices()
                                         .values().iterator();
                 while (devicesIter.hasNext()) {

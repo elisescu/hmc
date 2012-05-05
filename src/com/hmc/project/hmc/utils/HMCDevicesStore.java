@@ -184,15 +184,15 @@ public class HMCDevicesStore {
     private void flushCache() {
         // save the list of devices in our file
 
-//        HMCDevicesList devList = new HMCDevicesList(mHMCManager.getHMCName(), true,
-//                getListOfLocalDevicesDescriptors());
-//
-//        try {
-//            writeStringToFile(mLocalDevsFilePath, devList.toXMLString());
-//        } catch (IOException e) {
-//            Log.e(TAG, "Cannot save the current devices list to file: " + mLocalDevsFilePath);
-//            e.printStackTrace();
-//        }
+        HMCDevicesList devList = new HMCDevicesList(mHMCManager.getHMCName(), true,
+                                getListOfLocalDevicesDescriptors());
+
+        try {
+            writeStringToFile(mLocalDevsFilePath, devList.toXMLString());
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot save the current devices list to file: " + mLocalDevsFilePath);
+            e.printStackTrace();
+        }
 
         // TODO: implement a proper fix for this temporary one
         // if the external devices list is empty, then don't try to transform it
@@ -365,6 +365,11 @@ public class HMCDevicesStore {
     public void setExternalDevicesList(HMCDevicesList devList) {
         // a list of devices was received from the HMCServer after we joined its
         // HMC network
+        if (devList == null) {
+            Log.e(TAG, "Received null list of external devices !");
+            return;
+        }
+
         Iterator<DeviceDescriptor> devDescIter = devList.getIterator();
 
         while (devDescIter.hasNext()) {

@@ -193,7 +193,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     public void onNotificationReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         switch (opCode) {
             case CMD_SEND_LIST_DEVICES:
-                _sendListOfDevices(params);
+                _sendListOfDevices(params, fromDev);
                 break;
             default:
                 super.onNotificationReceived(opCode, params, fromDev);
@@ -201,10 +201,26 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         }
     }
 
-    private void _sendListOfDevices(String params) {
+    private void _sendListOfDevices(String params, HMCDeviceProxy fromDev) {
+        HMCServerProxy remoteServer = null;
+        try {
+            remoteServer = (HMCServerProxy) fromDev;
+        } catch (ClassCastException e) {
+            Log.e(TAG, "Fatal error: received list of devices from a non HMCServer proxy");
+            return;
+        }
         HMCDevicesList devList = HMCDevicesList.fromXMLString(params);
         // update the HMCManager about the new list of devices
         mHMCManager.updateListOfExternalDevices(devList, true);
+
+        // now we have to send the list back as well
+        HashMap<String, DeviceDescriptor> list = mHMCManager.getListOfLocalDevicesDescriptors();
+        devList = new HMCDevicesList(mHMCManager.getHMCName(), false, list);
+
+        // this should always be true, but just to be sure
+        if (remoteServer != null) {
+            remoteServer.sendListOfDevices(devList);
+        }
     }
 
     private String _exchangeHMCInfo(String params) {

@@ -30,11 +30,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -95,7 +93,7 @@ public class DevicesListActivity extends Activity {
                                             .getListOfExternalDevices();
 
                     updateListOfLocalDevicesUIThread();
-                    updateListOfRemoteDevicesUIThread();
+                    updateListOfExternalDevicesUIThread();
 
                 } catch (RemoteException e) {
                     e.printStackTrace();
@@ -103,10 +101,10 @@ public class DevicesListActivity extends Activity {
             }
         }
 
-        private void updateListOfRemoteDevicesUIThread() {
+        private void updateListOfExternalDevicesUIThread() {
             DevicesListActivity.this.runOnUiThread(new Runnable() {
                 public void run() {
-                    Iterator<String> iter = mLocalDevNames.keySet().iterator();
+                    Iterator<String> iter = mExternalDevNames.keySet().iterator();
                     while (iter.hasNext()) {
                         String jid = iter.next();
                         mExternalDeviceNamesAdapter.add(jid, mExternalDevNames.get(jid));

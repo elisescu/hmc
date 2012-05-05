@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2007 The Android Open Source Project
+<!--
+     Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,39 +15,35 @@
      limitations under the License.
 -->
 
-<!-- Demonstrates starting and stopping a local service.
-     See corresponding Java code com.android.sdk.app.LocalSerice.java. -->
+<!--
+     Demonstrates starting and stopping a local service.
+     See corresponding Java code com.android.sdk.app.LocalSerice.java.
+-->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:padding="4dip"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:layout_width="match_parent" android:layout_height="match_parent">
-       
-   <TextView
-        android:id="@+id/main_screen_list_title"
-        android:layout_width="match_parent" 
+    android:orientation="vertical"
+    android:padding="4dip" >
+
+    <Button
+        android:id="@+id/hmcserver_main_screen_see_devices_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:paddingBottom="4dip"
-        android:text="Local devices"/>
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="36dp"
+        android:text="See devices" />
 
-	
-	<ViewFlipper android:id="@+id/flipper"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:flipInterval="2000"
-	android:layout_marginBottom="20dip" >
-	    <ListView
-	        android:id="@+id/hmc_local_devices_list"
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent" >
-	    </ListView>
+    <Button
+        android:id="@+id/hmcserver_main_screen_logout_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="116dp"
+        android:text="Log out" />
 
-	    <ListView
-	        android:id="@+id/hmc_external_devices_list"
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent" >
-	    </ListView>
-	</ViewFlipper>
-	    
-</LinearLayout>
-
+</RelativeLayout>

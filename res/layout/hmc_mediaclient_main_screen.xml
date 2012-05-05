@@ -1,26 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2007 The Android Open Source Project
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:padding="4dip"
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!--
+     Demonstrates starting and stopping a local service.
+     See corresponding Java code com.android.sdk.app.LocalSerice.java.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:layout_width="match_parent" android:layout_height="match_parent">
-       
-   <TextView
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:paddingBottom="4dip"
-        android:text="@string/mediaclient_default_screen_description"/>
-        
-    <Button android:id="@+id/test_method_media_client"
-        android:layout_width="wrap_content" android:layout_height="wrap_content" 
-        android:text="@string/test_method_button_media_client">
-        <requestFocus />
-    </Button>
+    android:orientation="vertical"
+    android:padding="4dip" >
 
-    <ListView
-        android:id="@+id/hmc_devices_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </ListView>
+    <Button
+        android:id="@+id/hmcmediaclient_main_screen_see_devices_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="36dp"
+        android:text="See devices" />
 
-</LinearLayout>
+    <Button
+        android:id="@+id/hmcmediaclient_main_screen_logout_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="116dp"
+        android:text="Log out" />
 
+</RelativeLayout>

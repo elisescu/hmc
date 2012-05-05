@@ -393,7 +393,7 @@ public class HMCDevicesStore {
                 HMCDeviceProxy devPrxy = mHMCManager.createNewDeviceProxy(devDesc);
                 mListOfExternalDevices.put(devDesc.getFullJID(), devPrxy);
             } else {
-                Log.w(TAG, "Device already existing in the local devices list");
+                Log.w(TAG, "Device already existing in the external devices list");
             }
 
             try {

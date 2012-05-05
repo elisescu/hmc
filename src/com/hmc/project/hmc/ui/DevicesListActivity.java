@@ -58,13 +58,12 @@ public class DevicesListActivity extends Activity {
     private HMCApplication mHMCApplication;
     private ListView mLocalDevicesListView;
     private DevicesListAdapter mLocalDeviceNamesAdapter;
-    HashMap<String, String> mLocalDevNames;
 
     private ViewFlipper mListViewFlipper;
     private ListView mExternalDevicesListView;
     private DevicesListAdapter mExternalDeviceNamesAdapter;
-    private HashMap<String, String> mExternalDevNames;
     private GestureDetector mGestureDetector;
+
     private TextView mListTitle;
 
     HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
@@ -86,44 +85,20 @@ public class DevicesListActivity extends Activity {
                     // sure the result is a HashMap. The reason for returning
                     // actually a reference of type Map is that IPC doesn't
                     // support HashMap
-                    mLocalDevNames = (HashMap<String, String>) mHMCConnection.getHMCManager()
+                    HashMap<String, String> mLocalDevNames = (HashMap<String, String>) mHMCConnection
+                                            .getHMCManager()
                                             .getListOfLocalDevices();
 
-                    mExternalDevNames = (HashMap<String, String>) mHMCConnection.getHMCManager()
+                    HashMap<String, String> mExternalDevNames = (HashMap<String, String>) mHMCConnection
+                                            .getHMCManager()
                                             .getListOfExternalDevices();
 
-                    updateListOfLocalDevicesUIThread();
-                    updateListOfExternalDevicesUIThread();
-
+                    mLocalDeviceNamesAdapter.setDevices(mLocalDevNames);
+                    mExternalDeviceNamesAdapter.setDevices(mExternalDevNames);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
             }
-        }
-
-        private void updateListOfExternalDevicesUIThread() {
-            DevicesListActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    Iterator<String> iter = mExternalDevNames.keySet().iterator();
-                    while (iter.hasNext()) {
-                        String jid = iter.next();
-                        mExternalDeviceNamesAdapter.add(jid, mExternalDevNames.get(jid));
-                    }
-                }
-            });
-        }
-
-        private void updateListOfLocalDevicesUIThread() {
-            DevicesListActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    Iterator<String> iter = mLocalDevNames.keySet().iterator();
-                    while (iter.hasNext()) {
-                        String jid = iter.next();
-                        mLocalDeviceNamesAdapter.add(jid, mLocalDevNames.get(jid));
-                    }
-                }
-            });
-
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -179,14 +154,12 @@ public class DevicesListActivity extends Activity {
         mLocalDevicesListView = (ListView) findViewById(R.id.hmc_local_devices_list);
         mLocalDeviceNamesAdapter = new DevicesListAdapter(this);
         mLocalDevicesListView.setAdapter(mLocalDeviceNamesAdapter);
-        mLocalDevNames = new HashMap<String, String>();
 
         // list of external devices. For now support only a single external HMC
         // interconnection
         mExternalDevicesListView = (ListView) findViewById(R.id.hmc_external_devices_list);
         mExternalDeviceNamesAdapter = new DevicesListAdapter(this);
         mExternalDevicesListView.setAdapter(mExternalDeviceNamesAdapter);
-        mExternalDevNames = new HashMap<String, String>();
 
         // compute constants used for swiping left and right
         REL_SWIPE_MIN_DISTANCE = (int) (120.0f * dm.densityDpi / 160.0f + 0.5);
@@ -210,18 +183,15 @@ public class DevicesListActivity extends Activity {
         public void onDeviceAdded(IDeviceDescriptor devDesc) throws RemoteException {
             modifDeviceDescriptor = devDesc;
             // add the device in the list, inside ui thread
-            DevicesListActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    try {
-                        String jid = modifDeviceDescriptor.getFullJID();
-                        String name = modifDeviceDescriptor.getDeviceName();
-                        mLocalDeviceNamesAdapter.add(jid, name);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot retrieve the details about modified device");
-                        e.printStackTrace();
-                    }
-                }
-            });
+            try {
+                String jid = modifDeviceDescriptor.getFullJID();
+                String name = modifDeviceDescriptor.getDeviceName();
+                mLocalDeviceNamesAdapter.add(jid, name);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot retrieve the details about modified device");
+                e.printStackTrace();
+            }
+
         }
 
         @Override
@@ -242,18 +212,14 @@ public class DevicesListActivity extends Activity {
                                 throws RemoteException {
             modifDeviceDescriptor = devDesc;
             // add the device in the list of external devices, inside UI thread
-            DevicesListActivity.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    try {
-                        String jid = modifDeviceDescriptor.getFullJID();
-                        String name = modifDeviceDescriptor.getDeviceName();
-                        mExternalDeviceNamesAdapter.add(jid, name);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot retrieve the details about modified device");
-                        e.printStackTrace();
-                    }
-                }
-            });
+            try {
+                String jid = modifDeviceDescriptor.getFullJID();
+                String name = modifDeviceDescriptor.getDeviceName();
+                mExternalDeviceNamesAdapter.add(jid, name);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot retrieve the details about modified device");
+                e.printStackTrace();
+            }
         }
 
     }

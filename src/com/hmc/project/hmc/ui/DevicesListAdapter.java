@@ -7,12 +7,12 @@
 
 package com.hmc.project.hmc.ui;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,27 +24,51 @@ import com.hmc.project.hmc.R;
 
 public class DevicesListAdapter extends ArrayAdapter<String> {
     private static final String TAG = "DevicesListAdapter";
-    private final Context context;
-    //private List<String> mDeviceNames;
-    private LinkedHashMap<String, String> mDevices;
+    private Activity mActivity;
+    private LinkedHashMap<String, String> mDeviceNames;
+    private String mTempJid;
+    private String mTempName;
+    private HashMap<String, String> mTempList;
 
-    public DevicesListAdapter(Context context) {
-        super(context, R.layout.list_item);
-        this.context = context;
-        // mDeviceNames = new ArrayList<String>();
-        mDevices = new LinkedHashMap<String, String>();
+    public DevicesListAdapter(Activity activity) {
+        super(activity, R.layout.list_item);
+        mActivity = activity;
+        mDeviceNames = new LinkedHashMap<String, String>();
+    }
+
+    public void setDevices(HashMap<String, String> list) {
+        mTempList = list;
+        mActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                Iterator<String> iter = mTempList.keySet().iterator();
+                while (iter.hasNext()) {
+                    String val = iter.next();
+                    add(val, mTempList.get(val));
+                }
+            }
+        });
     }
 
     public void add(String jid, String name) {
-        if (!mDevices.containsKey(jid)) {
+        mTempJid = jid;
+        mTempName = name;
+        mActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                _add(mTempJid, mTempName);
+            }
+        });
+    }
+
+    private void _add(String jid, String name) {
+        if (!mDeviceNames.containsKey(jid)) {
             super.add(name);
-            mDevices.put(jid, name);
+            mDeviceNames.put(jid, name);
         }
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
+        LayoutInflater inflater = (LayoutInflater) mActivity
                                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View rowView = inflater.inflate(R.layout.list_item, parent, false);
@@ -54,8 +78,8 @@ public class DevicesListAdapter extends ArrayAdapter<String> {
         imageView.setImageResource(R.drawable.no_device_icon);
         textView.setText("no device");
 
-        if (mDevices.size() > position) {
-            String deviceName = (String) mDevices.values().toArray()[position];
+        if (mDeviceNames.size() > position) {
+            String deviceName = (String) mDeviceNames.values().toArray()[position];
             if (deviceName != null) {
                 textView.setText(deviceName);
                 imageView.setImageResource(R.drawable.device_icon);

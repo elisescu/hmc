@@ -111,7 +111,7 @@ public class HMCOTRManager implements OtrEngineHost {
     public String getRemoteFingerprint(String remoteFullJID) {
         // TODO: create a proper way to generate and get the key-pair
         SessionID sessId = new SessionID("dummy_JID_doesnt_matter", remoteFullJID, "xmpp");
-        getKeyPair(sessId);
+        // getKeyPair(sessId);
         return mOtrKeyManager.getRemoteFingerprint(sessId);
     }
 

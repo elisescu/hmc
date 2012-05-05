@@ -128,7 +128,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return addingSuccess;
     }
 
-    public boolean interconnectionRequest(String requesterName) {
+    public boolean interconnectionRequest(String requesterName, HMCDeviceProxy fromDev) {
         boolean retVal = true;
 
         // we have received an interconnection request from an external
@@ -144,6 +144,21 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             retVal = mHMCInterconnectionConfirmationListener.confirmHMCInterconnection(
                                     remoteHMCServer, mPendingHMCInfo.getHMCName(),
                                     mDeviceDescriptor.getFingerprint());
+
+            // if the user accepted addition, then add the remote server to our
+            // list of external devices
+            if (retVal) {
+                try {
+                    Log.d(TAG, "The user confirmed addition so add the device to the list");
+                    mHMCManager.promoteAnonymousProxyToExternal((HMCAnonymousDeviceProxy) fromDev,
+                                            mPendingHMCInfo.getHMCName(), true);
+                    Log.d(TAG, "The device was promoted");
+                } catch (ClassCastException e) {
+                    e.printStackTrace();
+                    // this shouldn't happen
+                    Log.e(TAG, "FATAL: Received interconnection request from non-anonymous device");
+                }
+            }
         } else {
             Log.e(TAG, "Cannot ask the user for confirmation");
             retVal = false;
@@ -177,10 +192,10 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         String retVal = null;
         switch (opCode) {
             case CMD_INTERCONNECTION_REQUEST:
-                retVal = _interconnectionRequest(params);
+                retVal = _interconnectionRequest(params, fromDev);
                 break;
             case CMD_EXCHANGE_HMC_INFO:
-                retVal = _exchangeHMCInfo(params);
+                retVal = _exchangeHMCInfo(params, fromDev);
                 break;
             default:
                 retVal = super.localExecute(opCode, params, fromDev);
@@ -223,18 +238,21 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         }
     }
 
-    private String _exchangeHMCInfo(String params) {
-        HMCDevicesList localList = exchangeHMCInfo(HMCDevicesList.fromXMLString(params));
+    private String _exchangeHMCInfo(String params, HMCDeviceProxy fromDev) {
+        HMCDevicesList localList = exchangeHMCInfo(HMCDevicesList.fromXMLString(params), fromDev);
         return localList.toXMLString();
     }
 
-    private HMCDevicesList exchangeHMCInfo(HMCDevicesList remoteHMCInfo) {
+    private HMCDevicesList exchangeHMCInfo(HMCDevicesList remoteHMCInfo, HMCDeviceProxy fromDev) {
         mPendingHMCInfo = remoteHMCInfo;
+
+        fromDev.setDeviceDescriptor(remoteHMCInfo.getIterator().next());
+
         return mLocalHMCInfo;
     }
 
-    private String _interconnectionRequest(String params) {
-        return interconnectionRequest(params) + "";
+    private String _interconnectionRequest(String params, HMCDeviceProxy fromDev) {
+        return interconnectionRequest(params, fromDev) + "";
     }
 
     public boolean addNewDevice(String fullJID) {

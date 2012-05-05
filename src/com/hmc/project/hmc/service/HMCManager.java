@@ -537,6 +537,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         // create a specific proxy for the newly added device and add it to the
         // devices list
         HMCDeviceProxy knownDevice = null;
+        Log.d(TAG, "Try to promote anonymous proxy: " + newDevProxy.getDeviceDescriptor()
+                                + "to a known device");
         knownDevice = newDevProxy.promoteToSpecificProxy();
         if (knownDevice != null) {
             // add the new device in local store

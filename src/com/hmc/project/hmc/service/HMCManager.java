@@ -91,6 +91,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
     private HMCDevicesList mTempDevicesList;
 
+    private HMCDeviceProxy mTempDeviceDesc;
+
     public HMCManager(Connection xmppConnection, HMCService service) {
         mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
         mAnonymousDevices = new HashMap<String, HMCDeviceProxy>();
@@ -325,43 +327,51 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         if (knownDevice != null ) {
             // add the new device in local store
             mHMCDevicesStore.addNewLocalDevice(knownDevice);
+            mTempDeviceDesc = knownDevice;
 
-            // let know also the rest of devices about this addition
-            // local devices
             if (notifyRestOfDevices) {
-                // notify the local devices about the addition
-                Iterator<HMCDeviceProxy> devicesIter = mHMCDevicesStore
-                                        .getListOfLocalDevices().values().iterator();
+                // TODO: use a more elegant way to run this in a separate thread
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // notify the local devices about the addition
+                        Iterator<HMCDeviceProxy> devicesIter = mHMCDevicesStore
+                                                .getListOfLocalDevices().values().iterator();
 
-                while (devicesIter.hasNext()) {
-                    HMCDeviceProxy localDev = devicesIter.next();
+                        while (devicesIter.hasNext()) {
+                            HMCDeviceProxy localDev = devicesIter.next();
 
-                    // TODO: fix this bad approach
-                    if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
-                        HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
-                        mediaDev.localDeviceAddedNotification(knownDevice.getDeviceDescriptor());
-                    }
-                }
-
-                // notify the external devices as well
-                HashMap<String, HMCDeviceProxy> extDevLit = mHMCDevicesStore
-                                        .getListOfExternalDevices();
-                if (extDevLit != null) {
-                    devicesIter = extDevLit.values().iterator();
-
-                    while (devicesIter.hasNext()) {
-                        HMCDeviceProxy localDev = devicesIter.next();
-
-                        // TODO: fix this bad approach
-                        if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
-                            HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
-                            mediaDev.externalDeviceAddedNotification(knownDevice
-                                                    .getDeviceDescriptor(), mHMCName);
+                            // TODO: fix this bad approach
+                            if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
+                                HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                                mediaDev.localDeviceAddedNotification(mTempDeviceDesc
+                                                        .getDeviceDescriptor());
+                            }
                         }
+
+                        // notify the external devices as well
+                        HashMap<String, HMCDeviceProxy> extDevLit = mHMCDevicesStore
+                                                .getListOfExternalDevices();
+                        if (extDevLit != null) {
+                            devicesIter = extDevLit.values().iterator();
+
+                            while (devicesIter.hasNext()) {
+                                HMCDeviceProxy localDev = devicesIter.next();
+
+                                // TODO: fix this bad approach
+                                if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
+                                    HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                                    mediaDev.externalDeviceAddedNotification(
+                                                            mTempDeviceDesc.getDeviceDescriptor(),
+                                                            mHMCName);
+                                }
+                            }
+                        } else {
+                            Log.w(TAG, "No external devices to notify about this addition");
+                        }
+
                     }
-                } else {
-                    Log.w(TAG, "No external devices to notify about this addition");
-                }
+                }).start();
             }
         } else {
             Log.e(TAG, "Couldn't promote the anonymous device");

@@ -1,13 +1,6 @@
 /**
  * Copyright (c) 2012 Vasile Popescu (elisescu@gmail.com)
  * 
- * This source file CANNOT be distributed and/or modified
- * without prior written consent of the author.
-**/
-
-/**
- * Copyright (c) 2012 Vasile Popescu (elisescu@gmail.com)
- * 
  * This source file CANNOT be distributed and/or modified without prior written
  * consent of the author.
  **/
@@ -16,7 +9,6 @@ package com.hmc.project.hmc.ui;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -57,12 +49,15 @@ public class DevicesListActivity extends Activity {
     private IHMCConnection mHMCConnection;
     private HMCApplication mHMCApplication;
     private ListView mLocalDevicesListView;
-    private DevicesListAdapter mLocalDeviceNamesAdapter;
+    private DevicesListAdapter mLocalDeviceListAdapter;
 
     private ViewFlipper mListViewFlipper;
     private ListView mExternalDevicesListView;
-    private DevicesListAdapter mExternalDeviceNamesAdapter;
+    private DevicesListAdapter mExternalDeviceListAdapter;
     private GestureDetector mGestureDetector;
+
+    private HashMap<ListView, DevicesListAdapter> mListsAdapters;
+    private HashMap<ListView, String> mListsTitles;
 
     private TextView mListTitle;
 
@@ -93,8 +88,8 @@ public class DevicesListActivity extends Activity {
                                             .getHMCManager()
                                             .getListOfExternalDevices();
 
-                    mLocalDeviceNamesAdapter.setDevices(mLocalDevNames);
-                    mExternalDeviceNamesAdapter.setDevices(mExternalDevNames);
+                    mLocalDeviceListAdapter.setDevices(mLocalDevNames);
+                    mExternalDeviceListAdapter.setDevices(mExternalDevNames);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -152,14 +147,22 @@ public class DevicesListActivity extends Activity {
 
         // list of local devices
         mLocalDevicesListView = (ListView) findViewById(R.id.hmc_local_devices_list);
-        mLocalDeviceNamesAdapter = new DevicesListAdapter(this);
-        mLocalDevicesListView.setAdapter(mLocalDeviceNamesAdapter);
+        mLocalDeviceListAdapter = new DevicesListAdapter(this);
+        mLocalDevicesListView.setAdapter(mLocalDeviceListAdapter);
 
         // list of external devices. For now support only a single external HMC
         // interconnection
         mExternalDevicesListView = (ListView) findViewById(R.id.hmc_external_devices_list);
-        mExternalDeviceNamesAdapter = new DevicesListAdapter(this);
-        mExternalDevicesListView.setAdapter(mExternalDeviceNamesAdapter);
+        mExternalDeviceListAdapter = new DevicesListAdapter(this);
+        mExternalDevicesListView.setAdapter(mExternalDeviceListAdapter);
+
+        mListsAdapters = new HashMap<ListView, DevicesListAdapter>();
+        mListsAdapters.put(mLocalDevicesListView, mLocalDeviceListAdapter);
+        mListsAdapters.put(mExternalDevicesListView, mExternalDeviceListAdapter);
+
+        mListsTitles = new HashMap<ListView, String>();
+        mListsTitles.put(mLocalDevicesListView, "Local devices");
+        mListsTitles.put(mExternalDevicesListView, "External devices");
 
         // compute constants used for swiping left and right
         REL_SWIPE_MIN_DISTANCE = (int) (120.0f * dm.densityDpi / 160.0f + 0.5);
@@ -186,7 +189,7 @@ public class DevicesListActivity extends Activity {
             try {
                 String jid = modifDeviceDescriptor.getFullJID();
                 String name = modifDeviceDescriptor.getDeviceName();
-                mLocalDeviceNamesAdapter.add(jid, name);
+                mLocalDeviceListAdapter.add(jid, name);
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot retrieve the details about modified device");
                 e.printStackTrace();
@@ -197,14 +200,12 @@ public class DevicesListActivity extends Activity {
         @Override
         public void onDeviceRemoved(IDeviceDescriptor devDesc) throws RemoteException {
             // TODO Auto-generated method stub
-
         }
 
         @Override
         public void onPresenceChanged(String presence, IDeviceDescriptor devDesc)
                                 throws RemoteException {
             // TODO Auto-generated method stub
-
         }
 
         @Override
@@ -215,7 +216,7 @@ public class DevicesListActivity extends Activity {
             try {
                 String jid = modifDeviceDescriptor.getFullJID();
                 String name = modifDeviceDescriptor.getDeviceName();
-                mExternalDeviceNamesAdapter.add(jid, name);
+                mExternalDeviceListAdapter.add(jid, name);
             } catch (RemoteException e) {
                 Log.e(TAG, "Cannot retrieve the details about modified device");
                 e.printStackTrace();
@@ -225,8 +226,11 @@ public class DevicesListActivity extends Activity {
     }
 
     private void onDeviceListClick(int position, ListView lv) {
-        String str = MessageFormat.format("Item clicked = {0,number}", position);
-        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+        if (position >= 0) {
+            String clikedJID = mListsAdapters.get(mListViewFlipper.getCurrentView())
+                                    .getJidFromPosition(position);
+            Toast.makeText(this, clikedJID, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void onLeftToRightFling() {
@@ -234,13 +238,7 @@ public class DevicesListActivity extends Activity {
         mListViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.push_right_out));
         mListViewFlipper.showPrevious();
 
-        // TODO: make this in a proper way
-        if (mListViewFlipper.getCurrentView().equals(mLocalDevicesListView)) {
-            mListTitle.setText("Local devices");
-        } else {
-            mListTitle.setText("External devices");
-        }
-
+        mListTitle.setText(mListsTitles.get(mListViewFlipper.getCurrentView()));
     }
 
     private void onRightToLeftFling() {
@@ -248,13 +246,7 @@ public class DevicesListActivity extends Activity {
         mListViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.push_left_out));
         mListViewFlipper.showNext();
 
-        // TODO: make this in a proper way
-        if (mListViewFlipper.getCurrentView().equals(mLocalDevicesListView)) {
-            mListTitle.setText("Local devices");
-        } else {
-            mListTitle.setText("External devices");
-        }
-
+        mListTitle.setText(mListsTitles.get(mListViewFlipper.getCurrentView()));
     }
 
     private ListView getCurrentListView() {
@@ -286,6 +278,5 @@ public class DevicesListActivity extends Activity {
         }
 
     }
-
 }
 

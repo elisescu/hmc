@@ -49,6 +49,10 @@ public class DevicesListAdapter extends ArrayAdapter<String> {
         });
     }
 
+    public String getJidFromPosition(int position) {
+        return (String) mDeviceNames.keySet().toArray()[position];
+    }
+
     public void add(String jid, String name) {
         mTempJid = jid;
         mTempName = name;
@@ -85,7 +89,6 @@ public class DevicesListAdapter extends ArrayAdapter<String> {
                 imageView.setImageResource(R.drawable.device_icon);
             }
         }
-
 
         return rowView;
     }

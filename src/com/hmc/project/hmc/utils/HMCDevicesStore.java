@@ -93,6 +93,8 @@ public class HMCDevicesStore {
         try {
             if (mDevicesListener != null) {
                 mDevicesListener.onExternalDeviceAdded(hmcName, dev.getDeviceDescriptor());
+            } else {
+                Log.w(TAG, "Have no device listener to notofy about new device");
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't notify the remote device listener");
@@ -114,6 +116,8 @@ public class HMCDevicesStore {
         try {
             if (mDevicesListener != null) {
                 mDevicesListener.onDeviceAdded(dev.getDeviceDescriptor());
+            } else {
+                Log.w(TAG, "Have no device listener to notofy about new device");
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't notify the remote device listener");
@@ -141,6 +145,8 @@ public class HMCDevicesStore {
         try {
             if (mDevicesListener != null) {
                 mDevicesListener.onDeviceAdded(devDesc);
+            } else {
+                Log.w(TAG, "Have no device listener to notofy about new device");
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't notify the remote device listener");
@@ -171,6 +177,8 @@ public class HMCDevicesStore {
         try {
             if (mDevicesListener != null) {
                 mDevicesListener.onExternalDeviceAdded(hmcName, devDesc);
+            } else {
+                Log.w(TAG, "Have no device listener to notofy about new device");
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't notify the remote device listener");
@@ -291,6 +299,8 @@ public class HMCDevicesStore {
             try {
                 if (mDevicesListener != null) {
                     mDevicesListener.onDeviceAdded(devDesc);
+                } else {
+                    Log.w(TAG, "Have no device listener to notofy about new device");
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Couldn't notify the remote device listener");
@@ -326,6 +336,8 @@ public class HMCDevicesStore {
                 try {
                     if (mDevicesListener != null) {
                         mDevicesListener.onExternalDeviceAdded(mExternalHMCName, devDesc);
+                    } else {
+                        Log.w(TAG, "Have no device listener to notofy about new device");
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Couldn't notify the remote device listener");
@@ -352,6 +364,8 @@ public class HMCDevicesStore {
             try {
                 if (mDevicesListener != null) {
                     mDevicesListener.onDeviceAdded(devDesc);
+                } else {
+                    Log.w(TAG, "Have no device listener to notofy about new device");
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Couldn't notify the remote device listener");
@@ -385,6 +399,8 @@ public class HMCDevicesStore {
             try {
                 if (mDevicesListener != null) {
                     mDevicesListener.onExternalDeviceAdded(mExternalHMCName, devDesc);
+                } else {
+                    Log.w(TAG, "Have no device listener to notofy about new device");
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Couldn't notify the remote device listener");

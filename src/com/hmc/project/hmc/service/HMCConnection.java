@@ -88,7 +88,16 @@ public class HMCConnection extends IHMCConnection.Stub {
         }
         if (mXMPPConnection != null) {
             mXMPPConnection.connect();
-            mXMPPConnection.login(lBareJid, password, lResource);
+            if (mXMPPConnection.isConnected()) {
+                mXMPPConnection.login(lBareJid, password, lResource);
+            } else {
+                Log.e(TAG, "Fatal error: cannot connect to server");
+                try {
+                    mRemoteConnectionListener.connectionSuccessful(false);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
 
             mXMPPConnection.addConnectionListener(mConnectionListener);
             Presence presence = new Presence(Presence.Type.available);

@@ -85,6 +85,12 @@ public class HMCDevicesList {
             doc.getDocumentElement().normalize();
 
             Element listEl = (Element) doc.getElementsByTagName(TAG_DEVLIST_ELEMENT).item(0);
+
+            if (listEl == null) {
+                Log.e(TAG, "Error: cannot parse XML list of devices: " + input);
+                return null;
+            }
+
             String name = listEl.getAttribute(TAG_DEVLIST_NAME);
             boolean isLocal = Boolean.parseBoolean(listEl.getAttribute(TAG_DEVLIST_ISLOCAL));
 

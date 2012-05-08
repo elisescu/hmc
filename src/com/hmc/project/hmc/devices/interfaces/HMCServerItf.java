@@ -25,7 +25,7 @@ public interface HMCServerItf {
 
     static final int CMD_EXCHANGE_LISTS_OF_LOCAL_DEVICES = HMC_SERVER_INITIAL_COMMAND + 4;
 
-    static final int HMC_SERVER_LAST_COMMAND = CMD_INTERCONNECTION_REQUEST;
+    static final int HMC_SERVER_LAST_COMMAND = CMD_EXCHANGE_LISTS_OF_LOCAL_DEVICES;
 
   /**
    * Get the new devices that were added to HMC while local device was offline. 

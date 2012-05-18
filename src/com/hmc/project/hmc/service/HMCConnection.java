@@ -82,6 +82,7 @@ public class HMCConnection extends IHMCConnection.Stub {
         String lXMPPServer = StringUtils.parseServer(fullJID);
         String lBareJid = StringUtils.parseBareAddress(fullJID);
         String lResource = StringUtils.parseResource(fullJID);
+        String lUsername = StringUtils.parseName(fullJID);
         
         if (mXMPPConnection == null) {
             mXMPPConnection = createXMPPConnection(lXMPPServer, port);
@@ -89,7 +90,7 @@ public class HMCConnection extends IHMCConnection.Stub {
         if (mXMPPConnection != null) {
             mXMPPConnection.connect();
             if (mXMPPConnection.isConnected()) {
-                mXMPPConnection.login(lBareJid, password, lResource);
+                mXMPPConnection.login(lUsername, password, lResource);
             } else {
                 Log.e(TAG, "Fatal error: cannot connect to server");
                 try {
@@ -233,7 +234,7 @@ public class HMCConnection extends IHMCConnection.Stub {
     private ConnectionConfiguration initConnectionConfiguration(String xmppServer, int port) {
     
         //TODO: check to see what's the deal with this ProviderManager on smack website
-        //configureProviderManager(ProviderManager.getInstance());
+        configureProviderManager(ProviderManager.getInstance());
         
         Log.d(TAG,"creating ConnectionConfiguration with "+xmppServer+","+port);
         ConnectionConfiguration lConnectionConfiguration = new ConnectionConfiguration(xmppServer, port);

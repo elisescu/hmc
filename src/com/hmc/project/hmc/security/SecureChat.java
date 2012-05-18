@@ -38,6 +38,8 @@ public class SecureChat implements MessageListener {
     private String mLocalFullJID;
     private SecureChatState mOTRStatus = SecureChatState.PLAINTEXT;
     private Presence.Type mPresenceType;
+    private SecureChat mThis;
+    private String mDecryptedMessage;
 
     enum SecureChatState {
         PLAINTEXT, ENCRYPTED, AUTHENTICATED, NEGOTIATING
@@ -127,7 +129,14 @@ public class SecureChat implements MessageListener {
         }
 
         if (decryptedMsg != null && mOTRStatus == SecureChatState.ENCRYPTED) {
-            mSecureMessageListener.processMessage(this, decryptedMsg);
+            mThis = this;
+            mDecryptedMessage = decryptedMsg;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mSecureMessageListener.processMessage(mThis, mDecryptedMessage);
+                }
+            }).start();
         } else if (msg.getBody().startsWith("?OTR:")) {
             // TODO: check and fix this work around
             // refresh the OTR session:

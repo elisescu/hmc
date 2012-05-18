@@ -8,10 +8,13 @@
 package com.hmc.project.hmc.ui;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -36,6 +39,8 @@ import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
 import com.hmc.project.hmc.ui.mediaclient.HMCMediaClientDeviceMainScreen;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
+import de.duenndns.ssl.MemorizingTrustManager;
+
 public class Login extends Activity {
     protected static final String TAG = "LoginActivity";
     private HMCService mBoundService;
@@ -52,6 +57,7 @@ public class Login extends Activity {
     private String mUsername;
     private int mDeviceType;
     private String mDeviceName;
+    private BroadcastReceiver mSslReceiver;
 
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
@@ -106,6 +112,25 @@ public class Login extends Activity {
         mStopButton = (Button)findViewById(R.id.stop);
         mStopButton.setOnClickListener(mStopListener);
         mStopButton.setEnabled(false);
+
+        mSslReceiver = new BroadcastReceiver() {
+            public void onReceive(Context ctx, Intent i) {
+                try {
+                    Log.i(TAG, "Interception the SSL notification");
+                    PendingIntent pi = i.getParcelableExtra(MemorizingTrustManager.INTERCEPT_DECISION_INTENT_LAUNCH);
+                    pi.send();
+                    abortBroadcast();
+                } catch (PendingIntent.CanceledException e) {
+                    Log.e(TAG, "Error while displaying the SSL dialog", e);
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(MemorizingTrustManager.INTERCEPT_DECISION_INTENT
+                                + "/" + getPackageName());
+        filter.setPriority(50);
+        registerReceiver(mSslReceiver, filter);
+
     }
 
     
@@ -120,6 +145,8 @@ public class Login extends Activity {
         if (!mHMCApplication.isConnected()) {
             stopService(new Intent(Login.this, HMCService.class));
         }
+
+        unregisterReceiver(mSslReceiver);
     }
     
     private OnClickListener mStartListener = new OnClickListener() {
@@ -249,6 +276,7 @@ public class Login extends Activity {
                 finish();
             } else {
                 HMCUserNotifications.normalToast(Login.this, "Login failed");
+                disconnectAndStopService();
             }
         }
     }

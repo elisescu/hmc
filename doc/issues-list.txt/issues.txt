@@ -1,0 +1,12 @@
+issues:
+
+1. fixed part with username instead of bare JID
+2. close the service if the connection was not successful or it was canceled
+3. make the loading progressbars cancelable
+3. fix unknown certificates
+4. fix the problem in RPC mechanism, when the ID of the opperation is lost
+   waiting for the reply 
+5. make the error reporting better
+6. document the code
+
+

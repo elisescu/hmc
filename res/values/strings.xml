@@ -86,5 +86,6 @@
     <string name="unbind_service">Unbind Service</string>
     <string name="local_service_connected">Connected to local service</string>
     <string name="local_service_disconnected">Disconnected from local service</string>
+    <string name="enter_username_text"></string>
     
 </resources>

@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -27,6 +28,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hmc.project.hmc.HMCApplication;
@@ -35,6 +39,7 @@ import com.hmc.project.hmc.aidl.IConnectionListener;
 import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
+import com.hmc.project.hmc.ui.hmcserver.AddNewDeviceWizzard;
 import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
 import com.hmc.project.hmc.ui.mediaclient.HMCMediaClientDeviceMainScreen;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
@@ -49,7 +54,7 @@ public class Login extends Activity {
     private boolean mServiceIsBound;
     private boolean mServiceIsStarted;
     private IHMCConnection mHMCConnection;
-    private ProgressDialog mLoginProgressDialog;
+    private ProgressBar mLoginProgressbar;
     HMCConnectionListener mConnectionListener = new HMCConnectionListener();
     private Button mStartButton;
     private Button mStopButton;
@@ -58,6 +63,8 @@ public class Login extends Activity {
     private int mDeviceType;
     private String mDeviceName;
     private BroadcastReceiver mSslReceiver;
+    private EditText mUsernameEditText;
+    private EditText mPasswordEditText;
 
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
@@ -82,7 +89,7 @@ public class Login extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.local_service_controller);
+        setContentView(R.layout.login_screen);
 
         // get HMCApplication state
         mHMCApplication = (HMCApplication)getApplication();
@@ -106,18 +113,22 @@ public class Login extends Activity {
         }
 
         // Watch for button clicks.
-        mStartButton = (Button)findViewById(R.id.start);
-        mStartButton.setOnClickListener(mStartListener);
+        mStartButton = (Button) findViewById(R.id.LoginButton);
+        mStartButton.setOnClickListener(mLoginListener);
+        
+        mUsernameEditText = (EditText) findViewById(R.id.login_username_editText);
+        mPasswordEditText = (EditText) findViewById(R.id.login_password_editText);
 
-        mStopButton = (Button)findViewById(R.id.stop);
-        mStopButton.setOnClickListener(mStopListener);
-        mStopButton.setEnabled(false);
+        mUsernameEditText.setText(mHMCApplication.getUsername());
+        mPasswordEditText.setText(mHMCApplication.getPassword());
+
+
+        mLoginProgressbar = (ProgressBar) findViewById(R.id.loginProgressBar);
 
         mSslReceiver = new BroadcastReceiver() {
             public void onReceive(Context ctx, Intent i) {
                 try {
                     Log.i(TAG, "Interception the SSL notification");
-                    mLoginProgressDialog.dismiss();
                     PendingIntent pi = i.getParcelableExtra(MemorizingTrustManager.INTERCEPT_DECISION_INTENT_LAUNCH);
                     pi.send();
                     abortBroadcast();
@@ -136,6 +147,13 @@ public class Login extends Activity {
 
     
     @Override
+    protected void onResume() {
+        super.onResume();
+        mUsernameEditText.setText(mHMCApplication.getUsername());
+        mPasswordEditText.setText(mHMCApplication.getPassword());
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mServiceIsBound) {
@@ -150,7 +168,7 @@ public class Login extends Activity {
         unregisterReceiver(mSslReceiver);
     }
     
-    private OnClickListener mStartListener = new OnClickListener() {
+    private OnClickListener mLoginListener = new OnClickListener() {
         public void onClick(View v) {
 
             // start HMCService
@@ -193,13 +211,6 @@ public class Login extends Activity {
         }
     }
 
-    private OnClickListener mStopListener = new OnClickListener() {
-        public void onClick(View v) {
-            disconnectAndStopService();
-        }
-    };
-
-
     void doBindService() {
         bindService(new Intent(Login.this, 
                 HMCService.class), mConnection, Context.BIND_AUTO_CREATE);
@@ -220,8 +231,8 @@ public class Login extends Activity {
             mHMCConnection = IHMCConnection.Stub.asInterface(service);
 
             if (!mHMCApplication.isConnected() && mHMCApplication.isConfigured()) {
-                mLoginProgressDialog = ProgressDialog.show(Login.this, "Login", "wait please",
-                                        true, false);
+                mLoginProgressbar.setVisibility(ProgressBar.VISIBLE);
+
                 mUsername = mHMCApplication.getUsername();
                 mPassword = mHMCApplication.getPassword();
                 mDeviceType = mHMCApplication.getDeviceType();
@@ -257,7 +268,13 @@ public class Login extends Activity {
         @Override
         public void connectionSuccessful(boolean success) throws RemoteException {
             Log.d(TAG, "Connection successful"+success);
-            mLoginProgressDialog.dismiss();
+
+            Login.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    mLoginProgressbar.setVisibility(ProgressBar.INVISIBLE);
+                }
+            });
+
             mHMCApplication.setConnected(success);
             if (success) {
                 HMCUserNotifications.normalToast(Login.this, "Login successful");

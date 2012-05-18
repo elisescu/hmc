@@ -33,6 +33,8 @@
             android:launchMode="standard">
         </activity>
 
+        <activity android:name="de.duenndns.ssl.MemorizingActivity" />
+        
         <activity android:name=".ui.hmcserver.HMCInterconnectionWizzard" 
             android:launchMode="standard">
         </activity>

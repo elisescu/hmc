@@ -419,7 +419,8 @@ public class MemorizingTrustManager implements X509TrustManager {
 		};
 		master.registerReceiver(decisionReceiver, new IntentFilter(DECISION_INTENT + "/" + master.getPackageName()));
 		LaunchRunnable lr = new LaunchRunnable(myId, certMessage);
-		masterHandler.post(lr);
+
+        new Thread(lr).start();
 
 		Log.d(TAG, "openDecisions: " + openDecisions);
 		Log.d(TAG, "waiting on " + myId);

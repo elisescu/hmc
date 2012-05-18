@@ -117,6 +117,7 @@ public class Login extends Activity {
             public void onReceive(Context ctx, Intent i) {
                 try {
                     Log.i(TAG, "Interception the SSL notification");
+                    mLoginProgressDialog.dismiss();
                     PendingIntent pi = i.getParcelableExtra(MemorizingTrustManager.INTERCEPT_DECISION_INTENT_LAUNCH);
                     pi.send();
                     abortBroadcast();

@@ -148,7 +148,6 @@ public class AddNewDeviceWizzard extends Activity {
         Button button = (Button) findViewById(R.id.add_new_dev_butt_add);
         button.setOnClickListener(mButtonsListener);
 
-        mInfoTextView = (TextView) findViewById(R.id.add_new_dev_text_info);
         mJidTextView =  (EditText) findViewById(R.id.add_new_dev_text_jid);
         // make sure we ended up in this activity with the app connected to XMPP
         // server

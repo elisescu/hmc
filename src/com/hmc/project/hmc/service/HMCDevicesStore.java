@@ -5,7 +5,7 @@
  * consent of the author.
  **/
 
-package com.hmc.project.hmc.utils;
+package com.hmc.project.hmc.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -28,7 +28,6 @@ import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
-import com.hmc.project.hmc.service.HMCManager;
 
 public class HMCDevicesStore {
     private static final String TAG = "HMCDeviceStore";

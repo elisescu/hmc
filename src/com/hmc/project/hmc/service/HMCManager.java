@@ -59,7 +59,6 @@ import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.HMCOTRManager;
 import com.hmc.project.hmc.security.HMCSecurityPolicy;
 import com.hmc.project.hmc.ui.mediaclient.ConfirmJoinHMC;
-import com.hmc.project.hmc.utils.HMCDevicesStore;
 
 public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                         HMCFingerprintsVerifier {
@@ -73,8 +72,6 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
     private HashMap<String, HMCDeviceProxy> mAnonymousDevices;
 
-    HMCServerProxy mLocalServer;
-    HashMap<String, HashMap<String, HMCDeviceProxy>> mExternalHMCs;
     Connection mXMPPConnection;
     private Roster mXMPPRoster;
     private ChatManager mXMPPChatManager;
@@ -94,7 +91,6 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     private HMCDeviceProxy mTempDeviceDesc;
 
     public HMCManager(Connection xmppConnection, HMCService service) {
-        mExternalHMCs = new HashMap<String, HashMap<String, HMCDeviceProxy>>();
         mAnonymousDevices = new HashMap<String, HMCDeviceProxy>();
         mXMPPConnection = xmppConnection;
         mXMPPChatManager = mXMPPConnection.getChatManager();

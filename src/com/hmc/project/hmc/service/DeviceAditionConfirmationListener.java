@@ -17,7 +17,7 @@ import android.util.Log;
 
 import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
-import com.hmc.project.hmc.ui.mediaclient.ConfirmJoinHMC;
+import com.hmc.project.hmc.ui.mediadevice.ConfirmJoinHMC;
 
 public class DeviceAditionConfirmationListener {
     private static final int DEVICE_ADDITION_CONFIRMATION_ID = 14; // out of the blue

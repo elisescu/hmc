@@ -58,7 +58,7 @@ import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.HMCOTRManager;
 import com.hmc.project.hmc.security.HMCSecurityPolicy;
-import com.hmc.project.hmc.ui.mediaclient.ConfirmJoinHMC;
+import com.hmc.project.hmc.ui.mediadevice.ConfirmJoinHMC;
 
 public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                         HMCFingerprintsVerifier {

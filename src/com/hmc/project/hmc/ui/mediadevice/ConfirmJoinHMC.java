@@ -5,7 +5,7 @@
  * without prior written consent of the author.
 **/
 
-package com.hmc.project.hmc.ui.mediaclient;
+package com.hmc.project.hmc.ui.mediadevice;
 
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;

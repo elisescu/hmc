@@ -41,7 +41,7 @@ import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.hmcserver.AddNewDeviceWizzard;
 import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
-import com.hmc.project.hmc.ui.mediaclient.HMCMediaClientDeviceMainScreen;
+import com.hmc.project.hmc.ui.mediaclientdevice.HMCMediaClientDeviceMainScreen;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 import de.duenndns.ssl.MemorizingTrustManager;

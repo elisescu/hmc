@@ -5,7 +5,7 @@
  * consent of the author.
  **/
 
-package com.hmc.project.hmc.ui.mediaclient;
+package com.hmc.project.hmc.ui.mediaclientdevice;
 
 import android.app.Activity;
 import android.content.ComponentName;

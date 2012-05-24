@@ -31,15 +31,34 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ConfirmJoinHMC.
+ */
 public class ConfirmJoinHMC extends Activity {
+    
+    /** The Constant TAG. */
     protected static final String TAG = "ConfirmJoinHMC";
+    
+    /** The m hmc connection. */
     private IHMCConnection mHMCConnection;
+    
+    /** The m bound service. */
     private HMCService mBoundService;
+    
+    /** The m is bound. */
     private boolean mIsBound;
+    
+    /** The m hmc application. */
     private HMCApplication mHMCApplication;
+    
+    /** The m context. */
     private ConfirmJoinHMC mContext;
+    
+    /** The m hmc manager. */
     private IHMCManager mHMCManager;
 
+    /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -61,12 +80,18 @@ public class ConfirmJoinHMC extends Activity {
         }
     };
 
+    /**
+     * Do bind service.
+     */
     void doBindService() {
         bindService(new Intent(ConfirmJoinHMC.this, HMCService.class), mConnection,
                                 Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
 
+    /**
+     * Do unbind service.
+     */
     void doUnbindService() {
         if (mIsBound) {
             unbindService(mConnection);
@@ -74,12 +99,18 @@ public class ConfirmJoinHMC extends Activity {
         }
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onDestroy()
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
         doUnbindService();
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +145,7 @@ public class ConfirmJoinHMC extends Activity {
         noButt.setOnClickListener(mButtonsListener);
     }
 
+    /** The m buttons listener. */
     private OnClickListener mButtonsListener = new OnClickListener() {
         public void onClick(View v) {
             switch (v.getId()) {

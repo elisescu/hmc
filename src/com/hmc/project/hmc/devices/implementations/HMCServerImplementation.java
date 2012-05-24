@@ -24,18 +24,38 @@ import com.hmc.project.hmc.service.HMCInterconnectionConfirmationListener;
 import com.hmc.project.hmc.service.HMCManager;
 import com.hmc.project.hmc.ui.DevicesListAdapter;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCServerImplementation.
+ */
 public class HMCServerImplementation extends HMCDeviceImplementation implements HMCServerItf {
 
+    /** The Constant TAG. */
     private static final String TAG = "HMCServerImplementation";
+    
+    /** The m hmc interconnection confirmation listener. */
     private HMCInterconnectionConfirmationListener mHMCInterconnectionConfirmationListener;
+    
+    /** The adding success. */
     private boolean addingSuccess = true;
+    
+    /** The interconnection success. */
     private boolean interconnectionSuccess = true;
+    
+    /** The m local hmc info. */
     private HMCDevicesList mLocalHMCInfo;
     // TODO: make sure this is enough and we don't need a vector of pending
     // remote info given that we anyway can interconnect with a single external
     // HMC at a time
+    /** The m pending hmc info. */
     private HMCDevicesList mPendingHMCInfo = null;
 
+    /**
+     * Instantiates a new hMC server implementation.
+     *
+     * @param hmcManager the hmc manager
+     * @param thisDeviceDesc the this device desc
+     */
     public HMCServerImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         super(hmcManager, thisDeviceDesc);
 
@@ -43,6 +63,12 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         mLocalHMCInfo.addDevice(mDeviceDescriptor);
     }
 
+    /**
+     * Interconnect to.
+     *
+     * @param externalHMCServerAddress the external hmc server address
+     * @return true, if successful
+     */
     public boolean interconnectTo(String externalHMCServerAddress) {
         Log.d(TAG, "Going to intercoonecto to " + externalHMCServerAddress);
         boolean userConfirmation = false;
@@ -143,6 +169,13 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return addingSuccess;
     }
 
+    /**
+     * Interconnection request.
+     *
+     * @param requesterName the requester name
+     * @param fromDev the from dev
+     * @return true, if successful
+     */
     public boolean interconnectionRequest(String requesterName, HMCDeviceProxy fromDev) {
         boolean retVal = true;
 
@@ -181,6 +214,11 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return retVal;
     }
 
+    /**
+     * Gets the list of local hmc devices.
+     *
+     * @return the list of local hmc devices
+     */
     private HMCDevicesList getListOfLocalHMCDevices() {
         HashMap<String, DeviceDescriptor> ourLocalDevices = mHMCManager
                                 .getListOfLocalDevicesDescriptors();
@@ -190,18 +228,27 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return locDevsList;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.interfaces.HMCServerItf#getListOfNewHMCDevices(java.lang.String)
+     */
     @Override
     public void getListOfNewHMCDevices(String hashOfMyListOfDevices) {
         // TODO Auto-generated method stub
 
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.interfaces.HMCServerItf#removeHMCDevice()
+     */
     @Override
     public void removeHMCDevice() {
         // TODO Auto-generated method stub
 
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation#localExecute(int, java.lang.String, com.hmc.project.hmc.devices.proxy.HMCDeviceProxy)
+     */
     @Override
     public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
         String retVal = null;
@@ -222,6 +269,13 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return retVal;
     }
 
+    /**
+     * _exchange lists of local devices.
+     *
+     * @param params the params
+     * @param fromDev the from dev
+     * @return the string
+     */
     private String _exchangeListsOfLocalDevices(String params, HMCDeviceProxy fromDev) {
         HMCDevicesList devList = HMCDevicesList.fromXMLString(params);
         // update the HMCManager about the new list of devices
@@ -235,11 +289,25 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return devList.toXMLString();
     }
 
+    /**
+     * _exchange hmc info.
+     *
+     * @param params the params
+     * @param fromDev the from dev
+     * @return the string
+     */
     private String _exchangeHMCInfo(String params, HMCDeviceProxy fromDev) {
         HMCDevicesList localList = exchangeHMCInfo(HMCDevicesList.fromXMLString(params), fromDev);
         return localList.toXMLString();
     }
 
+    /**
+     * Exchange hmc info.
+     *
+     * @param remoteHMCInfo the remote hmc info
+     * @param fromDev the from dev
+     * @return the hMC devices list
+     */
     private HMCDevicesList exchangeHMCInfo(HMCDevicesList remoteHMCInfo, HMCDeviceProxy fromDev) {
         mPendingHMCInfo = remoteHMCInfo;
 
@@ -248,10 +316,23 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return mLocalHMCInfo;
     }
 
+    /**
+     * _interconnection request.
+     *
+     * @param params the params
+     * @param fromDev the from dev
+     * @return the string
+     */
     private String _interconnectionRequest(String params, HMCDeviceProxy fromDev) {
         return interconnectionRequest(params, fromDev) + "";
     }
 
+    /**
+     * Adds the new device.
+     *
+     * @param fullJID the full jid
+     * @return true, if successful
+     */
     public boolean addNewDevice(String fullJID) {
         Log.d(TAG, "Have to add new device: !!" + fullJID);
         boolean userConfirmation = false;
@@ -318,6 +399,11 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     }
 
 
+    /**
+     * Register device adition confirmation listener.
+     *
+     * @param listener the listener
+     */
     public void registerDeviceAditionConfirmationListener(
                             HMCInterconnectionConfirmationListener listener) {
         mHMCInterconnectionConfirmationListener = listener;

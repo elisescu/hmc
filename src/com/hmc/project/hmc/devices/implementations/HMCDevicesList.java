@@ -31,21 +31,52 @@ import org.xml.sax.SAXException;
 
 import android.util.Log;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCDevicesList.
+ */
 public class HMCDevicesList {
+    
+    /** The Constant TAG_DEVLIST_ELEMENT. */
     private static final String TAG_DEVLIST_ELEMENT = "dl_el";
+    
+    /** The Constant TAG_DEVLIST_NAME. */
     private static final String TAG_DEVLIST_NAME = "dl_nm";
+    
+    /** The Constant TAG_DEVLIST_ISLOCAL. */
     private static final String TAG_DEVLIST_ISLOCAL = "dl_lc";
+    
+    /** The Constant TAG. */
     private static final String TAG = "HMCDevicesList";
+    
+    /** The m devices. */
     private HashMap<String, DeviceDescriptor> mDevices;
+    
+    /** The m name. */
     private String mName;
+    
+    /** The m is local. */
     private boolean mIsLocal;
 
+    /**
+     * Instantiates a new hMC devices list.
+     *
+     * @param name the name
+     * @param localDevices the local devices
+     */
     public HMCDevicesList(String name, boolean localDevices) {
         mName = name;
         mIsLocal = localDevices;
         mDevices = new HashMap<String, DeviceDescriptor>();
     }
 
+    /**
+     * Instantiates a new hMC devices list.
+     *
+     * @param name the name
+     * @param localDevices the local devices
+     * @param devices the devices
+     */
     public HMCDevicesList(String name, boolean localDevices,
                             HashMap<String, DeviceDescriptor> devices) {
         mName = name;
@@ -53,22 +84,49 @@ public class HMCDevicesList {
         mDevices = devices;
     }
 
+    /**
+     * Adds the device.
+     *
+     * @param dev the dev
+     */
     public void addDevice(DeviceDescriptor dev) {
         mDevices.put(dev.getFullJID(), dev);
     }
 
+    /**
+     * Gets the device.
+     *
+     * @param JID the jID
+     * @return the device
+     */
     public DeviceDescriptor getDevice(String JID) {
         return mDevices.get(JID);
     }
 
+    /**
+     * Gets the no devices.
+     *
+     * @return the no devices
+     */
     public int getNoDevices() {
         return mDevices.size();
     }
 
+    /**
+     * Gets the iterator.
+     *
+     * @return the iterator
+     */
     public Iterator<DeviceDescriptor> getIterator() {
         return mDevices.values().iterator();
     }
 
+    /**
+     * From xml string.
+     *
+     * @param input the input
+     * @return the hMC devices list
+     */
     public static HMCDevicesList fromXMLString(String input) {
         HMCDevicesList retList = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -135,6 +193,11 @@ public class HMCDevicesList {
           return retList;
     }
 
+    /**
+     * To xml string.
+     *
+     * @return the string
+     */
     public String toXMLString() {
         String retVal = null;
         TransformerFactory factory = TransformerFactory.newInstance();
@@ -155,6 +218,11 @@ public class HMCDevicesList {
         return retVal;
     }
 
+    /**
+     * To xml element.
+     *
+     * @return the element
+     */
     public Element toXMLElement() {
         Element retVal = null;
         DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
@@ -189,6 +257,11 @@ public class HMCDevicesList {
         return retVal;
     }
 
+    /**
+     * Gets the hMC name.
+     *
+     * @return the hMC name
+     */
     public String getHMCName() {
         return mName;
     }

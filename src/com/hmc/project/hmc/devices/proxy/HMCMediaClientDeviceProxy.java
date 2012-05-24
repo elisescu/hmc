@@ -15,17 +15,38 @@ import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.SecureChat;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCMediaClientDeviceProxy.
+ */
 public class HMCMediaClientDeviceProxy extends HMCMediaDeviceProxy implements HMCMediaClientDeviceItf {
+    
+    /**
+     * Instantiates a new hMC media client device proxy.
+     *
+     * @param chatManager the chat manager
+     * @param localFUllJID the local f ull jid
+     * @param remoteFullJid the remote full jid
+     * @param ver the ver
+     */
     public HMCMediaClientDeviceProxy(ChatManager chatManager, String localFUllJID,
                             String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
         super(chatManager, localFUllJID, remoteFullJid, ver);
     }
 
+    /**
+     * Instantiates a new hMC media client device proxy.
+     *
+     * @param secureChat the secure chat
+     */
     public HMCMediaClientDeviceProxy(SecureChat secureChat) {
         super(secureChat);
     }
 
+	/* (non-Javadoc)
+	 * @see com.hmc.project.hmc.devices.interfaces.HMCMediaClientDeviceItf#verifyFingerprints(java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void verifyFingerprints(String localFingerprint,
 			String remoteFingerprint) {
@@ -33,6 +54,9 @@ public class HMCMediaClientDeviceProxy extends HMCMediaDeviceProxy implements HM
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see com.hmc.project.hmc.devices.interfaces.HMCMediaClientDeviceItf#confirmAndVerifyFingerprints(java.lang.String, java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void confirmAndVerifyFingerprints(String localFingerprint,
 			String remoteFingerprint, String newDeviceName) {

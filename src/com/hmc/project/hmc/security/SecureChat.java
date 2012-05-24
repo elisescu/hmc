@@ -23,28 +23,69 @@ import org.jivesoftware.smack.packet.Presence.Mode;
 
 import android.util.Log;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author elisescu
+ * The Class SecureChat.
  *
+ * @author elisescu
  */
 public class SecureChat implements MessageListener {
 
+    /** The Constant TAG. */
     private static final String TAG = "SecureChat";
+    
+    /** The Constant MAX_OTR_TIMEOUT. */
     private static final long MAX_OTR_TIMEOUT = 15000;
+    
+    /** The m xmpp chat. */
     private Chat mXMPPChat;
+    
+    /** The m secure message listener. */
     SecuredMessageListener mSecureMessageListener;
+    
+    /** The m remote full jid. */
     private String mRemoteFullJID;
+    
+    /** The m otr session id. */
     private SessionID mOtrSessionId = null;
+    
+    /** The m local full jid. */
     private String mLocalFullJID;
+    
+    /** The m otr status. */
     private SecureChatState mOTRStatus = SecureChatState.PLAINTEXT;
+    
+    /** The m presence type. */
     private Presence.Type mPresenceType;
+    
+    /** The m this. */
     private SecureChat mThis;
+    
+    /** The m decrypted message. */
     private String mDecryptedMessage;
 
+    /**
+     * The Enum SecureChatState.
+     */
     enum SecureChatState {
-        PLAINTEXT, ENCRYPTED, AUTHENTICATED, NEGOTIATING
+        
+        /** The PLAINTEXT. */
+        PLAINTEXT, 
+ /** The ENCRYPTED. */
+ ENCRYPTED, 
+ /** The AUTHENTICATED. */
+ AUTHENTICATED, 
+ /** The NEGOTIATING. */
+ NEGOTIATING
     }
 
+    /**
+     * Instantiates a new secure chat.
+     *
+     * @param manager the manager
+     * @param localFullJID the local full jid
+     * @param remoteFullJid the remote full jid
+     */
     public SecureChat(ChatManager manager, String localFullJID, String remoteFullJid) {
 
         mXMPPChat = manager.createChat(remoteFullJid, this);
@@ -57,6 +98,9 @@ public class SecureChat implements MessageListener {
         HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }
 
+    /**
+     * Clean otr session.
+     */
     public void cleanOTRSession() {
         if (mOTRStatus == SecureChatState.ENCRYPTED || mOTRStatus == SecureChatState.AUTHENTICATED) {
             stopOtrSession();
@@ -64,6 +108,13 @@ public class SecureChat implements MessageListener {
         HMCOTRManager.getInstance().removeChat(mOtrSessionId, this);
     }
 
+    /**
+     * Instantiates a new secure chat.
+     *
+     * @param chat the chat
+     * @param localFullJID the local full jid
+     * @param ver the ver
+     */
     public SecureChat(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
         mXMPPChat = chat;
         chat.addMessageListener(this);
@@ -75,6 +126,9 @@ public class SecureChat implements MessageListener {
         HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }
 
+    /**
+     * Start otr session.
+     */
     public void startOtrSession() {
         if (mOtrSessionId == null) {
             Log.e(TAG, "The otr SessionID was not initialized ");
@@ -88,6 +142,9 @@ public class SecureChat implements MessageListener {
         }
     }
 
+    /**
+     * Stop otr session.
+     */
     public void stopOtrSession() {
         if (mOtrSessionId == null) {
             Log.e(TAG, "The otr SessionID was not initialized ");
@@ -101,6 +158,12 @@ public class SecureChat implements MessageListener {
         }
     }
 
+    /**
+     * Builds the sending message.
+     *
+     * @param body the body
+     * @return the message
+     */
     private Message buildSendingMessage(String body) {
         org.jivesoftware.smack.packet.Message message = new org.jivesoftware.smack.packet.Message();
         message.setTo(mRemoteFullJID);
@@ -110,6 +173,9 @@ public class SecureChat implements MessageListener {
         return message;
     }
 
+    /* (non-Javadoc)
+     * @see org.jivesoftware.smack.MessageListener#processMessage(org.jivesoftware.smack.Chat, org.jivesoftware.smack.packet.Message)
+     */
     @Override
     public void processMessage(Chat chat, Message msg) {
         String decryptedMsg = null;
@@ -147,6 +213,11 @@ public class SecureChat implements MessageListener {
 
     }
 
+    /**
+     * Send message.
+     *
+     * @param msg the msg
+     */
     public void sendMessage(String msg) {
         String encryptedMessage = null;
         if (mOTRStatus == SecureChatState.PLAINTEXT) {
@@ -185,10 +256,20 @@ public class SecureChat implements MessageListener {
         }
     }
 
+    /**
+     * Gets the participant.
+     *
+     * @return the participant
+     */
     public String getParticipant() {
         return mRemoteFullJID;
     }
 
+    /**
+     * Inject message.
+     *
+     * @param msg the msg
+     */
     public void injectMessage(String msg) {
         Log.d(TAG, "Inject OTR message: " + msg);
         try {
@@ -199,6 +280,11 @@ public class SecureChat implements MessageListener {
         }
     }
 
+    /**
+     * Otr status changed.
+     *
+     * @param sessionStatus the session status
+     */
     public void otrStatusChanged(SessionStatus sessionStatus) {
         mOTRStatus = toChatState(sessionStatus);
         Log.e(TAG, "Otr status changed to: " + mOTRStatus);
@@ -212,6 +298,11 @@ public class SecureChat implements MessageListener {
         }
     }
 
+    /**
+     * Presence changed.
+     *
+     * @param pres the pres
+     */
     public void presenceChanged(Presence pres) {
         mPresenceType = pres.getType();
 
@@ -222,6 +313,12 @@ public class SecureChat implements MessageListener {
         }
     }
     
+    /**
+     * To chat state.
+     *
+     * @param sessSt the sess st
+     * @return the secure chat state
+     */
     SecureChatState toChatState(SessionStatus sessSt) {
         SecureChatState retVal = SecureChatState.PLAINTEXT;
         switch (sessSt) {
@@ -238,10 +335,20 @@ public class SecureChat implements MessageListener {
         return retVal;
     }
 
+    /**
+     * Adds the message listener.
+     *
+     * @param msgListener the msg listener
+     */
     public void addMessageListener(SecuredMessageListener msgListener) {
         mSecureMessageListener = msgListener;
     }
 
+    /**
+     * Gets the session id.
+     *
+     * @return the session id
+     */
     public SessionID getSessionID() {
         return mOtrSessionId;
     }

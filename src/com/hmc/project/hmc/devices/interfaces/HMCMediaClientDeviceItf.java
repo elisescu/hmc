@@ -8,6 +8,7 @@
  */
 package com.hmc.project.hmc.devices.interfaces;
 
+// TODO: Auto-generated Javadoc
 /**
  * HMCMediaClientDevice is identified not only through the XMPP account
  *  but also by the resource (using full JID). This is because when the user 
@@ -16,13 +17,24 @@ package com.hmc.project.hmc.devices.interfaces;
  * 
  */
 public interface HMCMediaClientDeviceItf {
+  
   /**
    * displays to the user remote and the local fingerprints so that the user verifies them
-   *  manualy with the ones displayed on the other device (usually HMCServer
-   *  when adding the new device and also when interconnecting two HMC systems) 
+   * manualy with the ones displayed on the other device (usually HMCServer
+   * when adding the new device and also when interconnecting two HMC systems).
+   *
+   * @param localFingerprint the local fingerprint
+   * @param remoteFingerprint the remote fingerprint
    */
   void verifyFingerprints(String localFingerprint, String remoteFingerprint) ;
 
+  /**
+   * Confirm and verify fingerprints.
+   *
+   * @param localFingerprint the local fingerprint
+   * @param remoteFingerprint the remote fingerprint
+   * @param newDeviceName the new device name
+   */
   void confirmAndVerifyFingerprints(String localFingerprint, String remoteFingerprint, String newDeviceName) ;
 
 }

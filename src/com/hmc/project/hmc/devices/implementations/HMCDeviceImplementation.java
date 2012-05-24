@@ -17,18 +17,44 @@ import com.hmc.project.hmc.devices.proxy.AsyncCommandReplyListener;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.service.HMCManager;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCDeviceImplementation.
+ */
 public class HMCDeviceImplementation implements HMCDeviceItf {
+    
+    /** The Constant TAG. */
     private static final String TAG = "HMCDeviceImplementation";
+    
+    /** The m device descriptor. */
     protected DeviceDescriptor mDeviceDescriptor;
+    
+    /** The m hmc manager. */
     protected HMCManager mHMCManager;
+    
+    /** The m user requests listener. */
     protected IUserRequestsListener mUserRequestsListener;
 
+    /**
+     * Instantiates a new hMC device implementation.
+     *
+     * @param hmcManager the hmc manager
+     * @param thisDeviceDesc the this device desc
+     */
     public HMCDeviceImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         mHMCManager = hmcManager;
         mDeviceDescriptor = thisDeviceDesc;
     }
 
     // this method has to be overridden by subclasses
+    /**
+     * Local execute.
+     *
+     * @param opCode the op code
+     * @param params the params
+     * @param fromDev the from dev
+     * @return the string
+     */
     public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
         if (authenticateRemoteDevice(opCode, fromDev.getDeviceDescriptor())) {
             switch (opCode) {
@@ -46,12 +72,25 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
     // this method should be overridden by subclasses if the operations they
     // provide are special (i.e. the media devices can receive addition requests
     // from any device)
+    /**
+     * Authenticate remote device.
+     *
+     * @param opCode the op code
+     * @param fromDevDesc the from dev desc
+     * @return true, if successful
+     */
     protected boolean authenticateRemoteDevice(int opCode, DeviceDescriptor fromDevDesc) {
         // allow these generic test operations only for devices in our or
         // external HMC
         return mHMCManager.authenticateDevice(fromDevDesc);
     }
 
+    /**
+     * _remote increment.
+     *
+     * @param params the params
+     * @return the string
+     */
     public String _remoteIncrement(String params) {
         String retVal = null;
         try {
@@ -63,6 +102,9 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         return retVal;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.interfaces.HMCDeviceItf#remoteIncrement(int)
+     */
     @Override
     public int remoteIncrement(int val) {
         return (val + 1);
@@ -70,6 +112,13 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
 
     // this method should be implemented by the subclasses of device
     // implementation
+    /**
+     * On notification received.
+     *
+     * @param opCode the op code
+     * @param params the params
+     * @param fromDev the from dev
+     */
     public void onNotificationReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         switch (opCode) {
             case HMCDeviceItf.CMD_TEST_NOTIFICATION:
@@ -81,15 +130,28 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.interfaces.HMCDeviceItf#testNotification(java.lang.String)
+     */
     @Override
     public void testNotification(String notifString) {
         Log.d(TAG, "Recieved notification: " + notifString);
     }
 
+    /**
+     * Register user requests listener.
+     *
+     * @param usrReqListener the usr req listener
+     */
     public void registerUserRequestsListener(IUserRequestsListener usrReqListener) {
         mUserRequestsListener = usrReqListener;
     }
 
+    /**
+     * Unregister user requests listener.
+     *
+     * @param userReqListener the user req listener
+     */
     public void unregisterUserRequestsListener(IUserRequestsListener userReqListener) {
         if (mUserRequestsListener == userReqListener) {
             mUserRequestsListener = null;
@@ -98,6 +160,13 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         }
     }
 
+    /**
+     * Test async command.
+     *
+     * @param param the param
+     * @param listener the listener
+     * @return the string
+     */
     public String testAsyncCommand(String param, AsyncCommandReplyListener listener) {
         String retVal = "relpy async test";
         Log.d(TAG, "Received test async command with param: " + param);

@@ -10,8 +10,18 @@ package com.hmc.project.hmc.utils;
 import android.content.Context;
 import android.widget.Toast;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCUserNotifications.
+ */
 public class HMCUserNotifications {
 
+    /**
+     * Normal toast.
+     *
+     * @param ctx the ctx
+     * @param msg the msg
+     */
     public static void normalToast(Context ctx, String msg) {
         Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
     }

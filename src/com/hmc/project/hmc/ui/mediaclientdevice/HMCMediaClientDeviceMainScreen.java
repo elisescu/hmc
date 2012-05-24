@@ -30,17 +30,28 @@ import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListActivity;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author elisescu
+ * The Class HMCMediaClientDeviceMainScreen.
  *
+ * @author elisescu
  */
 public class HMCMediaClientDeviceMainScreen extends Activity {
+    
+    /** The Constant TAG. */
     protected static final String TAG = "DeviceMainScreen";
+    
+    /** The m is bound. */
     private boolean mIsBound;
+    
+    /** The m hmc connection. */
     private IHMCConnection mHMCConnection;
+    
+    /** The m hmc application. */
     private HMCApplication mHMCApplication;
 
 
+    /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -63,15 +74,25 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
                                     Toast.LENGTH_SHORT).show();
         }
     };
+    
+    /** The m see devices button. */
     private Button mSeeDevicesButton;
+    
+    /** The m logout button. */
     private Button mLogoutButton;
 
+    /**
+     * Do bind service.
+     */
     void doBindService() {
         bindService(new Intent(HMCMediaClientDeviceMainScreen.this, HMCService.class), mConnection,
                                 Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
 
+    /**
+     * Do unbind service.
+     */
     void doUnbindService() {
         if (mIsBound) {
             unbindService(mConnection);
@@ -79,12 +100,18 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         }
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onDestroy()
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
         doUnbindService();
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,6 +133,7 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         mLogoutButton.setOnClickListener(mButtonsClickListener);
     }
 
+    /** The m buttons click listener. */
     View.OnClickListener mButtonsClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -123,6 +151,9 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         }
     };
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
@@ -130,6 +161,9 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
     @Override
     public final boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -141,6 +175,9 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         }
     }
 
+    /**
+     * Log out and exit.
+     */
     private void logOutAndExit() {
         if (mHMCConnection != null) {
             try {

@@ -19,24 +19,48 @@ import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author elisescu
+ * The Class HMCAnonymousDeviceProxy.
  *
+ * @author elisescu
  */
 public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
 
+    /**
+     * Instantiates a new hMC anonymous device proxy.
+     *
+     * @param chatManager the chat manager
+     * @param localFullJID the local full jid
+     * @param remoteFullJid the remote full jid
+     * @param ver the ver
+     */
     public HMCAnonymousDeviceProxy(ChatManager chatManager, String localFullJID,
             String remoteFullJid, HMCFingerprintsVerifier ver) {
         super(chatManager, localFullJID, remoteFullJid, ver);
         // TODO Auto-generated constructor stub
     }
 
+    /**
+     * Instantiates a new hMC anonymous device proxy.
+     *
+     * @param chat the chat
+     * @param localFullJID the local full jid
+     * @param ver the ver
+     */
     public HMCAnonymousDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
         super(chat, localFullJID, ver);
     }
 
+    /** The Constant TAG. */
     private static final String TAG = "HMCAnonymousDeviceProxy";
 
+    /**
+     * Hello.
+     *
+     * @param myDev the my dev
+     * @return the device descriptor
+     */
     public DeviceDescriptor hello(DeviceDescriptor myDev) {
         DeviceDescriptor retDevDesc = null;
         String devDescStr;
@@ -51,14 +75,32 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
         return retDevDesc;
     }
 
+    /**
+     * Join hmc.
+     *
+     * @param hmcName the hmc name
+     * @param listener the listener
+     */
     public void joinHMC(String hmcName, AsyncCommandReplyListener listener) {
         sendCommandAsync(HMCMediaDeviceItf.CMD_JOIN_HMC, hmcName, listener);
     }
 
+    /**
+     * Interconnection request.
+     *
+     * @param hmcName the hmc name
+     * @param listener the listener
+     */
     public void interconnectionRequest(String hmcName, AsyncCommandReplyListener listener) {
         sendCommandAsync(HMCServerItf.CMD_INTERCONNECTION_REQUEST, hmcName, listener);
     }
 
+    /**
+     * Exchange hmc info.
+     *
+     * @param localHMCInfo the local hmc info
+     * @return the hMC devices list
+     */
     public HMCDevicesList exchangeHMCInfo(HMCDevicesList localHMCInfo) {
         HMCDevicesList remoteInfo = null;
 

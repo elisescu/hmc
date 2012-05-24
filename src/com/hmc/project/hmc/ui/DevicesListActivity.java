@@ -39,30 +39,64 @@ import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListAdapter;
 import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class DevicesListActivity.
+ */
 public class DevicesListActivity extends Activity {
+    
+    /** The Constant TAG. */
     protected static final String TAG = "DevicesListActivity";
+    
+    /** The RE l_ swip e_ mi n_ distance. */
     private int REL_SWIPE_MIN_DISTANCE;
+    
+    /** The RE l_ swip e_ ma x_ of f_ path. */
     private int REL_SWIPE_MAX_OFF_PATH;
+    
+    /** The RE l_ swip e_ threshol d_ velocity. */
     private int REL_SWIPE_THRESHOLD_VELOCITY;
 
+    /** The m is bound. */
     private boolean mIsBound;
+    
+    /** The m hmc connection. */
     private IHMCConnection mHMCConnection;
+    
+    /** The m hmc application. */
     private HMCApplication mHMCApplication;
+    
+    /** The m local devices list view. */
     private ListView mLocalDevicesListView;
+    
+    /** The m local device list adapter. */
     private DevicesListAdapter mLocalDeviceListAdapter;
 
+    /** The m list view flipper. */
     private ViewFlipper mListViewFlipper;
+    
+    /** The m external devices list view. */
     private ListView mExternalDevicesListView;
+    
+    /** The m external device list adapter. */
     private DevicesListAdapter mExternalDeviceListAdapter;
+    
+    /** The m gesture detector. */
     private GestureDetector mGestureDetector;
 
+    /** The m lists adapters. */
     private HashMap<ListView, DevicesListAdapter> mListsAdapters;
+    
+    /** The m lists titles. */
     private HashMap<ListView, String> mListsTitles;
 
+    /** The m list title. */
     private TextView mListTitle;
 
+    /** The m hmc devices listener. */
     HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
 
+    /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @SuppressWarnings("unchecked")
@@ -102,12 +136,18 @@ public class DevicesListActivity extends Activity {
         }
     };
 
+    /**
+     * Do bind service.
+     */
     void doBindService() {
         bindService(new Intent(DevicesListActivity.this, HMCService.class), mConnection,
                                 Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
 
+    /**
+     * Do unbind service.
+     */
     void doUnbindService() {
         if (mIsBound) {
             try {
@@ -121,12 +161,18 @@ public class DevicesListActivity extends Activity {
         }
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onDestroy()
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
         doUnbindService();
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -179,9 +225,25 @@ public class DevicesListActivity extends Activity {
         mExternalDevicesListView.setOnTouchListener(gestureListener);
     }
 
+    /**
+     * The listener interface for receiving HMCDevices events.
+     * The class that is interested in processing a HMCDevices
+     * event implements this interface, and the object created
+     * with that class is registered with a component using the
+     * component's <code>addHMCDevicesListener<code> method. When
+     * the HMCDevices event occurs, that object's appropriate
+     * method is invoked.
+     *
+     * @see HMCDevicesEvent
+     */
     private class HMCDevicesListener extends IHMCDevicesListener.Stub {
+        
+        /** The modif device descriptor. */
         IDeviceDescriptor modifDeviceDescriptor = null;
 
+        /* (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IHMCDevicesListener#onDeviceAdded(com.hmc.project.hmc.aidl.IDeviceDescriptor)
+         */
         @Override
         public void onDeviceAdded(IDeviceDescriptor devDesc) throws RemoteException {
             modifDeviceDescriptor = devDesc;
@@ -197,17 +259,26 @@ public class DevicesListActivity extends Activity {
 
         }
 
+        /* (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IHMCDevicesListener#onDeviceRemoved(com.hmc.project.hmc.aidl.IDeviceDescriptor)
+         */
         @Override
         public void onDeviceRemoved(IDeviceDescriptor devDesc) throws RemoteException {
             // TODO Auto-generated method stub
         }
 
+        /* (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IHMCDevicesListener#onPresenceChanged(java.lang.String, com.hmc.project.hmc.aidl.IDeviceDescriptor)
+         */
         @Override
         public void onPresenceChanged(String presence, IDeviceDescriptor devDesc)
                                 throws RemoteException {
             // TODO Auto-generated method stub
         }
 
+        /* (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IHMCDevicesListener#onExternalDeviceAdded(java.lang.String, com.hmc.project.hmc.aidl.IDeviceDescriptor)
+         */
         @Override
         public void onExternalDeviceAdded(String externalName, IDeviceDescriptor devDesc)
                                 throws RemoteException {
@@ -225,6 +296,12 @@ public class DevicesListActivity extends Activity {
 
     }
 
+    /**
+     * On device list click.
+     *
+     * @param position the position
+     * @param lv the lv
+     */
     private void onDeviceListClick(int position, ListView lv) {
         if (position >= 0) {
             String clikedJID = mListsAdapters.get(mListViewFlipper.getCurrentView())
@@ -233,6 +310,9 @@ public class DevicesListActivity extends Activity {
         }
     }
 
+    /**
+     * On left to right fling.
+     */
     private void onLeftToRightFling() {
         mListViewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.push_right_in));
         mListViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.push_right_out));
@@ -241,6 +321,9 @@ public class DevicesListActivity extends Activity {
         mListTitle.setText(mListsTitles.get(mListViewFlipper.getCurrentView()));
     }
 
+    /**
+     * On right to left fling.
+     */
     private void onRightToLeftFling() {
         mListViewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.push_left_in));
         mListViewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.push_left_out));
@@ -249,12 +332,23 @@ public class DevicesListActivity extends Activity {
         mListTitle.setText(mListsTitles.get(mListViewFlipper.getCurrentView()));
     }
 
+    /**
+     * Gets the current list view.
+     *
+     * @return the current list view
+     */
     private ListView getCurrentListView() {
         return (ListView) mListViewFlipper.getCurrentView();
     }
 
+    /**
+     * The Class MyGestureDetector.
+     */
     private class MyGestureDetector extends SimpleOnGestureListener {
         // Detect a single-click and call my own handler.
+        /* (non-Javadoc)
+         * @see android.view.GestureDetector.SimpleOnGestureListener#onSingleTapUp(android.view.MotionEvent)
+         */
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
             ListView lv = getCurrentListView();
@@ -263,6 +357,9 @@ public class DevicesListActivity extends Activity {
             return false;
         }
 
+        /* (non-Javadoc)
+         * @see android.view.GestureDetector.SimpleOnGestureListener#onFling(android.view.MotionEvent, android.view.MotionEvent, float, float)
+         */
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (Math.abs(e1.getY() - e2.getY()) > REL_SWIPE_MAX_OFF_PATH)

@@ -42,27 +42,56 @@ import com.hmc.project.hmc.aidl.IUserRequestsListener;
 
 import de.duenndns.ssl.MemorizingTrustManager;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author elisescu
+ * The Class HMCConnection.
  *
+ * @author elisescu
  */
 public class HMCConnection extends IHMCConnection.Stub {
 
+    /** The Constant TAG. */
     private static final String TAG = "HMCConnection";
+    
+    /** The m hmc manager. */
     private HMCManager mHMCManager = null;
+    
+    /** The m xmpp connection. */
     private Connection mXMPPConnection = null;
+    
+    /** The m hmc service. */
     private HMCService mHMCService = null;
+    
+    /** The m connection listener. */
     private ConnectionListener mConnectionListener = new HMCConnectionListener();
+    
+    /** The m remote connection listener. */
     private IConnectionListener mRemoteConnectionListener;
+    
+    /** The m connection remote exception. */
     private RemoteException mConnectionRemoteException;
+    
+    /** The m full jid. */
     private String mFullJID;
+    
+    /** The m password. */
     private String mPassword;
+    
+    /** The m port. */
     private int mPort;
 
+    /**
+     * Instantiates a new hMC connection.
+     *
+     * @param hmcService the hmc service
+     */
     public HMCConnection(HMCService hmcService) {
         mHMCService = hmcService;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCConnection#getHMCManager()
+     */
     @Override
     public IHMCManager getHMCManager() throws RemoteException {
         if (mHMCManager == null) {
@@ -73,11 +102,22 @@ public class HMCConnection extends IHMCConnection.Stub {
         return mHMCManager;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCConnection#registerConnectionListener(com.hmc.project.hmc.aidl.IConnectionListener)
+     */
     @Override
     public void registerConnectionListener(IConnectionListener conListener) throws RemoteException {
         mRemoteConnectionListener = conListener;
     }
 
+    /**
+     * Connect l.
+     *
+     * @param fullJID the full jid
+     * @param password the password
+     * @param port the port
+     * @throws XMPPException the xMPP exception
+     */
     private void connectL(String fullJID, String password, int port) throws XMPPException {
         String lXMPPServer = StringUtils.parseServer(fullJID);
         String lBareJid = StringUtils.parseBareAddress(fullJID);
@@ -116,6 +156,9 @@ public class HMCConnection extends IHMCConnection.Stub {
     }
     // connect and login to XMPP server. this is a blocking call so it should not be 
     // called in UI thread
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCConnection#connect(java.lang.String, java.lang.String, int)
+     */
     @Override
     public void connect(String fullJID, String password, int port) throws RemoteException {
         try {
@@ -128,6 +171,9 @@ public class HMCConnection extends IHMCConnection.Stub {
     }
     
     
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCConnection#connectAsync(java.lang.String, java.lang.String, int)
+     */
     @Override
     public void connectAsync(String fullJID, String password, int port) throws RemoteException {
         mFullJID = fullJID;
@@ -158,6 +204,13 @@ public class HMCConnection extends IHMCConnection.Stub {
     }
 
     // create the XMPPConnection to be used for login, for getting the chatmanager, etc
+    /**
+     * Creates the xmpp connection.
+     *
+     * @param xmppServer the xmpp server
+     * @param port the port
+     * @return the connection
+     */
     public Connection createXMPPConnection(String xmppServer, int port) {
         ConnectionConfiguration lConnConfig = null;
         Connection lXMPPConnection = null;
@@ -170,17 +223,26 @@ public class HMCConnection extends IHMCConnection.Stub {
     }
 
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCConnection#registerXMPPAccount(java.lang.String, java.lang.String)
+     */
     @Override
     public void registerXMPPAccount(String fullJID, String password) throws RemoteException {
         // TODO Auto-generated method stub
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCConnection#unregisterConnectionListener(com.hmc.project.hmc.aidl.IConnectionListener)
+     */
     @Override
     public void unregisterConnectionListener(IConnectionListener conListener)
             throws RemoteException {
         mRemoteConnectionListener = null;
     }
     
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCConnection#disconnect()
+     */
     @Override
     public void disconnect() throws RemoteException {
        if (mXMPPConnection != null && mXMPPConnection.isConnected()) {
@@ -190,13 +252,31 @@ public class HMCConnection extends IHMCConnection.Stub {
         
     }
     
+    /**
+     * The listener interface for receiving HMCConnection events.
+     * The class that is interested in processing a HMCConnection
+     * event implements this interface, and the object created
+     * with that class is registered with a component using the
+     * component's <code>addHMCConnectionListener<code> method. When
+     * the HMCConnection event occurs, that object's appropriate
+     * method is invoked.
+     *
+     * @see HMCConnectionEvent
+     */
     private class HMCConnectionListener implements ConnectionListener {
+        
+        /* (non-Javadoc)
+         * @see org.jivesoftware.smack.ConnectionListener#connectionClosed()
+         */
         @Override
         public void connectionClosed() {
             // notify remote listener
             Log.w(TAG, " connectionClosed() event received ");
         }
 
+        /* (non-Javadoc)
+         * @see org.jivesoftware.smack.ConnectionListener#connectionClosedOnError(java.lang.Exception)
+         */
         @Override
         public void connectionClosedOnError(Exception arg0) {
             // notify remote listener
@@ -210,18 +290,27 @@ public class HMCConnection extends IHMCConnection.Stub {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.jivesoftware.smack.ConnectionListener#reconnectingIn(int)
+         */
         @Override
         public void reconnectingIn(int arg0) {
             // notify remote listener
             Log.w(TAG, "reconnectingIn event received: " + arg0);
         }
 
+        /* (non-Javadoc)
+         * @see org.jivesoftware.smack.ConnectionListener#reconnectionFailed(java.lang.Exception)
+         */
         @Override
         public void reconnectionFailed(Exception arg0) {
             // notify remote listener
             Log.e(TAG,"reconnectionFailed event received: "+arg0);
          }
 
+        /* (non-Javadoc)
+         * @see org.jivesoftware.smack.ConnectionListener#reconnectionSuccessful()
+         */
         @Override
         public void reconnectionSuccessful() {
             // notify remote listener
@@ -231,6 +320,13 @@ public class HMCConnection extends IHMCConnection.Stub {
     }
     
 
+    /**
+     * Inits the connection configuration.
+     *
+     * @param xmppServer the xmpp server
+     * @param port the port
+     * @return the connection configuration
+     */
     private ConnectionConfiguration initConnectionConfiguration(String xmppServer, int port) {
     
         //TODO: check to see what's the deal with this ProviderManager on smack website
@@ -266,6 +362,11 @@ public class HMCConnection extends IHMCConnection.Stub {
     }
 
     //THIS METHOD IS TAKEN FROM BEEM project. //TODO: Understand and rewrite it!
+    /**
+     * Configure provider manager.
+     *
+     * @param pm the pm
+     */
     private void configureProviderManager(ProviderManager pm) {
         Log.d(TAG, "configure");
         // Service Discovery # Items

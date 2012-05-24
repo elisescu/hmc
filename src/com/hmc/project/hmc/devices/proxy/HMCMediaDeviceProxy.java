@@ -18,31 +18,60 @@ import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.SecureChat;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCMediaDeviceProxy.
+ */
 public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDeviceItf {
 
+    /** The Constant TAG. */
     private static final String TAG = "HMCMediaDeviceProxy";
 
+    /**
+     * Instantiates a new hMC media device proxy.
+     *
+     * @param chatManager the chat manager
+     * @param localFullJID the local full jid
+     * @param remoteFullJid the remote full jid
+     * @param ver the ver
+     */
     public HMCMediaDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
                             HMCFingerprintsVerifier ver) {
         super(chatManager, localFullJID, remoteFullJid, ver);
         // TODO Auto-generated constructor stub
     }
 
+    /**
+     * Instantiates a new hMC media device proxy.
+     *
+     * @param secureChat the secure chat
+     */
     public HMCMediaDeviceProxy(SecureChat secureChat) {
         super(secureChat);
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf#localDeviceRemovedNotification()
+     */
     @Override
 	public void localDeviceRemovedNotification() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf#localDeviceAddedNotification(com.hmc.project.hmc.devices.implementations.DeviceDescriptor)
+	 */
 	@Override
 	public void localDeviceAddedNotification(DeviceDescriptor newDev) {
         sendNotification(CMD_LOCAL_DEVICE_ADDED_NOTIFICATION, newDev.toXMLString());
 	}
 
+    /**
+     * Send list of devices.
+     *
+     * @param list the list
+     */
     public void sendListOfDevices(HMCDevicesList list) {
         // Send the list of deviecs to the newly added client. Use the
         // notification RPC mechanism
@@ -51,7 +80,10 @@ public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDevic
     }
 
     /**
-     * @param deviceDescriptor
+     * External device added notification.
+     *
+     * @param deviceDescriptor the device descriptor
+     * @param hmcName the hmc name
      */
     public void externalDeviceAddedNotification(DeviceDescriptor deviceDescriptor, String hmcName) {
         // TODO: add also the hmcName to the parameters. For now we support only
@@ -60,7 +92,9 @@ public class HMCMediaDeviceProxy extends HMCDeviceProxy implements HMCMediaDevic
     }
 
     /**
-     * @param devList
+     * Sets the external devices list.
+     *
+     * @param devList the new external devices list
      */
     public void setExternalDevicesList(HMCDevicesList devList) {
         sendNotification(CMD_SET_EXTERNAL_DEVICES_LIST_NOTIFICATION, devList.toXMLString());

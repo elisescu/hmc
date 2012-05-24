@@ -12,7 +12,15 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import com.hmc.project.hmc.R;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCSettings.
+ */
 public class HMCSettings extends PreferenceActivity {
+    
+    /* (non-Javadoc)
+     * @see android.preference.PreferenceActivity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

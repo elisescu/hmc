@@ -35,27 +35,66 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class DeviceDescriptor.
+ */
 public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelable {
+    
+    /** The Constant TAG. */
     private static final String TAG = null;
     // this order should be maintained in the XML representation
+    /** The Constant TAG_DEVICE_NAME. */
     public static final String TAG_DEVICE_NAME = "dd_dvn";
+    
+    /** The Constant TAG_USERNAME_NAME. */
     public static final String TAG_USERNAME_NAME = "dd_usn";
+    
+    /** The Constant TAG_DEVICE_TYPE. */
     public static final String TAG_DEVICE_TYPE = "dd_dvt";
+    
+    /** The Constant TAG_FULLJID. */
     public static final String TAG_FULLJID = "dd_flj";
+    
+    /** The Constant TAG_FINGERPRINT. */
     public static final String TAG_FINGERPRINT = "dd_fgp";
+    
+    /** The Constant TAG_DEVICE_ELEMENT. */
     public static final String TAG_DEVICE_ELEMENT = "dd_dvel";
+    
+    /** The m device name. */
     private String mDeviceName = "";
+    
+    /** The m user name. */
     private String mUserName = "";
+    
+    /** The m device type. */
     private int mDeviceType;
+    
+    /** The m full jid. */
     private String mFullJID;
+    
+    /** The m fingerprint. */
     private String mFingerprint;
 
+    /** The m doc builder factory. */
     DocumentBuilderFactory mDocBuilderFactory;
+    
+    /** The m doc builder. */
     DocumentBuilder mDocBuilder;
 
+    /**
+     * Instantiates a new device descriptor.
+     */
     public DeviceDescriptor() {
     }
     
+    /**
+     * From xml string.
+     *
+     * @param input the input
+     * @return the device descriptor
+     */
     public static DeviceDescriptor fromXMLString(String input) {
 
         if (input == null) {
@@ -121,6 +160,11 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
         return retDevDesc;
     }
 
+    /**
+     * To xml string.
+     *
+     * @return the string
+     */
     public String toXMLString() {
         String retVal = null;
         TransformerFactory factory = TransformerFactory.newInstance();
@@ -141,6 +185,11 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
         return retVal;
     }
 
+    /**
+     * To xml element.
+     *
+     * @return the element
+     */
     public Element toXMLElement() {
         Element devElement = null;
         DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
@@ -163,6 +212,9 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
         return devElement;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         String retStr = "";
@@ -174,42 +226,82 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
         return retStr;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getDeviceName()
+     */
     public String getDeviceName() {
         return mDeviceName;
     }
 
+    /**
+     * Sets the device name.
+     *
+     * @param deviceName the new device name
+     */
     public void setDeviceName(String deviceName) {
         mDeviceName = deviceName;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getUserName()
+     */
     public String getUserName() {
         return mUserName;
     }
 
+    /**
+     * Sets the user name.
+     *
+     * @param userName the new user name
+     */
     public void setUserName(String userName) {
         mUserName = userName;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getDeviceType()
+     */
     public int getDeviceType() {
         return mDeviceType;
     }
 
+    /**
+     * Sets the device type.
+     *
+     * @param deviceType the new device type
+     */
     public void setDeviceType(int deviceType) {
         mDeviceType = deviceType;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getFullJID()
+     */
     public String getFullJID() {
         return mFullJID;
     }
 
+    /**
+     * Sets the full jid.
+     *
+     * @param fullJID the new full jid
+     */
     public void setFullJID(String fullJID) {
         mFullJID = fullJID;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getFingerprint()
+     */
     public String getFingerprint() {
         return mFingerprint;
     }
 
+    /**
+     * Sets the fingerprint.
+     *
+     * @param fingerprint the new fingerprint
+     */
     public void setFingerprint(String fingerprint) {
         mFingerprint = fingerprint;
     }

@@ -29,14 +29,31 @@ import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListActivity;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCServerMainScreen.
+ */
 public class HMCServerMainScreen extends Activity {
+    
+    /** The Constant TAG. */
     protected static final String TAG = "DeviceMainScreen";
+    
+    /** The m is bound. */
     private boolean mIsBound;
+    
+    /** The m hmc connection. */
     private IHMCConnection mHMCConnection;
+    
+    /** The m hmc application. */
     private HMCApplication mHMCApplication;
+    
+    /** The m see devices button. */
     private Button mSeeDevicesButton;
+    
+    /** The m logout button. */
     private Button mLogoutButton;
 
+    /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mHMCConnection = IHMCConnection.Stub.asInterface(service);
@@ -58,6 +75,9 @@ public class HMCServerMainScreen extends Activity {
         }
     };
 
+    /**
+     * Do bind service.
+     */
     void doBindService() {
         bindService(new Intent(HMCServerMainScreen.this, 
  HMCService.class), mConnection,
@@ -65,6 +85,9 @@ public class HMCServerMainScreen extends Activity {
         mIsBound = true;
     }
 
+    /**
+     * Do unbind service.
+     */
     void doUnbindService() {
         if (mIsBound) {
             unbindService(mConnection);
@@ -72,12 +95,18 @@ public class HMCServerMainScreen extends Activity {
         }
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onDestroy()
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
         doUnbindService();
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +127,7 @@ public class HMCServerMainScreen extends Activity {
         mLogoutButton.setOnClickListener(mButtonsClickListener);
     }
 
+    /** The m buttons click listener. */
     View.OnClickListener mButtonsClickListener = new View.OnClickListener() {
 
         @Override
@@ -115,6 +145,9 @@ public class HMCServerMainScreen extends Activity {
         }
     };
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
@@ -122,6 +155,9 @@ public class HMCServerMainScreen extends Activity {
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
     @Override
     public final boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -139,6 +175,9 @@ public class HMCServerMainScreen extends Activity {
         }
     }
 
+    /**
+     * Log out and exit.
+     */
     private void logOutAndExit() {
         if (mHMCConnection != null) {
             try {

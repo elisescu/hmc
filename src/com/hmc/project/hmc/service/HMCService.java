@@ -45,19 +45,29 @@ import android.widget.Toast;
 // class is in a sub-package.
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IHMCConnection;
-import com.hmc.project.hmc.ui.LocalServiceActivities;
 import com.hmc.project.hmc.ui.Login;
 
 import de.duenndns.ssl.MemorizingTrustManager;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCService.
+ */
 public class HMCService extends Service {
+    
+    /** The Constant TAG. */
     private static final String TAG = "HMCService";
+    
+    /** The m notification manager. */
     private NotificationManager mNotificationManager;
+    
+    /** The m notification id. */
     private int mNotificationId = 0xbaba;
     
     // This is the object that receives interactions from clients.  See
     // RemoteService for a more complete example.
+    /** The m hmc connection. */
     private IHMCConnection.Stub mHMCConnection;
    
 
@@ -67,11 +77,20 @@ public class HMCService extends Service {
      * IPC.
      */
     public class LocalBinder extends Binder {
+        
+        /**
+         * Gets the service.
+         *
+         * @return the service
+         */
         public HMCService getService() {
             return HMCService.this;
         }
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Service#onCreate()
+     */
     @Override
     public void onCreate() {
         mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
@@ -82,6 +101,10 @@ public class HMCService extends Service {
         // Display a notification about us starting.  We put an icon in the status bar.
         showNotification();
     }
+    
+    /* (non-Javadoc)
+     * @see android.app.Service#onStartCommand(android.content.Intent, int, int)
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("LocalService", "Received start id " + startId + ": " + intent);
@@ -90,6 +113,9 @@ public class HMCService extends Service {
         return START_STICKY;
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Service#onDestroy()
+     */
     @Override
     public void onDestroy() {
         // Cancel the persistent notification.
@@ -100,12 +126,18 @@ public class HMCService extends Service {
         Toast.makeText(this, "HMC was closed", Toast.LENGTH_SHORT).show();
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Service#onBind(android.content.Intent)
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return mHMCConnection;
     }
 
     // TODO: taken from Beem. Rewrite it!
+    /**
+     * Show notification.
+     */
     private void showNotification() {
         // In this sample, we'll use the same text for the ticker and the expanded notification
         CharSequence text = "Tap here";
@@ -128,6 +160,12 @@ public class HMCService extends Service {
     }
 
     // TODO: taken from Beem. Rewrite it!
+    /**
+     * Send notification.
+     *
+     * @param id the id
+     * @param notif the notif
+     */
     public void sendNotification(int id, Notification notif) {
         notif.ledARGB = 0xff0000ff; // Blue color
         notif.ledOnMS = 1000;

@@ -19,17 +19,52 @@ import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.ui.mediadevice.ConfirmJoinHMC;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The listener interface for receiving deviceAditionConfirmation events.
+ * The class that is interested in processing a deviceAditionConfirmation
+ * event implements this interface, and the object created
+ * with that class is registered with a component using the
+ * component's <code>addDeviceAditionConfirmationListener<code> method. When
+ * the deviceAditionConfirmation event occurs, that object's appropriate
+ * method is invoked.
+ *
+ * @see DeviceAditionConfirmationEvent
+ */
 public class DeviceAditionConfirmationListener {
+    
+    /** The Constant DEVICE_ADDITION_CONFIRMATION_ID. */
     private static final int DEVICE_ADDITION_CONFIRMATION_ID = 14; // out of the blue
+    
+    /** The Constant TAG. */
     private static final String TAG = "DeviceAditionConfirmationListener";
+    
+    /** The m hmc service. */
     private HMCService mHMCService;
+    
+    /** The m wait lock. */
     private String mWaitLock = null;
+    
+    /** The m user reply. */
     private Boolean mUserReply = false;
 
+    /**
+     * Instantiates a new device adition confirmation listener.
+     *
+     * @param serv the serv
+     */
     public DeviceAditionConfirmationListener(HMCService serv) {
         mHMCService = serv;
     }
 
+    /**
+     * Confirm device addition.
+     *
+     * @param newDevice the new device
+     * @param hmcName the hmc name
+     * @param myFingerprint the my fingerprint
+     * @return true, if successful
+     */
     public boolean confirmDeviceAddition(DeviceDescriptor newDevice, String hmcName,
                             String myFingerprint) {
         boolean retVal = false;
@@ -72,6 +107,11 @@ public class DeviceAditionConfirmationListener {
         return mUserReply;
     }
 
+    /**
+     * Sets the user reply.
+     *
+     * @param val the new user reply
+     */
     public void setUserReply(boolean val) {
         Log.d(TAG, "Got the user response.. now let the HMC server know");
         mUserReply = val;

@@ -14,13 +14,27 @@ import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.implementations.HMCMediaClientDeviceImplementation;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCMediaClientHandler.
+ */
 public class HMCMediaClientHandler extends IHMCMediaClientHndl.Stub {
+    
+    /** The m local implementation. */
     private HMCMediaClientDeviceImplementation mLocalImplementation;
 
+    /**
+     * Instantiates a new hMC media client handler.
+     *
+     * @param localImplementation the local implementation
+     */
     public HMCMediaClientHandler(HMCMediaClientDeviceImplementation localImplementation) {
         mLocalImplementation = localImplementation;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCMediaClientHndl#registerUserRequestsListener(com.hmc.project.hmc.aidl.IUserRequestsListener)
+     */
     @Override
     public void registerUserRequestsListener(IUserRequestsListener usrReqListener)
                             throws RemoteException {
@@ -28,6 +42,9 @@ public class HMCMediaClientHandler extends IHMCMediaClientHndl.Stub {
     }
 
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.aidl.IHMCMediaClientHndl#unregisterUserRequestsListener(com.hmc.project.hmc.aidl.IUserRequestsListener)
+     */
     @Override
     public void unregisterUserRequestsListener(IUserRequestsListener userReqListener)
                             throws RemoteException {

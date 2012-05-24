@@ -15,22 +15,52 @@ import android.util.Log;
 
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCApplication.
+ */
 public class HMCApplication extends Application {
 
+    /** The Constant TAG. */
     private static final String TAG = "HMCApplication";
+    
+    /** The m preference listener. */
     private final HMCPreferenceListener mPreferenceListener = new HMCPreferenceListener();
+    
+    /** The m settings. */
     private SharedPreferences mSettings;
+    
+    /** The m is configured. */
     private boolean mIsConfigured = false;
+    
+    /** The m is connected. */
     private boolean mIsConnected;
+    
+    /** The m username. */
     private String mUsername = "insert_something";
+    
+    /** The m password. */
     private String mPassword = "insert_something";
+    
+    /** The m device type. */
     private int mDeviceType = -1;
+    
+    /** The m device name. */
     private String mDeviceName = "no name";
+    
+    /** The m hmc name. */
     private String mHMCName = "no name";
+    
+    /** The m external storage available. */
     boolean mExternalStorageAvailable = false;
+    
+    /** The m external storage writeable. */
     boolean mExternalStorageWriteable = false;
 
 
+    /* (non-Javadoc)
+     * @see android.app.Application#onCreate()
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -54,25 +84,48 @@ public class HMCApplication extends Application {
         mSettings.registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Application#onTerminate()
+     */
     @Override
     public void onTerminate() {
         super.onTerminate();
         mSettings.unregisterOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
+    /**
+     * Checks if is connected.
+     *
+     * @return true, if is connected
+     */
     public boolean isConnected() {
         return mIsConnected;
     }
 
+    /**
+     * Sets the connected.
+     *
+     * @param isConnected the new connected
+     */
     public void setConnected(boolean isConnected) {
         mIsConnected = isConnected;
     }
 
+    /**
+     * Checks if is configured.
+     *
+     * @return true, if is configured
+     */
     public boolean isConfigured() {
         // check whether we have access rights to write/read from SD card
         return mIsConfigured && externalStorageReady();
     }
 
+    /**
+     * External storage ready.
+     *
+     * @return true, if successful
+     */
     boolean externalStorageReady() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -96,30 +149,73 @@ public class HMCApplication extends Application {
         return mExternalStorageAvailable && mExternalStorageWriteable;
     }
 
+    /**
+     * Gets the username.
+     *
+     * @return the username
+     */
     public String getUsername() {
         return mUsername;
     }
 
+    /**
+     * Gets the password.
+     *
+     * @return the password
+     */
     public String getPassword() {
         return mPassword;
     }
 
+    /**
+     * Gets the device type.
+     *
+     * @return the device type
+     */
     public int getDeviceType() {
         return mDeviceType;
     }
     
+    /**
+     * Gets the device name.
+     *
+     * @return the device name
+     */
     public String getDeviceName() {
         return mDeviceName;
     }
 
+    /**
+     * Gets the hMC name.
+     *
+     * @return the hMC name
+     */
     public String getHMCName() {
         return mHMCName;
     }
 
+    /**
+     * The listener interface for receiving HMCPreference events.
+     * The class that is interested in processing a HMCPreference
+     * event implements this interface, and the object created
+     * with that class is registered with a component using the
+     * component's <code>addHMCPreferenceListener<code> method. When
+     * the HMCPreference event occurs, that object's appropriate
+     * method is invoked.
+     *
+     * @see HMCPreferenceEvent
+     */
     private class HMCPreferenceListener implements SharedPreferences.OnSharedPreferenceChangeListener {
+        
+        /**
+         * Instantiates a new hMC preference listener.
+         */
         public HMCPreferenceListener() {
         }
 
+        /* (non-Javadoc)
+         * @see android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged(android.content.SharedPreferences, java.lang.String)
+         */
         @Override
         public void onSharedPreferenceChanged(SharedPreferences  sharedPreferences, String key) {
             mUsername = mSettings.getString("hmc_jid_key", "");

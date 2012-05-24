@@ -46,26 +46,69 @@ import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 import de.duenndns.ssl.MemorizingTrustManager;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Login.
+ */
 public class Login extends Activity {
+    
+    /** The Constant TAG. */
     protected static final String TAG = "LoginActivity";
+    
+    /** The m bound service. */
     private HMCService mBoundService;
+    
+    /** The m hmc application. */
     private HMCApplication mHMCApplication;
+    
+    /** The m connection. */
     private ServiceConnection mConnection = new HMCServiceConnection();
+    
+    /** The m service is bound. */
     private boolean mServiceIsBound;
+    
+    /** The m service is started. */
     private boolean mServiceIsStarted;
+    
+    /** The m hmc connection. */
     private IHMCConnection mHMCConnection;
+    
+    /** The m login progressbar. */
     private ProgressBar mLoginProgressbar;
+    
+    /** The m connection listener. */
     HMCConnectionListener mConnectionListener = new HMCConnectionListener();
+    
+    /** The m start button. */
     private Button mStartButton;
+    
+    /** The m stop button. */
     private Button mStopButton;
+    
+    /** The m password. */
     private String mPassword;
+    
+    /** The m username. */
     private String mUsername;
+    
+    /** The m device type. */
     private int mDeviceType;
+    
+    /** The m device name. */
     private String mDeviceName;
+    
+    /** The m ssl receiver. */
     private BroadcastReceiver mSslReceiver;
+    
+    /** The m username edit text. */
     private EditText mUsernameEditText;
+    
+    /** The m password edit text. */
     private EditText mPasswordEditText;
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -74,6 +117,9 @@ public class Login extends Activity {
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
     @Override
     public final boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -85,6 +131,9 @@ public class Login extends Activity {
         }
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,6 +195,9 @@ public class Login extends Activity {
     }
 
     
+    /* (non-Javadoc)
+     * @see android.app.Activity#onResume()
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -153,6 +205,9 @@ public class Login extends Activity {
         mPasswordEditText.setText(mHMCApplication.getPassword());
     }
 
+    /* (non-Javadoc)
+     * @see android.app.Activity#onDestroy()
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -168,6 +223,7 @@ public class Login extends Activity {
         unregisterReceiver(mSslReceiver);
     }
     
+    /** The m login listener. */
     private OnClickListener mLoginListener = new OnClickListener() {
         public void onClick(View v) {
 
@@ -185,6 +241,9 @@ public class Login extends Activity {
         }
     };
     
+    /**
+     * Disconnect and stop service.
+     */
     private void disconnectAndStopService() {
         // disconnect from XMPP server\
         if (mHMCApplication.isConnected() && mHMCConnection != null) {
@@ -211,12 +270,18 @@ public class Login extends Activity {
         }
     }
 
+    /**
+     * Do bind service.
+     */
     void doBindService() {
         bindService(new Intent(Login.this, 
                 HMCService.class), mConnection, Context.BIND_AUTO_CREATE);
         mServiceIsBound = true;
     }
 
+    /**
+     * Do unbind service.
+     */
     void doUnbindService() {
         if (mServiceIsBound) {
             // Detach our existing connection.
@@ -225,8 +290,14 @@ public class Login extends Activity {
         }
     }
 
+    /**
+     * The Class HMCServiceConnection.
+     */
     private class HMCServiceConnection implements ServiceConnection {
 
+        /* (non-Javadoc)
+         * @see android.content.ServiceConnection#onServiceConnected(android.content.ComponentName, android.os.IBinder)
+         */
         public void onServiceConnected(ComponentName className, IBinder service) {
             mHMCConnection = IHMCConnection.Stub.asInterface(service);
 
@@ -251,6 +322,9 @@ public class Login extends Activity {
             }
         }
 
+        /* (non-Javadoc)
+         * @see android.content.ServiceConnection#onServiceDisconnected(android.content.ComponentName)
+         */
         public void onServiceDisconnected(ComponentName className) {
             mBoundService = null;
             Toast.makeText(Login.this, R.string.local_service_disconnected,
@@ -258,13 +332,31 @@ public class Login extends Activity {
         }
     };
 
+    /**
+     * The listener interface for receiving HMCConnection events.
+     * The class that is interested in processing a HMCConnection
+     * event implements this interface, and the object created
+     * with that class is registered with a component using the
+     * component's <code>addHMCConnectionListener<code> method. When
+     * the HMCConnection event occurs, that object's appropriate
+     * method is invoked.
+     *
+     * @see HMCConnectionEvent
+     */
     private class HMCConnectionListener extends IConnectionListener.Stub {
+        
+        /* (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IConnectionListener#connectionClosedOnError(java.lang.String)
+         */
         @Override
         public void connectionClosedOnError(String arg0) throws RemoteException {
             mHMCApplication.setConnected(false);
             Log.e(TAG, "XMPP connection was closed with the error:" + arg0);
         }
 
+        /* (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IConnectionListener#connectionSuccessful(boolean)
+         */
         @Override
         public void connectionSuccessful(boolean success) throws RemoteException {
             Log.d(TAG, "Connection successful"+success);

@@ -22,20 +22,46 @@ import android.widget.TextView;
 
 import com.hmc.project.hmc.R;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class DevicesListAdapter.
+ */
 public class DevicesListAdapter extends ArrayAdapter<String> {
+    
+    /** The Constant TAG. */
     private static final String TAG = "DevicesListAdapter";
+    
+    /** The m activity. */
     private Activity mActivity;
+    
+    /** The m device names. */
     private LinkedHashMap<String, String> mDeviceNames;
+    
+    /** The m temp jid. */
     private String mTempJid;
+    
+    /** The m temp name. */
     private String mTempName;
+    
+    /** The m temp list. */
     private HashMap<String, String> mTempList;
 
+    /**
+     * Instantiates a new devices list adapter.
+     *
+     * @param activity the activity
+     */
     public DevicesListAdapter(Activity activity) {
         super(activity, R.layout.list_item);
         mActivity = activity;
         mDeviceNames = new LinkedHashMap<String, String>();
     }
 
+    /**
+     * Sets the devices.
+     *
+     * @param list the list
+     */
     public void setDevices(HashMap<String, String> list) {
         mTempList = list;
         mActivity.runOnUiThread(new Runnable() {
@@ -49,10 +75,22 @@ public class DevicesListAdapter extends ArrayAdapter<String> {
         });
     }
 
+    /**
+     * Gets the jid from position.
+     *
+     * @param position the position
+     * @return the jid from position
+     */
     public String getJidFromPosition(int position) {
         return (String) mDeviceNames.keySet().toArray()[position];
     }
 
+    /**
+     * Adds the.
+     *
+     * @param jid the jid
+     * @param name the name
+     */
     public void add(String jid, String name) {
         mTempJid = jid;
         mTempName = name;
@@ -63,6 +101,12 @@ public class DevicesListAdapter extends ArrayAdapter<String> {
         });
     }
 
+    /**
+     * _add.
+     *
+     * @param jid the jid
+     * @param name the name
+     */
     private void _add(String jid, String name) {
         if (!mDeviceNames.containsKey(jid)) {
             super.add(name);
@@ -70,6 +114,9 @@ public class DevicesListAdapter extends ArrayAdapter<String> {
         }
     }
 
+    /* (non-Javadoc)
+     * @see android.widget.ArrayAdapter#getView(int, android.view.View, android.view.ViewGroup)
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mActivity

@@ -19,16 +19,35 @@ import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
 import com.hmc.project.hmc.service.DeviceAditionConfirmationListener;
 import com.hmc.project.hmc.service.HMCManager;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCMediaDeviceImplementation.
+ */
 public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implements
                         HMCMediaDeviceItf {
+    
+    /** The Constant TAG. */
     private static final String TAG = "HMCMediaDeviceImplementation";
+    
+    /** The m pending dev desc. */
     private DeviceDescriptor mPendingDevDesc = null;
+    
+    /** The m device adition confirmation listener. */
     protected DeviceAditionConfirmationListener mDeviceAditionConfirmationListener;
 
+    /**
+     * Instantiates a new hMC media device implementation.
+     *
+     * @param hmcManager the hmc manager
+     * @param thisDeviceDesc the this device desc
+     */
     public HMCMediaDeviceImplementation(HMCManager hmcManager, DeviceDescriptor thisDeviceDesc) {
         super(hmcManager, thisDeviceDesc);
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation#onNotificationReceived(int, java.lang.String, com.hmc.project.hmc.devices.proxy.HMCDeviceProxy)
+     */
     @Override
     public void onNotificationReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         if (authenticateRemoteDevice(opCode, fromDev.getDeviceDescriptor())) {
@@ -52,15 +71,18 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
     }
 
     /**
-     * @param params
+     * _update list of external devices.
+     *
+     * @param params the params
      */
     private void _updateListOfExternalDevices(String params) {
         mHMCManager.updateListOfExternalDevices(HMCDevicesList.fromXMLString(params), false);
     }
 
     /**
-     * @param params
-     *            the parameters received from remote
+     * _external device added notification.
+     *
+     * @param params the parameters received from remote
      */
     private void _externalDeviceAddedNotification(String params) {
         DeviceDescriptor newDev = DeviceDescriptor.fromXMLString(params);
@@ -68,23 +90,38 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
     }
 
     /**
-     * @param newDev
+     * External device added notification.
+     *
+     * @param newDev the new dev
      */
     private void externalDeviceAddedNotification(DeviceDescriptor newDev) {
         mHMCManager.externalDeviceAddedNotification(newDev);
     }
 
+    /**
+     * _local device added notification.
+     *
+     * @param params the params
+     */
     private void _localDeviceAddedNotification(String params) {
         DeviceDescriptor newDev = DeviceDescriptor.fromXMLString(params);
         localDeviceAddedNotification(newDev);
     }
 
+    /**
+     * _send list of devices.
+     *
+     * @param params the params
+     */
     private void _sendListOfDevices(String params) {
         HMCDevicesList devList = HMCDevicesList.fromXMLString(params);
         // update the HMCManager about the new list of devices
         mHMCManager.updateListOfLocalDevices(devList);
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation#localExecute(int, java.lang.String, com.hmc.project.hmc.devices.proxy.HMCDeviceProxy)
+     */
     @Override
     public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
         Log.d(TAG, "Local execute: " + opCode + "  " + params + "from ");
@@ -103,6 +140,9 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         return super.localExecute(opCode, params, fromDev);
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation#authenticateRemoteDevice(int, com.hmc.project.hmc.devices.implementations.DeviceDescriptor)
+     */
     @Override
     protected boolean authenticateRemoteDevice(int opCode, DeviceDescriptor fromDevDesc) {
         boolean remoteAuthenticated = false;
@@ -132,6 +172,13 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         return remoteAuthenticated;
     }
 
+    /**
+     * _join hmc.
+     *
+     * @param params the params
+     * @param fromDev the from dev
+     * @return the string
+     */
     private String _joinHMC(String params, HMCDeviceProxy fromDev) {
         String retVal = null;
 
@@ -140,6 +187,13 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         return retVal;
     }
 
+    /**
+     * _hello.
+     *
+     * @param params the params
+     * @param fromDev the from dev
+     * @return the string
+     */
     private String _hello(String params, HMCDeviceProxy fromDev) {
         String retVal = null;
         DeviceDescriptor recvDevDesc = DeviceDescriptor.fromXMLString(params);
@@ -152,6 +206,13 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         return retVal;
     }
 
+    /**
+     * Hello.
+     *
+     * @param recvDevDesc the recv dev desc
+     * @param fromDev the from dev
+     * @return the device descriptor
+     */
     private DeviceDescriptor hello(DeviceDescriptor recvDevDesc, HMCDeviceProxy fromDev) {
         if (recvDevDesc != null) {
             Log.d(TAG, "Received devive descriptor from remote in hello msg: "
@@ -164,22 +225,38 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         return mDeviceDescriptor;
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf#localDeviceRemovedNotification()
+     */
     @Override
     public void localDeviceRemovedNotification() {
         // TODO Auto-generated method stub
 
     }
 
+    /* (non-Javadoc)
+     * @see com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf#localDeviceAddedNotification(com.hmc.project.hmc.devices.implementations.DeviceDescriptor)
+     */
     @Override
     public void localDeviceAddedNotification(DeviceDescriptor newDev) {
         mHMCManager.localDeviceAddedNotification(newDev);
     }
 
+    /**
+     * Register device adition confirmation listener.
+     *
+     * @param deviceAdditionListener the device addition listener
+     */
     public void registerDeviceAditionConfirmationListener(
             DeviceAditionConfirmationListener deviceAdditionListener) {
         mDeviceAditionConfirmationListener = deviceAdditionListener;
     }
 
+    /**
+     * Unregister device adition confirmation listener.
+     *
+     * @param deviceAdditionListener the device addition listener
+     */
     public void unregisterDeviceAditionConfirmationListener(
             DeviceAditionConfirmationListener deviceAdditionListener) {
         if (mDeviceAditionConfirmationListener == deviceAdditionListener) {
@@ -189,6 +266,13 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         }
     }
 
+    /**
+     * Join hmc.
+     *
+     * @param remoteHMCName the remote hmc name
+     * @param fromDev the from dev
+     * @return true, if successful
+     */
     public boolean joinHMC(String remoteHMCName, HMCDeviceProxy fromDev) {
         boolean retVal = false;
 

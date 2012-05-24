@@ -29,20 +29,54 @@ import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HMCDevicesStore.
+ */
 public class HMCDevicesStore {
+    
+    /** The Constant TAG. */
     private static final String TAG = "HMCDeviceStore";
+    
+    /** The INSTANCE. */
     private static HMCDevicesStore INSTANCE = null;
+    
+    /** The m serializer. */
     XmlSerializer mSerializer;
+    
+    /** The m writer. */
     StringWriter mWriter;
+    
+    /** The m local devs file path. */
     private String mLocalDevsFilePath;
+    
+    /** The m ext devs file path. */
     private String mExtDevsFilePath;
+    
+    /** The m no device. */
     private int mNoDevice = 0;
+    
+    /** The m list of local devices. */
     HashMap<String, HMCDeviceProxy> mListOfLocalDevices;
+    
+    /** The m list of external devices. */
     HashMap<String, HMCDeviceProxy> mListOfExternalDevices;
+    
+    /** The m hmc manager. */
     private HMCManager mHMCManager;
+    
+    /** The m devices listener. */
     private IHMCDevicesListener mDevicesListener;
+    
+    /** The m external hmc name. */
     private String mExternalHMCName;
 
+    /**
+     * Instantiates a new hMC devices store.
+     *
+     * @param mng the mng
+     * @param filePath the file path
+     */
     public HMCDevicesStore(HMCManager mng, String filePath) {
         mListOfLocalDevices = new HashMap<String, HMCDeviceProxy>();
         mListOfExternalDevices = new HashMap<String, HMCDeviceProxy>();
@@ -53,20 +87,40 @@ public class HMCDevicesStore {
         mExtDevsFilePath = mLocalDevsFilePath + "_ext";
     }
 
+    /**
+     * Register devices listener.
+     *
+     * @param devListener the dev listener
+     */
     public void registerDevicesListener(IHMCDevicesListener devListener) {
         mDevicesListener = devListener;
     }
 
+    /**
+     * Gets the devices listener.
+     *
+     * @return the devices listener
+     */
     public IHMCDevicesListener getDevicesListener() {
         return mDevicesListener;
     }
 
+    /**
+     * Unregister devices listener.
+     *
+     * @param devListener the dev listener
+     */
     public void unregisterDevicesListener(IHMCDevicesListener devListener) {
         // TODO: if we support multiple listeners, fix this: add a vector with
         // listeners
         mDevicesListener = null;
     }
 
+    /**
+     * Gets the list of local devices.
+     *
+     * @return the list of local devices
+     */
     public HashMap<String, HMCDeviceProxy> getListOfLocalDevices() {
         if (mListOfLocalDevices == null) {
             // read from file the list of devices
@@ -74,10 +128,22 @@ public class HMCDevicesStore {
         return mListOfLocalDevices;
     }
 
+    /**
+     * Gets the list of external devices.
+     *
+     * @return the list of external devices
+     */
     public HashMap<String, HMCDeviceProxy> getListOfExternalDevices() {
         return mListOfExternalDevices;
     }
 
+    /**
+     * Adds the new external device.
+     *
+     * @param hmcName the hmc name
+     * @param dev the dev
+     * @return true, if successful
+     */
     public boolean addNewExternalDevice(String hmcName, HMCDeviceProxy dev) {
         // TODO: fix this
         // mExternalHMCName = hmcName;
@@ -104,6 +170,12 @@ public class HMCDevicesStore {
         return true;
     }
 
+    /**
+     * Adds the new local device.
+     *
+     * @param dev the dev
+     * @return true, if successful
+     */
     public boolean addNewLocalDevice(HMCDeviceProxy dev) {
         if (mListOfLocalDevices.containsKey(dev.getDeviceDescriptor().getFullJID())) {
             Log.e(TAG, "Device " + dev.getDeviceDescriptor().getFullJID()
@@ -127,6 +199,12 @@ public class HMCDevicesStore {
         return true;
     }
 
+    /**
+     * Adds the new local device.
+     *
+     * @param devDesc the dev desc
+     * @return true, if successful
+     */
     public boolean addNewLocalDevice(DeviceDescriptor devDesc) {
         HMCDeviceProxy dev = mHMCManager.createNewDeviceProxy(devDesc);
 
@@ -156,6 +234,13 @@ public class HMCDevicesStore {
         return true;
     }
 
+    /**
+     * Adds the new external device.
+     *
+     * @param hmcName the hmc name
+     * @param devDesc the dev desc
+     * @return true, if successful
+     */
     public boolean addNewExternalDevice(String hmcName, DeviceDescriptor devDesc) {
         // TODO: fix this
         mExternalHMCName = hmcName;
@@ -188,6 +273,9 @@ public class HMCDevicesStore {
         return true;
     }
 
+    /**
+     * Flush cache.
+     */
     private void flushCache() {
         // save the list of devices in our file
 
@@ -220,6 +308,12 @@ public class HMCDevicesStore {
 
     }
 
+    /**
+     * Removes the local device.
+     *
+     * @param fullJID the full jid
+     * @return true, if successful
+     */
     public boolean removeLocalDevice(String fullJID) {
         boolean retVal = false;
         // String fullJID = dev.getDeviceDescriptor().getFullJID();
@@ -233,6 +327,13 @@ public class HMCDevicesStore {
         return retVal;
     }
 
+    /**
+     * Read string from file.
+     *
+     * @param path the path
+     * @return the string
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private static String readStringFromFile(String path) throws IOException {
         FileInputStream stream = new FileInputStream(new File(path));
         try {
@@ -246,6 +347,13 @@ public class HMCDevicesStore {
     }
 
     // TODO: optimize the readings/writings from/to files
+    /**
+     * Write string to file.
+     *
+     * @param path the path
+     * @param data the data
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private static void writeStringToFile(String path, String data) throws IOException {
         FileWriter fstream;
         fstream = new FileWriter(new File(path));
@@ -256,11 +364,22 @@ public class HMCDevicesStore {
         fstream.close();
     }
 
+    /**
+     * Gets the local device.
+     *
+     * @param from the from
+     * @return the local device
+     */
     public HMCDeviceProxy getLocalDevice(String from) {
         HMCDeviceProxy retVal = mListOfLocalDevices.get(from);
         return retVal;
     }
 
+    /**
+     * Load.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public void load() throws IOException {
         // load devices from file and create the proxies. Notify also the
         // listeners about the devices we have in the local and external lists
@@ -346,6 +465,11 @@ public class HMCDevicesStore {
         }
     }
 
+    /**
+     * Sets the local devices list.
+     *
+     * @param devList the new local devices list
+     */
     public void setLocalDevicesList(HMCDevicesList devList) {
         // a list of devices was received from the HMCServer after we joined its
         // HMC network
@@ -375,6 +499,11 @@ public class HMCDevicesStore {
         flushCache();
     }
 
+    /**
+     * Sets the external devices list.
+     *
+     * @param devList the new external devices list
+     */
     public void setExternalDevicesList(HMCDevicesList devList) {
         // a list of devices was received from the HMCServer after we joined its
         // HMC network
@@ -410,6 +539,11 @@ public class HMCDevicesStore {
         flushCache();
     }
 
+    /**
+     * Gets the list of local devices descriptors.
+     *
+     * @return the list of local devices descriptors
+     */
     public HashMap<String, DeviceDescriptor> getListOfLocalDevicesDescriptors() {
         HashMap<String, DeviceDescriptor> retVal = new HashMap<String, DeviceDescriptor>();
         Iterator<HMCDeviceProxy> iter = getListOfLocalDevices().values().iterator();
@@ -420,6 +554,12 @@ public class HMCDevicesStore {
         return retVal;
     }
 
+    /**
+     * Gets the list of external devices descriptors.
+     *
+     * @param hmcName the hmc name
+     * @return the list of external devices descriptors
+     */
     public HashMap<String, DeviceDescriptor> getListOfExternalDevicesDescriptors(String hmcName) {
         HashMap<String, DeviceDescriptor> retVal = new HashMap<String, DeviceDescriptor>();
         Iterator<HMCDeviceProxy> iter = getListOfExternalDevices().values().iterator();

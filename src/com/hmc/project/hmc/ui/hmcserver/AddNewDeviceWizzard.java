@@ -1,9 +1,9 @@
 /**
  * Copyright (c) 2012 Vasile Popescu (elisescu@gmail.com)
  * 
- * This source file CANNOT be distributed and/or modified
- * without prior written consent of the author.
-**/
+ * This source file CANNOT be distributed and/or modified without prior written
+ * consent of the author.
+ **/
 
 package com.hmc.project.hmc.ui.hmcserver;
 
@@ -47,21 +47,55 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class AddNewDeviceWizzard.
+ */
 public class AddNewDeviceWizzard extends Activity {
+
+    /** The Constant TAG. */
     protected static final String TAG = "DeviceMainScreen";
+
+    /** The m is bound. */
     private boolean mIsBound;
+
+    /** The m bound service. */
     private HMCService mBoundService;
+
+    /** The m hmc connection. */
     private IHMCConnection mHMCConnection;
+
+    /** The m hmc application. */
     private HMCApplication mHMCApplication;
+
+    /** The m info text view. */
     private TextView mInfoTextView;
+
+    /** The m jid text view. */
     private EditText mJidTextView;  
+
+    /** The m context. */
     private Context mContext; 
+
+    /** The m user requests listener. */
     private UserRequestsListener mUserRequestsListener = new UserRequestsListener();
+
+    /** The m add device progress dialog. */
     private ProgressDialog mAddDeviceProgressDialog;
+
+    /** The m new device desc. */
     private IDeviceDescriptor mNewDeviceDesc;
+
+    /** The m valid jid. */
     private boolean mValidJid;
+
+    /** The m user confirmed. */
     private Boolean mUserConfirmed = new Boolean(false);;
+
+    /** The m user confirmed notif. */
     private Object mUserConfirmedNotif = new Object();
+
+    /** The m buttons listener. */
     private OnClickListener mButtonsListener = new OnClickListener() {
         public void onClick(View v) {
             switch (v.getId()) {
@@ -85,6 +119,14 @@ public class AddNewDeviceWizzard extends Activity {
 
     };
 
+    /**
+     * Adds the new device.
+     * 
+     * @param newDevFullJid
+     *            the new dev full jid
+     * @throws Exception
+     *             the exception
+     */
     private void addNewDevice(String newDevFullJid) throws Exception {
 
         if (mHMCConnection == null) {
@@ -100,6 +142,7 @@ public class AddNewDeviceWizzard extends Activity {
         }
     }
 
+    /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -116,12 +159,18 @@ public class AddNewDeviceWizzard extends Activity {
         }
     };
 
+    /**
+     * Do bind service.
+     */
     void doBindService() {
         bindService(new Intent(AddNewDeviceWizzard.this,
                 HMCService.class), mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
 
+    /**
+     * Do unbind service.
+     */
     void doUnbindService() {
         if (mIsBound) {
             unbindService(mConnection);
@@ -129,12 +178,20 @@ public class AddNewDeviceWizzard extends Activity {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onDestroy()
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
         doUnbindService();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -157,6 +214,13 @@ public class AddNewDeviceWizzard extends Activity {
         }
     }
     
+    /**
+     * Check username.
+     * 
+     * @param username
+     *            the username
+     * @return true, if successful
+     */
     private boolean checkUsername(String username) {
         String name = StringUtils.parseName(username);
         String server = StringUtils.parseServer(username);
@@ -168,8 +232,25 @@ public class AddNewDeviceWizzard extends Activity {
         return mValidJid;
     }
     
+    /**
+     * The listener interface for receiving userRequests events. The class that
+     * is interested in processing a userRequests event implements this
+     * interface, and the object created with that class is registered with a
+     * component using the component's
+     * <code>addUserRequestsListener<code> method. When
+     * the userRequests event occurs, that object's appropriate
+     * method is invoked.
+     * 
+     * @see UserRequestsEvent
+     */
     class UserRequestsListener extends IUserRequestsListener.Stub {
 
+        /*
+         * (non-Javadoc)
+         * @see
+         * com.hmc.project.hmc.aidl.IUserRequestsListener#confirmDeviceAddition
+         * (com.hmc.project.hmc.aidl.IDeviceDescriptor)
+         */
         @Override
         public boolean confirmDeviceAddition(IDeviceDescriptor newDevice) throws RemoteException {
             mNewDeviceDesc = newDevice;
@@ -180,6 +261,12 @@ public class AddNewDeviceWizzard extends Activity {
             return askUserConfirmation();
         }
 
+        /*
+         * (non-Javadoc)
+         * @see
+         * com.hmc.project.hmc.aidl.IUserRequestsListener#verifyFingerprint(
+         * java.lang.String, java.lang.String, java.lang.String)
+         */
         @Override
         public boolean verifyFingerprint(String localFingerprint, String remoteFingerprint,
                 String deviceName) throws RemoteException {
@@ -201,6 +288,13 @@ public class AddNewDeviceWizzard extends Activity {
         }
     }
     
+    /**
+     * Ask user confirmation.
+     * 
+     * @return true, if successful
+     * @throws RemoteException
+     *             the remote exception
+     */
     private boolean askUserConfirmation() throws RemoteException {
         Log.d(TAG, "Showing the dialog to ask user for confirmation");
 
@@ -228,6 +322,9 @@ public class AddNewDeviceWizzard extends Activity {
 
     }
 
+    /**
+     * Ask user confirmation ui th.
+     */
     private void askUserConfirmationUITh() {
         AddNewDeviceWizzard.this.runOnUiThread(new Runnable() {
             public void run() {
@@ -262,7 +359,15 @@ public class AddNewDeviceWizzard extends Activity {
         });
     }
 
+    /**
+     * The Class AddDeviceAsyncTask.
+     */
     private class AddDeviceAsyncTask extends AsyncTask<Object, Void, Boolean> {
+
+        /*
+         * (non-Javadoc)
+         * @see android.os.AsyncTask#doInBackground(Params[])
+         */
         @Override
         protected Boolean doInBackground(Object... param) {
             IHMCServerHndl hmcServerHmdl = (IHMCServerHndl) param[0];
@@ -279,6 +384,10 @@ public class AddNewDeviceWizzard extends Activity {
             return new Boolean(addSuccess);
         }
 
+        /*
+         * (non-Javadoc)
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         */
         @Override
         protected void onPostExecute(Boolean result) {
             // mConnectionRemoteException = result;

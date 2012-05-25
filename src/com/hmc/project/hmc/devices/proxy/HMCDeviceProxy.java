@@ -511,7 +511,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
      */
     protected String executeLocalCommand(int opCode, String params) {
         if (mLocalImplementation != null) {
-            return mLocalImplementation.localExecute(opCode, params, this);
+            return mLocalImplementation.onCommandReceived(opCode, params, this);
         } else {
             Log.e(TAG, "Don't have local implementation to execute request!");
             return "not-having-local-implementation";

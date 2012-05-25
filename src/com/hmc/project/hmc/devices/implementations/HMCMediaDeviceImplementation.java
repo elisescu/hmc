@@ -123,7 +123,7 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
      * @see com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation#localExecute(int, java.lang.String, com.hmc.project.hmc.devices.proxy.HMCDeviceProxy)
      */
     @Override
-    public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
+    public String onCommandReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         Log.d(TAG, "Local execute: " + opCode + "  " + params + "from ");
 
         if (authenticateRemoteDevice(opCode, fromDev.getDeviceDescriptor())) {
@@ -137,7 +137,7 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         // if there's no operation on this class, maybe there's one on the super
         // class (the super class is responsible with authenticate the remote
         // for its operations
-        return super.localExecute(opCode, params, fromDev);
+        return super.onCommandReceived(opCode, params, fromDev);
     }
 
     /* (non-Javadoc)

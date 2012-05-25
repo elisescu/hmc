@@ -250,7 +250,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
      * @see com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation#localExecute(int, java.lang.String, com.hmc.project.hmc.devices.proxy.HMCDeviceProxy)
      */
     @Override
-    public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
+    public String onCommandReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         String retVal = null;
         switch (opCode) {
             case CMD_INTERCONNECTION_REQUEST:
@@ -263,7 +263,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
                 retVal = _exchangeListsOfLocalDevices(params, fromDev);
                 break;
             default:
-                retVal = super.localExecute(opCode, params, fromDev);
+                retVal = super.onCommandReceived(opCode, params, fromDev);
                 break;
         }
         return retVal;

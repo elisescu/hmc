@@ -32,11 +32,11 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
      * @see com.hmc.project.hmc.devices.implementations.HMCMediaDeviceImplementation#localExecute(int, java.lang.String, com.hmc.project.hmc.devices.proxy.HMCDeviceProxy)
      */
     @Override
-    public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
+    public String onCommandReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         String retVal = null;
         switch (opCode) {
             default:
-                retVal = super.localExecute(opCode, params, fromDev);
+                retVal = super.onCommandReceived(opCode, params, fromDev);
                 break;
         }
         return retVal;

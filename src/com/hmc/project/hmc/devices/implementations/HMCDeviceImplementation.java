@@ -55,7 +55,7 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
      * @param fromDev the from dev
      * @return the string
      */
-    public String localExecute(int opCode, String params, HMCDeviceProxy fromDev) {
+    public String onCommandReceived(int opCode, String params, HMCDeviceProxy fromDev) {
         if (authenticateRemoteDevice(opCode, fromDev.getDeviceDescriptor())) {
             switch (opCode) {
                 case HMCDeviceItf.CMD_REMOTE_INCREMENT:

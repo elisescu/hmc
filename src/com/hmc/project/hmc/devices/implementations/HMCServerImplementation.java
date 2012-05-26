@@ -37,7 +37,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     private HMCInterconnectionConfirmationListener mHMCInterconnectionConfirmationListener;
     
     /** The adding success. */
-    private boolean addingSuccess = true;
+    private boolean remoteUserReply = true;
     
     /** The interconnection success. */
     private boolean interconnectionSuccess = true;
@@ -166,7 +166,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             }
         }
 
-        return addingSuccess;
+        return remoteUserReply;
     }
 
     /**
@@ -363,8 +363,8 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // sending the join request
         newDevProxy.joinHMC(mHMCManager.getHMCName(), new AsyncCommandReplyListener() {
             public void onReplyReceived(String reply) {
-                addingSuccess = Boolean.parseBoolean(reply);
-                Log.d(TAG, "Got the reply from media deviec user:" + addingSuccess);
+                remoteUserReply = Boolean.parseBoolean(reply);
+                Log.d(TAG, "Got the reply from media deviec user:" + remoteUserReply);
             }
         });
 
@@ -386,7 +386,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
 
         // if remote device accepted to join HMC, then send it the list of
         // devices
-        if (addingSuccess) {
+        if (remoteUserReply) {
             // TODO: maybe do all this in a separate thread
             HMCMediaDeviceProxy specificDevPrxy = (HMCMediaDeviceProxy)mHMCManager
                                     .promoteAnonymousProxyToLocal(newDevProxy, true);
@@ -395,7 +395,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
         }
 
-        return addingSuccess;
+        return remoteUserReply;
     }
 
 

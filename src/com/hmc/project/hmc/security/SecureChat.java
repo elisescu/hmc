@@ -137,7 +137,17 @@ public class SecureChat implements MessageListener {
 
         try {
             HMCOTRManager.getInstance().getOtrEngine().startSession(mOtrSessionId);
-            } catch (OtrException e) {
+
+            // wait now for the OTR negotiation to take place
+            synchronized (mOtrSessionId) {
+                mOtrSessionId.wait(MAX_OTR_TIMEOUT);
+            }
+
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (OtrException e) {
             e.printStackTrace();
         }
     }
@@ -222,19 +232,8 @@ public class SecureChat implements MessageListener {
         String encryptedMessage = null;
         if (mOTRStatus == SecureChatState.PLAINTEXT) {
             startOtrSession();
-            // wait now for the OTR negotiation to take place
-            synchronized (mOtrSessionId) {
-                try {
-                    mOtrSessionId.wait(MAX_OTR_TIMEOUT);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-                if (mOTRStatus == SecureChatState.PLAINTEXT) {
-                    Log.e(TAG, "Could not start an ecrypted OTR session");
-                }
-
+            if (mOTRStatus == SecureChatState.PLAINTEXT) {
+                Log.e(TAG, "Could not start an ecrypted OTR session");
             }
         }
 

@@ -11,4 +11,6 @@ interface IHMCMediaClientHndl {
 	void registerUserRequestsListener(IUserRequestsListener usrReqListener);
     
     void unregisterUserRequestsListener(IUserRequestsListener userReqListener);
+    
+    String runTests(String fullJID);
 }

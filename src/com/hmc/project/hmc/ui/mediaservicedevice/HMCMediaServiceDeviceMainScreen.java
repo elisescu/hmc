@@ -29,6 +29,7 @@ import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListActivity;
+import com.hmc.project.hmc.ui.mediaclientdevice.HMCMediaClientDeviceMainScreen;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -139,8 +140,12 @@ public class HMCMediaServiceDeviceMainScreen extends Activity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.hmcmediaservice_main_screen_see_devices_button:
-                    startActivity(new Intent(HMCMediaServiceDeviceMainScreen.this,
-                                            DevicesListActivity.class));
+                    Intent intent = new Intent(HMCMediaServiceDeviceMainScreen.this,
+                                            DevicesListActivity.class);
+
+                    intent.putExtra(DevicesListActivity.DEV_LIST_INTENT_KEY,
+                                            DevicesListActivity.DEV_LIST_INTENT_DISPLAY);
+                    startActivity(intent);
                     break;
                 case R.id.hmcmediaservice_main_screen_logout_button:
                     logOutAndExit();

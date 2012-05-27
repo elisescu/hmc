@@ -29,6 +29,9 @@ import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListActivity;
+import com.hmc.project.hmc.ui.hmcserver.ConfirmHMCInterconnection;
+import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
+import com.hmc.project.hmc.ui.mediadevice.TestsActivity;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -40,6 +43,8 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
     
     /** The Constant TAG. */
     protected static final String TAG = "DeviceMainScreen";
+
+    protected static final int PICK_JID_FOR_TESTS = 0x10;
     
     /** The m is bound. */
     private boolean mIsBound;
@@ -80,6 +85,8 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
     
     /** The m logout button. */
     private Button mLogoutButton;
+
+    private Button mRunTests;
 
     /**
      * Do bind service.
@@ -129,27 +136,66 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
 
         mSeeDevicesButton = (Button) findViewById(R.id.hmcmediaclient_main_screen_see_devices_button);
         mLogoutButton = (Button) findViewById(R.id.hmcmediaclient_main_screen_logout_button);
+        mRunTests = (Button) findViewById(R.id.hmcmediaclient_main_screen_tests_button);
         mSeeDevicesButton.setOnClickListener(mButtonsClickListener);
         mLogoutButton.setOnClickListener(mButtonsClickListener);
+        mRunTests.setOnClickListener(mButtonsClickListener);
     }
 
     /** The m buttons click listener. */
     View.OnClickListener mButtonsClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.d(TAG, "Pressed: " + Integer.toHexString(v.getId()));
             switch (v.getId()) {
                 case R.id.hmcmediaclient_main_screen_see_devices_button:
-                    startActivity(new Intent(HMCMediaClientDeviceMainScreen.this,
-                                            DevicesListActivity.class));
+                    Intent intent = new Intent(HMCMediaClientDeviceMainScreen.this,
+                                            DevicesListActivity.class);
+
+                    intent.putExtra(DevicesListActivity.DEV_LIST_INTENT_KEY,
+                                            DevicesListActivity.DEV_LIST_INTENT_DISPLAY);
+                    startActivity(intent);
                     break;
                 case R.id.hmcmediaclient_main_screen_logout_button:
                     logOutAndExit();
+                    break;
+                case R.id.hmcmediaclient_main_screen_tests_button:
+                    runSmallTests();
                     break;
                 default:
                     break;
             }
         }
+
     };
+
+    private void runSmallTests() {
+        Log.d(TAG, "Display the list of devices");
+        Intent intent = new Intent(HMCMediaClientDeviceMainScreen.this, DevicesListActivity.class);
+
+        intent.putExtra(DevicesListActivity.DEV_LIST_INTENT_KEY,
+                                DevicesListActivity.DEV_LIST_INTENT_PICK);
+
+        startActivityForResult(intent, PICK_JID_FOR_TESTS);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PICK_JID_FOR_TESTS) {
+            if (resultCode == RESULT_OK) {
+                String jidToDoTests = data.getStringExtra(DevicesListActivity.DEV_LIST_JID_PICKED_KEY);
+                Log.d(TAG, "Got jid from the pick activity: " + jidToDoTests
+                                        + " and start test activity");
+
+                Intent intent = new Intent(HMCMediaClientDeviceMainScreen.this,
+                                        TestsActivity.class);
+
+                intent.putExtra(TestsActivity.TESTS_JID_KEY, jidToDoTests);
+
+                startActivity(intent);
+            }
+        }
+    }
 
     /* (non-Javadoc)
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)

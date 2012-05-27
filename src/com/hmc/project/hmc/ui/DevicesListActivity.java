@@ -18,6 +18,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.text.style.ClickableSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -44,7 +45,11 @@ import com.hmc.project.hmc.aidl.IHMCDevicesListener;
  * The Class DevicesListActivity.
  */
 public class DevicesListActivity extends Activity {
-    
+    public static String DEV_LIST_INTENT_KEY = "dev_list_intent";
+    public static String DEV_LIST_INTENT_PICK = "dev_list_pick";
+    public static String DEV_LIST_INTENT_DISPLAY = "dev_list_display";
+    public static String DEV_LIST_JID_PICKED_KEY = "dev_list_jid";
+
     /** The Constant TAG. */
     protected static final String TAG = "DevicesListActivity";
     
@@ -96,6 +101,8 @@ public class DevicesListActivity extends Activity {
     /** The m hmc devices listener. */
     HMCDevicesListener mHMCDevicesListener = new HMCDevicesListener();
 
+    private String mIntentType;
+
     /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -135,7 +142,6 @@ public class DevicesListActivity extends Activity {
                                     Toast.LENGTH_SHORT).show();
         }
     };
-
     /**
      * Do bind service.
      */
@@ -179,6 +185,11 @@ public class DevicesListActivity extends Activity {
         doBindService();
         DisplayMetrics dm = getResources().getDisplayMetrics();
         mHMCApplication = (HMCApplication) getApplication();
+
+        Intent sender = getIntent();
+        mIntentType = sender.getExtras().getString(DEV_LIST_INTENT_KEY);
+
+        Log.d(TAG, "intent type got: " + mIntentType);
 
         setContentView(R.layout.devices_list_activity);
         // make sure we ended up in this activity with the app connected to XMPP
@@ -304,9 +315,15 @@ public class DevicesListActivity extends Activity {
      */
     private void onDeviceListClick(int position, ListView lv) {
         if (position >= 0) {
-            String clikedJID = mListsAdapters.get(mListViewFlipper.getCurrentView())
+            String clickedJID = mListsAdapters.get(mListViewFlipper.getCurrentView())
                                     .getJidFromPosition(position);
-            Toast.makeText(this, clikedJID, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, clickedJID, Toast.LENGTH_SHORT).show();
+            if (DEV_LIST_INTENT_PICK.equals(mIntentType)) {
+                Intent resultData = new Intent();
+                resultData.putExtra(DEV_LIST_JID_PICKED_KEY, clickedJID);
+                setResult(Activity.RESULT_OK, resultData);
+                finish();
+            }
         }
     }
 

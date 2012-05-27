@@ -9,9 +9,8 @@ package com.hmc.project.hmc.devices.handlers;
 
 import android.os.RemoteException;
 
-import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
+import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
-import com.hmc.project.hmc.devices.implementations.HMCMediaClientDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCMediaServiceDeviceImplementation;
 
 
@@ -19,7 +18,7 @@ import com.hmc.project.hmc.devices.implementations.HMCMediaServiceDeviceImplemen
 /**
  * The Class HMCMediaClientHandler.
  */
-public class HMCMediaServiceHandler extends IHMCMediaClientHndl.Stub {
+public class HMCMediaServiceHandler extends IHMCMediaServiceHndl.Stub {
     
     /** The m local implementation. */
     private HMCMediaServiceDeviceImplementation mLocalImplementation;
@@ -33,8 +32,11 @@ public class HMCMediaServiceHandler extends IHMCMediaClientHndl.Stub {
         mLocalImplementation = localImplementation;
     }
 
-    /* (non-Javadoc)
-     * @see com.hmc.project.hmc.aidl.IHMCMediaClientHndl#registerUserRequestsListener(com.hmc.project.hmc.aidl.IUserRequestsListener)
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.hmc.project.hmc.aidl.IHMCMediaClientHndl#registerUserRequestsListener
+     * (com.hmc.project.hmc.aidl.IUserRequestsListener)
      */
     @Override
     public void registerUserRequestsListener(IUserRequestsListener usrReqListener)
@@ -51,5 +53,4 @@ public class HMCMediaServiceHandler extends IHMCMediaClientHndl.Stub {
                             throws RemoteException {
         mLocalImplementation.unregisterUserRequestsListener(userReqListener);
     }
-
 }

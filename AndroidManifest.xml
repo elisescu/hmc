@@ -55,6 +55,11 @@
             android:launchMode="standard">
         </activity>
         
+        <activity android:name=".ui.mediadevice.TestsActivity" 
+            android:launchMode="standard">
+        </activity>
+        
+        
         <service android:name=".service.HMCService">
             <intent-filter>
                 <action android:name="com.hmc.project.hmc.service.HMCService"/>

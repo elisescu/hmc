@@ -33,50 +33,45 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="HMC media client"
+        android:text="Simple tests"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <Button
-        android:id="@+id/hmcmediaclient_main_screen_see_devices_button"
+    <TextView
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView1"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="28dp"
-        android:text="See devices" />
+        android:text="with: %s"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <ImageView
-        android:id="@+id/imageView1"
+    <Button
+        android:id="@+id/run_tests"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/hmcmediaclient_main_screen_see_devices_button"
+        android:layout_below="@+id/textView2"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="17dp"
-        android:src="@drawable/stat_sample" />
+        android:layout_marginTop="30dp"
+        android:text="Run tests" />
 
-    <Button
-        android:id="@+id/hmcmediaclient_main_screen_demo_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/imageView1"
-        android:layout_toLeftOf="@+id/imageView1"
-        android:text="Demo" />
+    <RelativeLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/run_tests"
+        android:layout_centerHorizontal="true" >
 
-    <Button
-        android:id="@+id/hmcmediaclient_main_screen_logout_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
-        android:text="Log out" />
+        <TextView
+            android:id="@+id/tests_results"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="Press the button to run some tests..."
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <Button
-        android:id="@+id/hmcmediaclient_main_screen_tests_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/imageView1"
-        android:layout_toRightOf="@+id/imageView1"
-        android:text="Tests" />
+    </RelativeLayout>
 
 </RelativeLayout>

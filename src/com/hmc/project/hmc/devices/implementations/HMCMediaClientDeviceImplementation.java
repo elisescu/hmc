@@ -68,27 +68,49 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
     public String runTests(String fullJID) {
         String retVal = "";
         long startTime, duration;
-        int failedOTRNegotiations = 0;
+        int failedNo = 0;
         
         retVal += "Time for start and stop OTR session: ";
 
         // test 10 start-stop OTR
-        duration = 0;
         HMCAnonymousDeviceProxy anonProxy = mHMCManager.createAnonymousProxy(fullJID);
+        duration = 0;
         for (int i = 0; i < 10; i++) {
             startTime = System.currentTimeMillis();
             boolean succses = anonProxy.test_StartAndStopOTR();
             if (!succses) {
-                failedOTRNegotiations++;
+                failedNo++;
             } else {
                 duration += System.currentTimeMillis() - startTime;
             }
         }
-        if (failedOTRNegotiations != 10)
-            duration /= 10 - failedOTRNegotiations;
-        mHMCManager.deleteAnonymousProxy(fullJID);
+        if (failedNo != 10)
+            duration /= 10 - failedNo;
+        retVal += duration + " miliseconds. Failed = " + failedNo;
 
-        retVal += duration + " miliseconds. Failed = " + failedOTRNegotiations;
+        retVal += "\n\nTime for call an RPC sync command: ";
+        // test 10 start-stop OTR
+        duration = 0;
+        failedNo = 0;
+        for (int i = 0; i < 10; i++) {
+            startTime = System.currentTimeMillis();
+            String ret = anonProxy.testSyncCommand("dummy");
+            boolean succes = ret.equals("sync-reply");
+
+            if (!succes) {
+                failedNo++;
+            } else {
+                duration += System.currentTimeMillis() - startTime;
+            }
+        }
+        if (failedNo != 10)
+            duration /= 10 - failedNo;
+
+        retVal += duration + " miliseconds. Failed = " + failedNo;
+
+        anonProxy.cleanOTRSession();
+
+        mHMCManager.deleteAnonymousProxy(fullJID);
 
         return retVal;
     }

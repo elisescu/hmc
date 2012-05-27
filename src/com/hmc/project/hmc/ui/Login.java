@@ -7,6 +7,8 @@
 
 package com.hmc.project.hmc.ui;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -114,7 +116,7 @@ public class Login extends Activity {
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.controler_service, menu);
+        inflater.inflate(R.menu.login_screen, menu);
         return true;
     }
 
@@ -124,12 +126,33 @@ public class Login extends Activity {
     @Override
     public final boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.controler_list_menu_preferences:
+            case R.id.login_menu_preferences:
                 startActivity(new Intent(this, HMCSettings.class));
+                return true;
+            case R.id.login_menu_clearHMC:
+                clearHMCData();
                 return true;
             default:
                 return false;
         }
+    }
+
+    /**
+     * 
+     */
+    private void clearHMCData() {
+        // delete the files where we keep info about local and extenral devices
+
+        // TODO: improve the horrible way of clearing HMC data
+        File f = new File("/sdcard/HMCDeviceStore.dat");
+        if (f.exists()) {
+            f.delete();
+        }
+        f = new File("/sdcard/HMCDeviceStore.dat_ext");
+        if (f.exists()) {
+            f.delete();
+        }
+        Toast.makeText(Login.this, "Deleted devices store files", Toast.LENGTH_SHORT).show();
     }
 
     /* (non-Javadoc)

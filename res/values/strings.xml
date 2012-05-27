@@ -36,9 +36,9 @@
 		
 		
     
-	<!-- Controller activity !! -->
-		<string name="controler_list_menu_preferences">Configure device</string>
-		<string name="controler_list_menu_login">Login</string>
+	<!-- Login activity !! -->
+		<string name="login_menu_preferences">Configure device</string>
+		<string name="login_menu_clearHMC">Clear HMC data</string>
 
 
 

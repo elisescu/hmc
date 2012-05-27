@@ -5,6 +5,7 @@ import android.util.Log;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaClientDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
+import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.service.HMCManager;
 
@@ -59,5 +60,24 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
             String newDeviceName) {
         // TODO Auto-generated method stub
 
+    }
+
+    /**
+     * @param fullJID
+     */
+    public String runTests(String fullJID) {
+        String retVal = "";
+        long startTime, duration;
+        
+        retVal += "Time for start and stop OTR session: ";
+
+        startTime = System.currentTimeMillis();
+        HMCAnonymousDeviceProxy anonProxy = mHMCManager.createAnonymousProxy(fullJID);
+        anonProxy.test_StartAndStopOTR();
+        duration = System.currentTimeMillis() - startTime;
+        mHMCManager.deleteAnonymousProxy(fullJID);
+
+        retVal += duration + " miliseconds";
+        return retVal;
     }
 }

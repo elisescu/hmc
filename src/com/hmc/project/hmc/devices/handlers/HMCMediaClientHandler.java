@@ -58,8 +58,7 @@ public class HMCMediaClientHandler extends IHMCMediaClientHndl.Stub {
      */
     @Override
     public String runTests(String fullJID) throws RemoteException {
-        // TODO Auto-generated method stub
-        return "Tested!!!!!!!";
+        return mLocalImplementation.runTests(fullJID);
     }
 
 }

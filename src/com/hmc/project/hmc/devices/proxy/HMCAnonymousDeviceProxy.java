@@ -109,4 +109,13 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
         remoteInfo = HMCDevicesList.fromXMLString(retStr);
         return remoteInfo;
     }
+
+    /**
+     * needed for testing purposes: start and stop the OTR session on the secure
+     * chat reference.
+     */
+    public void test_StartAndStopOTR() {
+        mSecureChat.startOtrSession();
+        mSecureChat.stopOtrSession();
+    }
 }

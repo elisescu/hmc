@@ -756,4 +756,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         sendCommandAsync(CMD_TEST_ASYNC_COMMAND, param, listener);
     }
 
+    public String testSyncCommand(String param) {
+        return sendCommandSync(CMD_TEST_SYNC_COMMAND, param);
+    }
+
 }

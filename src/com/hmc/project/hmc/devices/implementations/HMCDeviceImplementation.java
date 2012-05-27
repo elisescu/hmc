@@ -61,12 +61,40 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
                 case HMCDeviceItf.CMD_REMOTE_INCREMENT:
                     return _remoteIncrement(params);
                 case HMCDeviceItf.CMD_TEST_ASYNC_COMMAND:
-                    return testAsyncCommand(params, null);
+                    return _testAsyncCommand(params, fromDev);
+                case HMCDeviceItf.CMD_TEST_SYNC_COMMAND:
+                    return _testSyncCommand(params, fromDev);
                 default:
                     return "invalid-operation";
             }
         }
         return "not-authenticated";
+    }
+
+    /**
+     * @param params
+     * @param fromDev
+     * @return
+     */
+    private String _testSyncCommand(String params, HMCDeviceProxy fromDev) {
+        return testSyncCommand(params);
+    }
+
+    /**
+     * @param params
+     * @return
+     */
+    private String testSyncCommand(String params) {
+        return "sync-reply";
+    }
+
+    /**
+     * @param params
+     * @param fromDev
+     * @return
+     */
+    private String _testAsyncCommand(String params, HMCDeviceProxy fromDev) {
+        return testAsyncCommand(params, null);
     }
 
     // this method should be overridden by subclasses if the operations they
@@ -168,7 +196,7 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
      * @return the string
      */
     public String testAsyncCommand(String param, AsyncCommandReplyListener listener) {
-        String retVal = "relpy async test";
+        String retVal = "relpy async";
         Log.d(TAG, "Received test async command with param: " + param);
 
         // simulate long processing

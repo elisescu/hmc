@@ -45,6 +45,9 @@ public interface HMCDeviceItf {
     /** The Constant CMD_TEST_ASYNC_COMMAND. */
     static final int CMD_TEST_ASYNC_COMMAND = HMC_DEVICE_INITIAL_COMMAND + 3;
 
+    /** The Constant CMD_TEST_SYNC_COMMAND. */
+    static final int CMD_TEST_SYNC_COMMAND = HMC_DEVICE_INITIAL_COMMAND + 4;
+
     /** The Constant HMC_DEVICE_LAST_COMMAND. */
     static final int HMC_DEVICE_LAST_COMMAND = CMD_TEST_ASYNC_COMMAND;
 	

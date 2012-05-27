@@ -43,11 +43,15 @@
             android:launchMode="standard">
         </activity>
        
-        <activity android:name=".ui.mediaclient.HMCMediaClientDeviceMainScreen" 
+        <activity android:name=".ui.mediaclientdevice.HMCMediaClientDeviceMainScreen" 
             android:launchMode="standard">
         </activity>
         
-        <activity android:name=".ui.mediaclient.ConfirmJoinHMC" 
+        <activity android:name=".ui.mediaservicedevice.HMCMediaServiceDeviceMainScreen" 
+            android:launchMode="standard">
+        </activity>
+
+        <activity android:name=".ui.mediadevice.ConfirmJoinHMC" 
             android:launchMode="standard">
         </activity>
         

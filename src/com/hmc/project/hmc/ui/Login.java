@@ -42,6 +42,7 @@ import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.hmcserver.AddNewDeviceWizzard;
 import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
 import com.hmc.project.hmc.ui.mediaclientdevice.HMCMediaClientDeviceMainScreen;
+import com.hmc.project.hmc.ui.mediaservicedevice.HMCMediaServiceDeviceMainScreen;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
 import de.duenndns.ssl.MemorizingTrustManager;
@@ -153,6 +154,9 @@ public class Login extends Activity {
             case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
                 startActivity(new Intent(Login.this, HMCMediaClientDeviceMainScreen.class));
                 break;
+                case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
+                    startActivity(new Intent(Login.this, HMCMediaServiceDeviceMainScreen.class));
+                    break;
             default:
                 Log.e(TAG, "Very baad error: we don't know what type of device we are");
                 disconnectAndStopService();
@@ -377,6 +381,9 @@ public class Login extends Activity {
                         break;
                     case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
                         startActivity(new Intent(Login.this, HMCMediaClientDeviceMainScreen.class));
+                        break;
+                    case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
+                        startActivity(new Intent(Login.this, HMCMediaServiceDeviceMainScreen.class));
                         break;
                     default:
                         Log.e(TAG, "Very baad error: we don't know what type of device we are");

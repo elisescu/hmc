@@ -48,6 +48,7 @@ import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.implementations.HMCMediaDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCMediaClientDeviceImplementation;
+import com.hmc.project.hmc.devices.implementations.HMCMediaServiceDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCServerImplementation;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
@@ -241,6 +242,16 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                     }
                 }
                 break;
+                case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE: {
+                    if (mLocalImplementation == null) {
+                        mLocalDeviceDescriptor.setDeviceType(HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE);
+                        mLocalImplementation = new HMCMediaServiceDeviceImplementation(this,
+                                                mLocalDeviceDescriptor);
+                        ((HMCMediaDeviceImplementation) mLocalImplementation)
+                                                .registerDeviceAditionConfirmationListener(mDeviceAdditionListener);
+                    }
+                }
+                    break;
                 default:
                     Log.e(TAG, "Don't have implementation for that specific device: " + devType);
                     break;

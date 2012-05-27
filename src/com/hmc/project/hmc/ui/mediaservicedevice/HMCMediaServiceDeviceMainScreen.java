@@ -60,7 +60,7 @@ public class HMCMediaServiceDeviceMainScreen extends Activity {
             if (mHMCConnection != null) {
                 try {
                     mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(), "",
-                                            HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE,
+                                            HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE,
                                             mHMCApplication.getHMCName());
                 } catch (RemoteException e) {
                     e.printStackTrace();
@@ -118,7 +118,7 @@ public class HMCMediaServiceDeviceMainScreen extends Activity {
         doBindService();
         mHMCApplication = (HMCApplication) getApplication();
 
-        setContentView(R.layout.hmc_mediaclient_main_screen);
+        setContentView(R.layout.hmc_mediaservice_main_screen);
 
         // make sure we ended up in this activity with the app connected to XMPP
         // server
@@ -127,8 +127,8 @@ public class HMCMediaServiceDeviceMainScreen extends Activity {
             finish();
         }
 
-        mSeeDevicesButton = (Button) findViewById(R.id.hmcmediaclient_main_screen_see_devices_button);
-        mLogoutButton = (Button) findViewById(R.id.hmcmediaclient_main_screen_logout_button);
+        mSeeDevicesButton = (Button) findViewById(R.id.hmcmediaservice_main_screen_see_devices_button);
+        mLogoutButton = (Button) findViewById(R.id.hmcmediaservice_main_screen_logout_button);
         mSeeDevicesButton.setOnClickListener(mButtonsClickListener);
         mLogoutButton.setOnClickListener(mButtonsClickListener);
     }
@@ -138,11 +138,11 @@ public class HMCMediaServiceDeviceMainScreen extends Activity {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.hmcmediaclient_main_screen_see_devices_button:
+                case R.id.hmcmediaservice_main_screen_see_devices_button:
                     startActivity(new Intent(HMCMediaServiceDeviceMainScreen.this,
                                             DevicesListActivity.class));
                     break;
-                case R.id.hmcmediaclient_main_screen_logout_button:
+                case R.id.hmcmediaservice_main_screen_logout_button:
                     logOutAndExit();
                     break;
                 default:
@@ -157,7 +157,7 @@ public class HMCMediaServiceDeviceMainScreen extends Activity {
     public final boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.hmc_mediaclient_main_screen, menu);
+        inflater.inflate(R.menu.hmc_mediaservice_main_screen, menu);
         return true;
     }
 
@@ -167,7 +167,7 @@ public class HMCMediaServiceDeviceMainScreen extends Activity {
     @Override
     public final boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.hmc_mediaclient_default_screen_stop_hmc:
+            case R.id.hmc_mediaservice_default_screen_stop_hmc:
                 logOutAndExit();
                 return true;
             default:

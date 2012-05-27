@@ -29,7 +29,7 @@
     android:padding="4dip" >
 
     <Button
-        android:id="@+id/hmcmediaclient_main_screen_see_devices_button"
+        android:id="@+id/hmcmediaservice_main_screen_see_devices_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -38,7 +38,7 @@
         android:text="See devices" />
 
     <Button
-        android:id="@+id/hmcmediaclient_main_screen_logout_button"
+        android:id="@+id/hmcmediaservice_main_screen_logout_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/button1"
@@ -47,12 +47,12 @@
         android:text="Log out" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/title_mediaservice_mainscreen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="HMC media client"
+        android:text="HMC media service"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </RelativeLayout>

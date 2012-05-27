@@ -129,10 +129,10 @@ public class SecureChat implements MessageListener {
     /**
      * Start otr session.
      */
-    public void startOtrSession() {
+    public boolean startOtrSession() {
         if (mOtrSessionId == null) {
             Log.e(TAG, "The otr SessionID was not initialized ");
-            return;
+            return false;
         }
 
         try {
@@ -142,30 +142,39 @@ public class SecureChat implements MessageListener {
             synchronized (mOtrSessionId) {
                 mOtrSessionId.wait(MAX_OTR_TIMEOUT);
             }
-
+            if (mOTRStatus == SecureChatState.PLAINTEXT) {
+                Log.e(TAG, "Could not start an ecrypted OTR session");
+                return false;
+            }
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return false;
         }
         catch (OtrException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     /**
      * Stop otr session.
      */
-    public void stopOtrSession() {
+    public boolean stopOtrSession() {
         if (mOtrSessionId == null) {
             Log.e(TAG, "The otr SessionID was not initialized ");
-            return;
+            return false;
         }
 
         try {
             HMCOTRManager.getInstance().getOtrEngine().endSession(mOtrSessionId);
         } catch (OtrException e) {
             e.printStackTrace();
+            return false;
         }
+
+        return true;
     }
 
     /**

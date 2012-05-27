@@ -68,16 +68,28 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
     public String runTests(String fullJID) {
         String retVal = "";
         long startTime, duration;
+        int failedOTRNegotiations = 0;
         
         retVal += "Time for start and stop OTR session: ";
 
-        startTime = System.currentTimeMillis();
+        // test 10 start-stop OTR
+        duration = 0;
         HMCAnonymousDeviceProxy anonProxy = mHMCManager.createAnonymousProxy(fullJID);
-        anonProxy.test_StartAndStopOTR();
-        duration = System.currentTimeMillis() - startTime;
+        for (int i = 0; i < 10; i++) {
+            startTime = System.currentTimeMillis();
+            boolean succses = anonProxy.test_StartAndStopOTR();
+            if (!succses) {
+                failedOTRNegotiations++;
+            } else {
+                duration += System.currentTimeMillis() - startTime;
+            }
+        }
+        if (failedOTRNegotiations != 10)
+            duration /= 10 - failedOTRNegotiations;
         mHMCManager.deleteAnonymousProxy(fullJID);
 
-        retVal += duration + " miliseconds";
+        retVal += duration + " miliseconds. Failed = " + failedOTRNegotiations;
+
         return retVal;
     }
 }

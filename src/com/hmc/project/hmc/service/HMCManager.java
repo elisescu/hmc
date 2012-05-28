@@ -184,6 +184,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                                    dev.getFingerprint().equals(remoteDevice.getFingerprint())) {
                     Log.d(TAG, "Successfuly authenticated device: " + remoteDevice);
                     return true;
+                } else {
+                    Log.e(TAG, "Device not authenticated: " + remoteDevice);
                 }
                 return false;
             }

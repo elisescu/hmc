@@ -10,6 +10,7 @@ package com.hmc.project.hmc.devices.proxy;
 
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 import net.java.otr4j.session.SessionID;
@@ -604,17 +605,17 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     private class SyncResults {
         
         /** The m replies locks. */
-        private HashMap<CommandUniqueIdentifier, String> mRepliesLocks;
+        private ConcurrentHashMap<CommandUniqueIdentifier, String> mRepliesLocks;
         
         /** The m replies values. */
-        private HashMap<CommandUniqueIdentifier, String> mRepliesValues;
+        private ConcurrentHashMap<CommandUniqueIdentifier, String> mRepliesValues;
 
         /**
          * Instantiates a new sync results.
          */
         public SyncResults() {
-            mRepliesLocks = new HashMap<CommandUniqueIdentifier, String>();
-            mRepliesValues = new HashMap<CommandUniqueIdentifier, String>();
+            mRepliesLocks = new ConcurrentHashMap<CommandUniqueIdentifier, String>();
+            mRepliesValues = new ConcurrentHashMap<CommandUniqueIdentifier, String>();
         }
 
         /**

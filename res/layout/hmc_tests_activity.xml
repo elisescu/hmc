@@ -61,17 +61,31 @@
         android:layout_below="@+id/run_tests"
         android:layout_centerHorizontal="true" >
 
-        <TextView
-            android:id="@+id/tests_results"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:text="Press the button to run some tests..."
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroller"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fillViewport="true" >
+    
+        <HorizontalScrollView
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:fillViewport="true">
+		
+	        <TextView
+	            android:id="@+id/tests_results"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_alignParentBottom="true"
+	            android:layout_alignParentLeft="true"
+	            android:layout_alignParentRight="true"
+	            android:layout_alignParentTop="true"
+	            android:text="Press the button to run some tests..."
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	        
+  		</HorizontalScrollView>
+  	</ScrollView>
+  	
     </RelativeLayout>
 
 </RelativeLayout>

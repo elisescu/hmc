@@ -85,7 +85,7 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
      * @return
      */
     private String testSyncCommand(String params) {
-        return "sync-reply";
+        return params;
     }
 
     /**

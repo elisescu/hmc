@@ -35,7 +35,7 @@ public class SecureChat implements MessageListener {
     private static final String TAG = "SecureChat";
     
     /** The Constant MAX_OTR_TIMEOUT. */
-    private static final long MAX_OTR_TIMEOUT = 15000;
+    private static final long MAX_OTR_TIMEOUT = 4000;
     
     /** The m xmpp chat. */
     private Chat mXMPPChat;

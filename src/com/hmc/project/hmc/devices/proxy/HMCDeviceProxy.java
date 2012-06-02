@@ -61,7 +61,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     // max timeout for a command reply: 15 sec?
     /** The Constant REPLY_MAX_TIME_OUT. */
-    private static final long REPLY_MAX_TIME_OUT = 15000;
+    private static final long REPLY_MAX_TIME_OUT = 4000;
 
     // RPC header format:
     // |...type_of_message...|...operation_code...|...operation_id...|...other_data(params, reply value)...|

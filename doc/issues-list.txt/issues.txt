@@ -8,5 +8,9 @@ issues:
    waiting for the reply 
 5. make the error reporting better
 6. document the code
-
-
+7. wait for remote user relpy when doing addition or interconnction so that if the local user confirmed don';t exit until the remote repklied as well
+8. send the list of external devices as well when adding new device
+9. display the online devics in a different way of the offline ones
+10. icons to notifications
+11. notification must be permanent (if I click clear button doesnt have to dissapear)
+12. 

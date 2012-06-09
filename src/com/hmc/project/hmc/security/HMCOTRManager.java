@@ -51,7 +51,7 @@ public class HMCOTRManager implements OtrEngineHost {
      */
     public HMCOTRManager() {
         try {
-            mOtrKeyManager = new OtrKeyManagerImpl("/sdcard/HMCdata");
+            mOtrKeyManager = new OtrKeyManagerImpl("/sdcard/HMCkeystore.dat");
         } catch (IOException e) {
             Log.d(TAG, "Fatal error: we can't write to SD card");
             e.printStackTrace();

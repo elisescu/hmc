@@ -152,7 +152,7 @@ public class Login extends Activity {
         if (f.exists()) {
             f.delete();
         }
-        f = new File("/sdcard/HMCdata");
+        f = new File("/sdcard/HMCkeystore.dat");
         if (f.exists()) {
             f.delete();
         }

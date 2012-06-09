@@ -242,7 +242,7 @@ public class HMCDevicesStore {
      */
     public boolean addNewExternalDevice(String hmcName, DeviceDescriptor devDesc) {
         // TODO: fix this
-        mExternalHMCName = hmcName;
+        // mExternalHMCName = hmcName;
 
         HMCDeviceProxy dev = mHMCManager.createNewDeviceProxy(devDesc);
 

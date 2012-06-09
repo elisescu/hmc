@@ -392,6 +392,9 @@ public class Login extends Activity {
         public void connectionSuccessful(boolean success) throws RemoteException {
             Log.d(TAG, "Connection successful"+success);
 
+            mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(),
+                                    mHMCApplication.getUsername(), mHMCApplication.getDeviceType(),
+                                    mHMCApplication.getHMCName());
             Login.this.runOnUiThread(new Runnable() {
                 public void run() {
                     mLoginProgressbar.setVisibility(ProgressBar.INVISIBLE);

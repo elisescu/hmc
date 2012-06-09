@@ -179,13 +179,19 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                 // the fingerprints match
                 HashMap<String, DeviceDescriptor> localDevs = getListOfLocalDevicesDescriptors();
                 DeviceDescriptor dev = localDevs.get(remoteDevice.getFullJID());
+                
+                // try the external list if the dev is not in the local list
+                if (dev == null) {
+                    HashMap<String, DeviceDescriptor> externalDevs = getListOfExternalDevicesDescriptors();
+                    dev = externalDevs.get(remoteDevice.getFullJID());
+                }
 
                 if (dev != null && dev.getFullJID().equals(remoteDevice.getFullJID()) && 
                                    dev.getFingerprint().equals(remoteDevice.getFingerprint())) {
                     Log.d(TAG, "Successfuly authenticated device: " + remoteDevice);
                     return true;
                 } else {
-                    Log.e(TAG, "Device not authenticated: " + remoteDevice);
+                    Log.e(TAG, "remote dev not authenticated: " + remoteDevice + "  vs:  " + dev);
                 }
                 return false;
             }
@@ -597,6 +603,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         return retVal;
     }
 
+    public HashMap<String, DeviceDescriptor> getListOfExternalDevicesDescriptors() {
+        HashMap<String, DeviceDescriptor> retVal = mHMCDevicesStore
+                .getListOfExternalDevicesDescriptors("fix-me");
+        return retVal;
+    }
     /**
      * De init.
      */

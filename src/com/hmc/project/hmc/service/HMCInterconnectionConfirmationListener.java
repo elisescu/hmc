@@ -114,8 +114,11 @@ public class HMCInterconnectionConfirmationListener {
     public void setUserReply(boolean val) {
         Log.d(TAG, "Got the user response.. now let the HMC server know");
         mUserReply = val;
-        synchronized (mWaitLock) {
-            mWaitLock.notify();
+
+        if (mWaitLock != null) {
+            synchronized (mWaitLock) {
+                mWaitLock.notify();
+            }
         }
     }
 }

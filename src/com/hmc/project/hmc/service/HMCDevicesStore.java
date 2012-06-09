@@ -145,8 +145,7 @@ public class HMCDevicesStore {
      * @return true, if successful
      */
     public boolean addNewExternalDevice(String hmcName, HMCDeviceProxy dev) {
-        // TODO: fix this
-        // mExternalHMCName = hmcName;
+        mExternalHMCName = hmcName;
 
         if (mListOfExternalDevices.containsKey(dev.getDeviceDescriptor().getFullJID())) {
             Log.e(TAG, "Device " + dev.getDeviceDescriptor().getFullJID()

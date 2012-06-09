@@ -7,6 +7,8 @@
 
 package com.hmc.project.hmc;
 
+import org.jivesoftware.smack.util.StringUtils;
+
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.os.Environment;
@@ -77,7 +79,12 @@ public class HMCApplication extends Application {
             mDeviceType = -1;
         }
 
-        mIsConfigured = !("".equals(mUsername) || "".equals(mPassword) || mDeviceType == -1);
+        String resource;
+        resource = StringUtils.parseResource(mUsername);
+
+        mIsConfigured = !("".equals(resource)) || !("".equals(mUsername) || "".equals(mPassword) ||
+                                mDeviceType == -1);
+
         Log.d(TAG, "------------Configuration: " + mUsername + " " + mPassword.length() + " "
                                 + mDeviceName
                                 + " " + mDeviceType);

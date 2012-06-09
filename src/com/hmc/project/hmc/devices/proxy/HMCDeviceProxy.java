@@ -169,6 +169,12 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
                 retVal.setDeviceDescriptor(mDeviceDescriptor);
                 Log.d(TAG, mDeviceDescriptor.getDeviceName() + " promoted as HMC Media Client");
                 break;
+            case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
+                retVal = new HMCMediaServiceDeviceProxy(mSecureChat);
+                retVal.setLocalImplementation(mLocalImplementation);
+                retVal.setDeviceDescriptor(mDeviceDescriptor);
+                Log.d(TAG, mDeviceDescriptor.getDeviceName() + " promoted as HMC Media Client");
+                break;
             default:
                 Log.e(TAG, "Promote to unknown device type proxy");
                 break;

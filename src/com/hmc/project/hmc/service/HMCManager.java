@@ -55,6 +55,7 @@ import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCMediaClientDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
+import com.hmc.project.hmc.devices.proxy.HMCMediaServiceDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCServerProxy;
 import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.HMCOTRManager;
@@ -531,6 +532,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
                 devProxy = new HMCMediaClientDeviceProxy(mXMPPChatManager,
                         mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(), this);
+                break;
+            case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
+                devProxy = new HMCMediaServiceDeviceProxy(mXMPPChatManager,
+                                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(),
+                                        this);
                 break;
             default:
                 devProxy = null;

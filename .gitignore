@@ -1,3 +1,5 @@
+.settings/
+javadoc.xml
 bin/*
 R.java
 gen/*

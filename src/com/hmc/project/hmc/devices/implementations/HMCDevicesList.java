@@ -170,6 +170,7 @@ public class HMCDevicesList {
                         devType = Integer.parseInt(eElement
                                                 .getAttribute(DeviceDescriptor.TAG_DEVICE_TYPE));
                     } catch (NumberFormatException e) {
+                        devType = -1;
                         e.printStackTrace();
                     }
                     dev.setDeviceType(devType);

@@ -230,6 +230,9 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
      * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getDeviceName()
      */
     public String getDeviceName() {
+        if (mDeviceName == null)
+            return "";
+
         return mDeviceName;
     }
 
@@ -246,6 +249,8 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
      * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getUserName()
      */
     public String getUserName() {
+        if (mUserName == null)
+            return "";
         return mUserName;
     }
 
@@ -278,6 +283,8 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
      * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getFullJID()
      */
     public String getFullJID() {
+        if (mFullJID == null)
+            return "";
         return mFullJID;
     }
 
@@ -294,6 +301,8 @@ public class DeviceDescriptor extends IDeviceDescriptor.Stub implements Parcelab
      * @see com.hmc.project.hmc.aidl.IDeviceDescriptor#getFingerprint()
      */
     public String getFingerprint() {
+        if (mFingerprint == null)
+            return "";
         return mFingerprint;
     }
 

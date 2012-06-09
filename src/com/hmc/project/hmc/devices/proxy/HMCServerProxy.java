@@ -87,10 +87,10 @@ public class HMCServerProxy extends HMCDeviceProxy implements HMCServerItf {
     public HMCDevicesList exchangeListsOfLocalDevices(HMCDevicesList list) {
         // Send the list of deviecs to the newly added client. Use the
         // notification RPC mechanism
-        Log.d(TAG, "Send the list to remote: " + list.toXMLString());
-        String retDevsList = sendCommandSync(CMD_EXCHANGE_LISTS_OF_LOCAL_DEVICES,
-                                list.toXMLString());
-
+        String strList = list.toXMLString();
+        Log.d(TAG, "Send the list to remote: " + strList);
+        String retDevsList = sendCommandSync(CMD_EXCHANGE_LISTS_OF_LOCAL_DEVICES, strList);
+        Log.d(TAG, "Received list from remote: " + retDevsList);
         return HMCDevicesList.fromXMLString(retDevsList);
     }
 

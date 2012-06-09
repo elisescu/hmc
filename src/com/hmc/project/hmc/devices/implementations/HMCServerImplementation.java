@@ -40,7 +40,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     private boolean remoteUserReply = true;
     
     /** The interconnection success. */
-    private boolean interconnectionSuccess = true;
+    private RemoteReply intconnUsrReply = null;
     
     /** The m local hmc info. */
     private HMCDevicesList mLocalHMCInfo;
@@ -78,6 +78,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         HMCDevicesList remoteHMCInfo = null;
         DeviceDescriptor remoteHMCServerDesc = null;
         String remoteHMCName = "";
+        intconnUsrReply = new RemoteReply();
 
         HMCAnonymousDeviceProxy newDevProxy = mHMCManager
                                 .createAnonymousProxy(externalHMCServerAddress);
@@ -85,6 +86,13 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // send a hello message to remote anonymous device to negotiate OTR and
         // get information about device which will be approved by the user
         remoteHMCInfo = newDevProxy.exchangeHMCInfo(mLocalHMCInfo);
+
+        if (remoteHMCInfo == null) {
+            Log.e(TAG, "info from remote device is null");
+            mHMCManager.deleteAnonymousProxy(externalHMCServerAddress);
+            return false;
+        }
+
         remoteHMCName = remoteHMCInfo.getHMCName();
         // we should have only one device in this "pseudo-list". this will be
         // changed in future according with the previous TODO
@@ -118,8 +126,9 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         newDevProxy.interconnectionRequest(mHMCManager.getHMCName(),
                                 new AsyncCommandReplyListener() {
             public void onReplyReceived(String reply) {
-                interconnectionSuccess = Boolean.parseBoolean(reply);
-                Log.d(TAG, "Got the reply from media deviec user:" + interconnectionSuccess);
+                                        intconnUsrReply.setUserReply(Boolean.parseBoolean(reply));
+                                        Log.d(TAG, "Got the reply from media deviec user: "
+                                                                + intconnUsrReply.userReply);
             }
         });
 
@@ -144,7 +153,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         // devices
         // TODO: wait here for the remote reply! use a different variable that I
         // can wait for and the notify on in when the reply arrived
-        if (interconnectionSuccess) {
+        if (intconnUsrReply.userReply) {
             try {
                 // TODO:elis: shouldn't I use true so that I notify the rest of
                 // devices as well?
@@ -166,7 +175,7 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             }
         }
 
-        return remoteUserReply;
+        return intconnUsrReply.userReply;
     }
 
     /**
@@ -187,6 +196,11 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             // parameter
             DeviceDescriptor remoteHMCServer = mPendingHMCInfo.getIterator().next();
 
+            if (remoteHMCServer == null) {
+                Log.e(TAG, "remote HMCServer descriptor is null");
+                return false;
+            }
+
             // Log.d(TAG, "Ask the user to confirm joining with HMCServer: " +
             // remoteHMCServer);
             retVal = mHMCInterconnectionConfirmationListener.confirmHMCInterconnection(
@@ -203,7 +217,8 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
                     Log.d(TAG, "The device was promoted");
                 } catch (ClassCastException e) {
                     e.printStackTrace();
-                    // this shouldn't happen
+                    retVal = false;
+                    // this should never happen
                     Log.e(TAG, "FATAL: Received interconnection request from non-anonymous device");
                 }
             }
@@ -280,13 +295,17 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         HMCDevicesList devList = HMCDevicesList.fromXMLString(params);
         // update the HMCManager about the new list of devices
 
-        mHMCManager.updateListOfExternalDevices(devList, true);
+        if (devList != null) {
+            mHMCManager.updateListOfExternalDevices(devList, true);
+        }
 
         // now we have to send the list back as well
         HashMap<String, DeviceDescriptor> list = mHMCManager.getListOfLocalDevicesDescriptors();
         devList = new HMCDevicesList(mHMCManager.getHMCName(), false, list);
+        String strList = devList.toXMLString();
 
-        return devList.toXMLString();
+        Log.d(TAG, "List of local devs to be sent back: " + strList);
+        return strList;
     }
 
     /**
@@ -297,8 +316,12 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
      * @return the string
      */
     private String _exchangeHMCInfo(String params, HMCDeviceProxy fromDev) {
+        String retVal = "";
         HMCDevicesList localList = exchangeHMCInfo(HMCDevicesList.fromXMLString(params), fromDev);
-        return localList.toXMLString();
+        if (localList != null) {
+            retVal = localList.toXMLString();
+        }
+        return retVal;
     }
 
     /**
@@ -310,9 +333,9 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
      */
     private HMCDevicesList exchangeHMCInfo(HMCDevicesList remoteHMCInfo, HMCDeviceProxy fromDev) {
         mPendingHMCInfo = remoteHMCInfo;
-
-        fromDev.setDeviceDescriptor(remoteHMCInfo.getIterator().next());
-
+        if (remoteHMCInfo != null) {
+            fromDev.setDeviceDescriptor(remoteHMCInfo.getIterator().next());
+        }
         return mLocalHMCInfo;
     }
 
@@ -407,6 +430,21 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
     public void registerDeviceAditionConfirmationListener(
                             HMCInterconnectionConfirmationListener listener) {
         mHMCInterconnectionConfirmationListener = listener;
+    }
+
+    private class RemoteReply {
+        public boolean userReply;
+        public boolean receivedReply;
+
+        public RemoteReply() {
+            userReply = false;
+            receivedReply = false;
+        }
+
+        public void setUserReply(boolean usrRepl) {
+            userReply = usrRepl;
+            receivedReply = true;
+        }
 
     }
 }

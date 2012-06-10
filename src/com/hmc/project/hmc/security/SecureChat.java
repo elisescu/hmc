@@ -105,7 +105,7 @@ public class SecureChat implements MessageListener {
         if (mOTRStatus == SecureChatState.ENCRYPTED || mOTRStatus == SecureChatState.AUTHENTICATED) {
             stopOtrSession();
         }
-        HMCOTRManager.getInstance().removeChat(mOtrSessionId, this);
+        // HMCOTRManager.getInstance().removeChat(mOtrSessionId, this);
     }
 
     /**
@@ -219,7 +219,12 @@ public class SecureChat implements MessageListener {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    mSecureMessageListener.processMessage(mThis, mDecryptedMessage);
+                    if (mSecureMessageListener != null) {
+                        Log.d(TAG, "Notify listener " + mSecureMessageListener.hashCode());
+                        mSecureMessageListener.processMessage(mThis, mDecryptedMessage);
+                    } else {
+                        Log.e(TAG, "Null message listener for encrypted messages received");
+                    }
                 }
             }).start();
         } else if (msg.getBody().startsWith("?OTR:")) {
@@ -344,12 +349,24 @@ public class SecureChat implements MessageListener {
     }
 
     /**
-     * Adds the message listener.
-     *
-     * @param msgListener the msg listener
+     * Registers the message listener.
+     * 
+     * @param msgListener
+     *            the msg listener
      */
-    public void addMessageListener(SecuredMessageListener msgListener) {
+    public void registerMessageListener(SecuredMessageListener msgListener) {
         mSecureMessageListener = msgListener;
+    }
+
+    /**
+     * Unregisters the message listener.
+     * 
+     * @param msgListener
+     *            the msg listener
+     */
+    public void unregisterMessageListener() {
+        Log.d(TAG, "Removed secure messages listener (Device Proxy) " + mSecureMessageListener);
+        mSecureMessageListener = null;
     }
 
     /**

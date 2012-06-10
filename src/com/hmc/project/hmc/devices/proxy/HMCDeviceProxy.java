@@ -99,7 +99,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
                             HMCFingerprintsVerifier ver) {
         mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid);
 
-        mSecureChat.addMessageListener(this);
+        mSecureChat.registerMessageListener(this);
         mFullJID = remoteFullJid;
         mSyncResults = new SyncResults();
         mAsyncResults = new ASyncResults();
@@ -116,7 +116,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
      */
     public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
         mSecureChat = new SecureChat(chat, localFullJID, ver);
-        mSecureChat.addMessageListener(this);
+        mSecureChat.registerMessageListener(this);
         mFullJID = chat.getParticipant();
         mSyncResults = new SyncResults();
         mAsyncResults = new ASyncResults();
@@ -131,7 +131,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
      */
     public HMCDeviceProxy(SecureChat secureChat) {
         mSecureChat = secureChat;
-        mSecureChat.addMessageListener(this);
+        mSecureChat.registerMessageListener(this);
         mFullJID = secureChat.getParticipant();
         mSyncResults = new SyncResults();
         mAsyncResults = new ASyncResults();
@@ -156,29 +156,31 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     public HMCDeviceProxy promoteToSpecificProxy() {
         HMCDeviceProxy retVal = null;
 
+        mSecureChat.unregisterMessageListener();
         switch (mDeviceDescriptor.getDeviceType()) {
             case HMCDeviceItf.TYPE.HMC_SERVER:
                 retVal = new HMCServerProxy(mSecureChat);
-                retVal.setLocalImplementation(mLocalImplementation);
-                retVal.setDeviceDescriptor(mDeviceDescriptor);
                 Log.d(TAG, mDeviceDescriptor.getDeviceName() + " promoted as HMC Server");
                 break;
             case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
                 retVal = new HMCMediaClientDeviceProxy(mSecureChat);
-                retVal.setLocalImplementation(mLocalImplementation);
-                retVal.setDeviceDescriptor(mDeviceDescriptor);
                 Log.d(TAG, mDeviceDescriptor.getDeviceName() + " promoted as HMC Media Client");
                 break;
             case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
                 retVal = new HMCMediaServiceDeviceProxy(mSecureChat);
-                retVal.setLocalImplementation(mLocalImplementation);
-                retVal.setDeviceDescriptor(mDeviceDescriptor);
                 Log.d(TAG, mDeviceDescriptor.getDeviceName() + " promoted as HMC Media Client");
                 break;
             default:
                 Log.e(TAG, "Promote to unknown device type proxy");
                 break;
         }
+
+        if (retVal != null) {
+            retVal.setLocalImplementation(mLocalImplementation);
+            retVal.setDeviceDescriptor(mDeviceDescriptor);
+            mSecureChat.registerMessageListener(retVal);
+        }
+
         return retVal;
     }
 

@@ -211,6 +211,10 @@ public class HMCDevicesList {
         try {
             transformer = factory.newTransformer();
 
+            if (transformer == null) {
+                return null;
+            }
+
             DOMSource domSource = new DOMSource(toXMLElement());
             OutputStream output = new StringOutputStream();
             StreamResult result = new StreamResult(output);

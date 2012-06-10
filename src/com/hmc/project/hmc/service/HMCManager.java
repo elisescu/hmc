@@ -398,7 +398,23 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
      */
     public HMCAnonymousDeviceProxy createAnonymousProxy(String fullJID) {
         HMCAnonymousDeviceProxy retVal = null;
-        retVal = new HMCAnonymousDeviceProxy(mXMPPChatManager, mXMPPConnection.getUser(), fullJID);
+        // if we already have a proxy for the remote device, but for some
+        // strange reason we need an anonymous..
+
+        if (mHMCDevicesStore.getListOfLocalDevices().containsKey(fullJID)) {
+            HMCDeviceProxy knownProxy = mHMCDevicesStore.getListOfLocalDevices().get(fullJID);
+            knownProxy.release();
+            retVal = new HMCAnonymousDeviceProxy(knownProxy.getSecureChat());
+            mHMCDevicesStore.getListOfLocalDevices().remove(fullJID);
+        } else if (mHMCDevicesStore.getListOfExternalDevices().containsKey(fullJID)) {
+            HMCDeviceProxy knownProxy = mHMCDevicesStore.getListOfExternalDevices().get(fullJID);
+            knownProxy.release();
+            retVal = new HMCAnonymousDeviceProxy(knownProxy.getSecureChat());
+            mHMCDevicesStore.getListOfExternalDevices().remove(fullJID);
+        } else {
+            retVal = new HMCAnonymousDeviceProxy(mXMPPChatManager, mXMPPConnection.getUser(),
+                                    fullJID);
+        }
 
         mAnonymousDevices.put(fullJID, retVal);
 

@@ -180,9 +180,20 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         return retVal;
     }
 
+    public void release() {
+        mSecureChat.unregisterMessageListener();
+    }
+
+    /**
+     * @return the mSecureChat
+     */
+    public SecureChat getSecureChat() {
+        return mSecureChat;
+    }
+
     /**
      * Gets the device descriptor.
-     *
+     * 
      * @return the device descriptor
      */
     public DeviceDescriptor getDeviceDescriptor() {

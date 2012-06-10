@@ -105,7 +105,6 @@ public class SecureChat implements MessageListener {
         if (mOTRStatus == SecureChatState.ENCRYPTED || mOTRStatus == SecureChatState.AUTHENTICATED) {
             stopOtrSession();
         }
-        // HMCOTRManager.getInstance().removeChat(mOtrSessionId, this);
     }
 
     /**
@@ -120,7 +119,7 @@ public class SecureChat implements MessageListener {
         mRemoteFullJID = chat.getParticipant();
         mLocalFullJID = localFullJID;
         mOTRStatus = SecureChatState.PLAINTEXT;
-        Log.d(TAG, "Created a non-LOCAL secure chat with " + mRemoteFullJID);
+        Log.d(TAG, "Created a NON-LOCAL secure chat with " + mRemoteFullJID);
         mOtrSessionId = new SessionID(mLocalFullJID, mRemoteFullJID, "xmpp");
         HMCOTRManager.getInstance().addChat(mOtrSessionId, this);
     }

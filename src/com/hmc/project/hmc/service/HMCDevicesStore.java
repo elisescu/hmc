@@ -410,8 +410,10 @@ public class HMCDevicesStore {
 
         while (devDescIter.hasNext()) {
             DeviceDescriptor devDesc = devDescIter.next();
-            HMCDeviceProxy devPrxy = mHMCManager.createNewDeviceProxy(devDesc);
-            mListOfLocalDevices.put(devDesc.getFullJID(), devPrxy);
+            if (!devDesc.getFullJID().equals(mHMCManager.getLocalDevDesc().getFullJID())) {
+                HMCDeviceProxy devPrxy = mHMCManager.createNewDeviceProxy(devDesc);
+                mListOfLocalDevices.put(devDesc.getFullJID(), devPrxy);
+            }
 
             try {
                 if (mDevicesListener != null) {

@@ -17,6 +17,7 @@ import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
+import com.hmc.project.hmc.security.SecureChat;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -47,6 +48,10 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
      */
     public HMCAnonymousDeviceProxy(Chat chat, String localFullJID) {
         super(chat, localFullJID);
+    }
+
+    public HMCAnonymousDeviceProxy(SecureChat secChat) {
+        super(secChat);
     }
 
     /** The Constant TAG. */

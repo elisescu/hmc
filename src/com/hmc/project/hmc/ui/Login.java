@@ -392,9 +392,13 @@ public class Login extends Activity {
         public void connectionSuccessful(boolean success) throws RemoteException {
             Log.d(TAG, "Connection successful"+success);
 
-            mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(),
-                                    mHMCApplication.getUsername(), mHMCApplication.getDeviceType(),
-                                    mHMCApplication.getHMCName());
+            if (success) {
+                mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(),
+                                        mHMCApplication.getUsername(),
+                                        mHMCApplication.getDeviceType(),
+                                        mHMCApplication.getHMCName());
+            }
+
             Login.this.runOnUiThread(new Runnable() {
                 public void run() {
                     mLoginProgressbar.setVisibility(ProgressBar.INVISIBLE);
@@ -403,8 +407,8 @@ public class Login extends Activity {
 
             mHMCApplication.setConnected(success);
             if (success) {
-                HMCUserNotifications.normalToast(Login.this, "Login successful");
 
+                HMCUserNotifications.normalToast(Login.this, "Login successful");
                 switch (mDeviceType) {
                     case HMCDeviceItf.TYPE.HMC_SERVER:
                         startActivity(new Intent(Login.this, HMCServerMainScreen.class));

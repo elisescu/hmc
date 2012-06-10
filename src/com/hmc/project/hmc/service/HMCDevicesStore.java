@@ -413,17 +413,17 @@ public class HMCDevicesStore {
             if (!devDesc.getFullJID().equals(mHMCManager.getLocalDevDesc().getFullJID())) {
                 HMCDeviceProxy devPrxy = mHMCManager.createNewDeviceProxy(devDesc);
                 mListOfLocalDevices.put(devDesc.getFullJID(), devPrxy);
-            }
 
-            try {
-                if (mDevicesListener != null) {
-                    mDevicesListener.onDeviceAdded(devDesc);
-                } else {
-                    Log.w(TAG, "Have no device listener to notofy about new device");
+                try {
+                    if (mDevicesListener != null) {
+                        mDevicesListener.onDeviceAdded(devDesc);
+                    } else {
+                        Log.w(TAG, "Have no device listener to notofy about new device");
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Couldn't notify the remote device listener");
+                    e.printStackTrace();
                 }
-            } catch (RemoteException e) {
-                Log.e(TAG, "Couldn't notify the remote device listener");
-                e.printStackTrace();
             }
         }
 

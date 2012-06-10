@@ -217,7 +217,8 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
                     Log.d(TAG, "The device was promoted");
                 } catch (ClassCastException e) {
                     e.printStackTrace();
-                    retVal = false;
+                    if (!(fromDev instanceof HMCServerProxy))
+                        retVal = false;
                     // this should never happen
                     Log.e(TAG, "FATAL: Received interconnection request from non-anonymous device");
                 }

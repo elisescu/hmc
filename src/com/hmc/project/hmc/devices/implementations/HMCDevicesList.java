@@ -140,6 +140,11 @@ public class HMCDevicesList {
         try {
             db = dbf.newDocumentBuilder();
             Document doc = db.parse(new InputSource(new StringReader(input)));
+
+            if (doc == null || doc.getDocumentElement() == null) {
+                return null;
+            }
+
             doc.getDocumentElement().normalize();
 
             Element listEl = (Element) doc.getElementsByTagName(TAG_DEVLIST_ELEMENT).item(0);

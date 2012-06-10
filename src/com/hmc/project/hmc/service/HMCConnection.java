@@ -130,7 +130,11 @@ public class HMCConnection extends IHMCConnection.Stub {
         if (mXMPPConnection != null) {
             mXMPPConnection.connect();
             if (mXMPPConnection.isConnected()) {
+                try {
                 mXMPPConnection.login(lUsername, password, lResource);
+                } catch (java.lang.IllegalStateException e) {
+                    throw new XMPPException();
+                }
             } else {
                 Log.e(TAG, "Fatal error: cannot connect to server");
                 try {

@@ -160,8 +160,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
     @Override
     public synchronized void chatCreated(Chat chat, boolean createdLocally) {
         if (!createdLocally) {
-            HMCDeviceProxy devProxy = new HMCAnonymousDeviceProxy(chat, mXMPPConnection.getUser(),
-                                    this);
+            HMCDeviceProxy devProxy = new HMCAnonymousDeviceProxy(chat, mXMPPConnection.getUser());
             devProxy.setLocalImplementation(mLocalImplementation);
             mAnonymousDevices.put(chat.getParticipant(), devProxy);
         }
@@ -399,8 +398,7 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
      */
     public HMCAnonymousDeviceProxy createAnonymousProxy(String fullJID) {
         HMCAnonymousDeviceProxy retVal = null;
-        retVal = new HMCAnonymousDeviceProxy(mXMPPChatManager, mXMPPConnection.getUser(), fullJID,
-                this);
+        retVal = new HMCAnonymousDeviceProxy(mXMPPChatManager, mXMPPConnection.getUser(), fullJID);
 
         mAnonymousDevices.put(fullJID, retVal);
 
@@ -527,16 +525,15 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
         switch (devDesc.getDeviceType()) {
             case HMCDeviceItf.TYPE.HMC_SERVER:
                 devProxy = new HMCServerProxy(mXMPPChatManager,
-                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(), this);
+                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID());
                 break;
             case HMCDeviceItf.TYPE.HMC_CLIENT_DEVICE:
                 devProxy = new HMCMediaClientDeviceProxy(mXMPPChatManager,
-                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(), this);
+                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID());
                 break;
             case HMCDeviceItf.TYPE.HMC_SERVICE_DEVICE:
                 devProxy = new HMCMediaServiceDeviceProxy(mXMPPChatManager,
-                                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID(),
-                                        this);
+                                        mLocalDeviceDescriptor.getFullJID(), devDesc.getFullJID());
                 break;
             default:
                 devProxy = null;

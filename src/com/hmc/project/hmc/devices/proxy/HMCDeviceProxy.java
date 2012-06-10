@@ -26,7 +26,6 @@ import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCMediaDeviceImplementation;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
-import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.SecureChat;
 import com.hmc.project.hmc.security.SecuredMessageListener;
 import com.hmc.project.hmc.utils.UniqueId;
@@ -93,10 +92,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
      * @param chatManager the chat manager
      * @param localFullJID the local full jid
      * @param remoteFullJid the remote full jid
-     * @param ver the ver
      */
-    public HMCDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid,
-                            HMCFingerprintsVerifier ver) {
+    public HMCDeviceProxy(ChatManager chatManager, String localFullJID, String remoteFullJid) {
         mSecureChat = new SecureChat(chatManager, localFullJID, remoteFullJid);
 
         mSecureChat.registerMessageListener(this);
@@ -112,10 +109,9 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
      *
      * @param chat the chat
      * @param localFullJID the local full jid
-     * @param ver the ver
      */
-    public HMCDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
-        mSecureChat = new SecureChat(chat, localFullJID, ver);
+    public HMCDeviceProxy(Chat chat, String localFullJID) {
+        mSecureChat = new SecureChat(chat, localFullJID);
         mSecureChat.registerMessageListener(this);
         mFullJID = chat.getParticipant();
         mSyncResults = new SyncResults();

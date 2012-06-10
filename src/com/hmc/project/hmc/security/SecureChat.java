@@ -113,9 +113,8 @@ public class SecureChat implements MessageListener {
      *
      * @param chat the chat
      * @param localFullJID the local full jid
-     * @param ver the ver
      */
-    public SecureChat(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
+    public SecureChat(Chat chat, String localFullJID) {
         mXMPPChat = chat;
         chat.addMessageListener(this);
         mRemoteFullJID = chat.getParticipant();

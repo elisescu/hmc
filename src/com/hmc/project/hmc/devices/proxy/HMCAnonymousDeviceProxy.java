@@ -17,7 +17,6 @@ import com.hmc.project.hmc.devices.implementations.HMCDevicesList;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
-import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -33,11 +32,10 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
      * @param chatManager the chat manager
      * @param localFullJID the local full jid
      * @param remoteFullJid the remote full jid
-     * @param ver the ver
      */
     public HMCAnonymousDeviceProxy(ChatManager chatManager, String localFullJID,
-            String remoteFullJid, HMCFingerprintsVerifier ver) {
-        super(chatManager, localFullJID, remoteFullJid, ver);
+            String remoteFullJid) {
+        super(chatManager, localFullJID, remoteFullJid);
         // TODO Auto-generated constructor stub
     }
 
@@ -46,10 +44,9 @@ public class HMCAnonymousDeviceProxy extends HMCDeviceProxy {
      *
      * @param chat the chat
      * @param localFullJID the local full jid
-     * @param ver the ver
      */
-    public HMCAnonymousDeviceProxy(Chat chat, String localFullJID, HMCFingerprintsVerifier ver) {
-        super(chat, localFullJID, ver);
+    public HMCAnonymousDeviceProxy(Chat chat, String localFullJID) {
+        super(chat, localFullJID);
     }
 
     /** The Constant TAG. */

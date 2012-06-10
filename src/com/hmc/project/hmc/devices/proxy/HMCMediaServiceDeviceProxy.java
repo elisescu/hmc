@@ -12,7 +12,6 @@ import org.jivesoftware.smack.ChatManager;
 
 import com.hmc.project.hmc.devices.interfaces.HMCMediaClientDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaServiceDeviceItf;
-import com.hmc.project.hmc.security.HMCFingerprintsVerifier;
 import com.hmc.project.hmc.security.SecureChat;
 
 
@@ -29,12 +28,10 @@ public class HMCMediaServiceDeviceProxy extends HMCMediaDeviceProxy implements
      * @param chatManager the chat manager
      * @param localFUllJID the local f ull jid
      * @param remoteFullJid the remote full jid
-     * @param ver the ver
      */
     public HMCMediaServiceDeviceProxy(ChatManager chatManager, String localFUllJID,
-                            String remoteFullJid,
-                            HMCFingerprintsVerifier ver) {
-        super(chatManager, localFUllJID, remoteFullJid, ver);
+                            String remoteFullJid) {
+        super(chatManager, localFUllJID, remoteFullJid);
     }
 
     /**

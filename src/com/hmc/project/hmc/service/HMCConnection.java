@@ -95,7 +95,7 @@ public class HMCConnection extends IHMCConnection.Stub {
     @Override
     public IHMCManager getHMCManager() throws RemoteException {
         if (mHMCManager == null) {
-            if (mXMPPConnection.isAuthenticated()) {
+            if (mXMPPConnection != null && mXMPPConnection.isAuthenticated()) {
                 mHMCManager = new HMCManager(mXMPPConnection, mHMCService);
             }
         }

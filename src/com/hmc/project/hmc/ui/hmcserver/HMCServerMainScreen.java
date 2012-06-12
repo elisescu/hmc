@@ -29,6 +29,7 @@ import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListActivity;
 import com.hmc.project.hmc.ui.mediaclientdevice.HMCMediaClientDeviceMainScreen;
+import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -143,6 +144,14 @@ public class HMCServerMainScreen extends Activity {
                     break;
                 case R.id.hmcserver_main_screen_logout_button:
                     logOutAndExit();
+                    break;
+                case R.id.hmcserver_main_screen_demo_button:
+                    Intent intentDemo = new Intent(HMCServerMainScreen.this,
+                                            VideoPlayerActivity.class);
+
+                    intentDemo.putExtra(VideoPlayerActivity.PLAYER_MODE_KEY,
+                                            VideoPlayerActivity.PLAYER_MODE_LOCAL);
+                    startActivity(intentDemo);
                     break;
                 default:
                     break;

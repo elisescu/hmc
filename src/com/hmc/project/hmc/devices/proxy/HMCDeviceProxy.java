@@ -20,8 +20,10 @@ import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.media.audiofx.Equalizer;
+import android.os.RemoteException;
 import android.util.Log;
 
+import com.hmc.project.hmc.aidl.IMediaController;
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCMediaDeviceImplementation;
@@ -85,6 +87,8 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     
     /** The m async results. */
     private ASyncResults mAsyncResults;
+
+    private IMediaController mRemotePlayerProxy;
 
     /**
      * Instantiates a new hMC device proxy.
@@ -774,6 +778,51 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
 
     public String testSyncCommand(String param) {
         return sendCommandSync(CMD_TEST_SYNC_COMMAND, param);
+    }
+
+    /**
+     * @return
+     */
+    public IMediaController getMediaController() {
+        if (mRemotePlayerProxy == null) {
+            mRemotePlayerProxy = new MediaPlayerProxy();
+        }
+
+        return mRemotePlayerProxy;
+    }
+
+    class MediaPlayerProxy extends IMediaController.Stub {
+
+        /*
+         * (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IMediaController#play(java.lang.String)
+         */
+        @Override
+        public boolean play(String path) throws RemoteException {
+            Log.d(TAG, "Going to call PLAY on remote " + mDeviceDescriptor.getFullJID());
+            return true;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IMediaController#stop()
+         */
+        @Override
+        public boolean stop() throws RemoteException {
+            Log.d(TAG, "Going to call STOP on remote " + mDeviceDescriptor.getFullJID());
+            return true;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IMediaController#pause()
+         */
+        @Override
+        public boolean pause() throws RemoteException {
+            Log.d(TAG, "Going to call PAUSE on remote " + mDeviceDescriptor.getFullJID());
+            return true;
+        }
+
     }
 
 }

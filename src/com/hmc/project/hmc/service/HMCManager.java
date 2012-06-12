@@ -34,12 +34,14 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.hmc.project.hmc.aidl.IAsyncRPCReplyListener;
 import com.hmc.project.hmc.aidl.IDeviceDescriptor;
 import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
 import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
 import com.hmc.project.hmc.aidl.IHMCServerHndl;
+import com.hmc.project.hmc.aidl.IMediaController;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.handlers.HMCMediaClientHandler;
 import com.hmc.project.hmc.devices.handlers.HMCServerHandler;
@@ -808,5 +810,40 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                                 + knownDevice.getDeviceDescriptor().getFullJID()
                                 + ") was promoted and added to our list of devices");
         return knownDevice;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.hmc.project.hmc.aidl.IHMCManager#initRemoteRender_TEMP(java.lang.
+     * String, com.hmc.project.hmc.aidl.IAsyncRPCReplyListener)
+     */
+    @Override
+    public boolean initRemoteRender_TEMP(String fullJID, IAsyncRPCReplyListener listener)
+                            throws RemoteException {
+
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.hmc.project.hmc.aidl.IHMCManager#initRemoteRender(java.lang.String)
+     */
+    @Override
+    public IMediaController initRemoteRender(String fullJID) throws RemoteException {
+        HMCDeviceProxy devProxy;
+        IMediaController retVal = null;
+        devProxy = mHMCDevicesStore.getLocalDevice(fullJID);
+
+        if (devProxy == null) {
+            devProxy = mHMCDevicesStore.getExternalDevice(fullJID);
+        }
+
+        if (devProxy != null) {
+            retVal = devProxy.getMediaController();
+        }
+
+        return retVal;
     }
 }

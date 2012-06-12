@@ -13,14 +13,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import org.xbill.DNS.MINFORecord;
+
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
+import com.hmc.project.hmc.aidl.IAsyncRPCReplyListener;
 import com.hmc.project.hmc.aidl.IHMCConnection;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListAdapter;
 import com.hmc.project.hmc.ui.Login;
-import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.MediaController;
+import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.LocalMediaController;
+import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.RemoteMediaController;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 import com.hmc.project.hmc.aidl.IMediaController;
 
@@ -96,8 +100,10 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     private CharSequence[] mLocalDevicesJIDs;
     private CharSequence[] mLocalDevicesNames;
     private HashMap<String, String>  mLocalDevNamesHashMap;
-    private String mSelectedRender = "local";
+    private String mSelectedRenderFullJID = "local";
     private HashMap<String, String> mVideoResourcesList;
+    private RemoteMediaController mSelectedRender;
+    private HashMap<String, RemoteMediaController> mRemoteRenderers;
     
     /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -195,7 +201,9 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
     private MediaPlayer mMediaPlayer;
 
-    private MediaController mMediaController;
+    private LocalMediaController mLocalMediaController;
+
+    private Button mRemoteInitButton;
 
     /**
      * Do bind service.
@@ -266,16 +274,20 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             mRendererNameTxtView = (TextView) findViewById(R.id.vidAct_RenderName);
             mVideoListView = (ListView) findViewById(R.id.vidAct_ResourcesList);
             mVideoTitle = (TextView) findViewById(R.id.vidAct_streamTitle);
+            mRemoteInitButton = (Button) findViewById(R.id.vidAct_initRemoteButton);
 
             mPlayStopButton.setOnClickListener(mOnClickListener);
             mPauseResumeButton.setOnClickListener(mOnClickListener);
             mPreviousButton.setOnClickListener(mOnClickListener);
             mNextButton.setOnClickListener(mOnClickListener);
             mRendererNameTxtView.setOnClickListener(mOnClickListener);
+            mRemoteInitButton.setOnClickListener(mOnClickListener);
+
             mVideoListView.setOnItemClickListener(mOnListItemListener);
             mVideoResourcesListAdapter = new VideoResAdapter(this);
             mVideoListView.setAdapter(mVideoResourcesListAdapter);
 
+            mRemoteRenderers = new HashMap<String, VideoPlayerActivity.RemoteMediaController>();
             mContext = this;
             mBigProgressbar = (ProgressBar) findViewById(R.id.vidAct_bigProgressBar);
         } else if (mPlayerMode.equals(PLAYER_MODE_REMOTE)) {
@@ -306,7 +318,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         mMediaPlayer.setOnVideoSizeChangedListener(this);
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-        mMediaController = new MediaController();
+        mLocalMediaController = new LocalMediaController();
 
     }
     // resources list listener
@@ -338,6 +350,9 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 case R.id.vidAct_PauseResume:
                     pauseResume();
                     break;
+                case R.id.vidAct_initRemoteButton:
+                    initRemoteRender();
+                    break;
                 default:
                     break;
             }
@@ -345,15 +360,29 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         }
     };
 
+    private void initRemoteRender() {
+        setStatusMessage("Initializing remote...: " + mSelectedRenderFullJID, Color.WHITE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean result = mSelectedRender.init();
+                if (!result) {
+                    setStatusMessage("Cannot initialize", Color.RED);
+                } else {
+                    setStatusMessage(" ", Color.BLACK);
+                }
+            }
+        }).start();
+    }
+
     private void pauseResume() {
         boolean playbackResult = false;
         try {
-            if (mSelectedRender.equals("local")) {
-                playbackResult = mMediaController.pause();
+            if (mSelectedRenderFullJID.equals("local")) {
+                playbackResult = mLocalMediaController.pause();
             } else {
                 // send command to remote
-                HMCUserNotifications.normalToast(mContext, "Cannot send to remote for now");
-                playbackResult = false;
+                playbackResult = mSelectedRender.pause();
             }
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
@@ -374,12 +403,11 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                                     .getResourceURIFromPosition(mResourceSelectedPosition);
             boolean playbackResult = false;
 
-            if (mSelectedRender.equals("local")) {
-                playbackResult = mMediaController.play(videoResource);
+            if (mSelectedRenderFullJID.equals("local")) {
+                playbackResult = mLocalMediaController.play(videoResource);
             } else {
                 // send command to remote
-                HMCUserNotifications.normalToast(mContext, "Cannot send to remote for now");
-                playbackResult = false;
+                playbackResult = mSelectedRender.play(videoResource);
             }
 
             if (!playbackResult) {
@@ -396,17 +424,31 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
     }
 
+
     private void pickRendererDevice() {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle("Select a device to render");
         builder.setItems(mLocalDevicesNames,
                                 new DialogInterface.OnClickListener() {
+
             public void onClick(DialogInterface dialog, int item) {
                 HMCUserNotifications.normalToast(mContext, "Selected " + mLocalDevicesNames[item]
                                         + " (" + mLocalDevicesJIDs[item] + ") ");
-                mSelectedRender = mLocalDevicesJIDs[item].toString();
+                mSelectedRenderFullJID = mLocalDevicesJIDs[item].toString();
                 mRendererNameTxtView.setText(mLocalDevicesNames[item]);
                 
+                if (!mSelectedRenderFullJID.equals("local")) {
+                    mRemoteInitButton.setVisibility(View.VISIBLE);
+                } else {
+                    mRemoteInitButton.setVisibility(View.INVISIBLE);
+                }
+
+                if (mRemoteRenderers.containsKey(mSelectedRenderFullJID)) {
+                    mSelectedRender = mRemoteRenderers.get(mSelectedRenderFullJID);
+                } else {
+                    mSelectedRender = new RemoteMediaController(mSelectedRenderFullJID);
+                    mRemoteRenderers.put(mSelectedRenderFullJID, mSelectedRender);
+                }
             }
         });
         AlertDialog alert = builder.create();
@@ -721,7 +763,112 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         });
     }
 
-    class MediaController extends IMediaController.Stub {
+    class RemoteMediaController extends IMediaController.Stub {
+
+        private String mFullJID;
+        private boolean mInitialized;
+        private boolean mRemoteResult;
+        IMediaController mRemoteMediaController;
+        private String mStringPath;
+
+        public RemoteMediaController(String fullJID) {
+            mFullJID = fullJID;
+            mInitialized = false;
+        }
+
+        public boolean init() {
+            try {
+                mRemoteMediaController = mHMCManager.initRemoteRender(mFullJID);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                mRemoteMediaController = null;
+            }
+            return (mRemoteMediaController != null);
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IMediaController#play(java.lang.String)
+         */
+        @Override
+        public boolean play(String path) throws RemoteException {
+            if (mRemoteMediaController == null)
+                return false;
+
+            mStringPath = path;
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mRemoteResult = mRemoteMediaController.play(mStringPath);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                        mRemoteResult = false;
+                    }
+                    if (mRemoteResult == false) {
+                        setStatusMessage("Cannot play remote", Color.RED);
+                    }
+                }
+            }).start();
+            return mRemoteResult;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IMediaController#stop()
+         */
+        @Override
+        public boolean stop() throws RemoteException {
+            if (mRemoteMediaController == null)
+                return false;
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mRemoteResult = mRemoteMediaController.stop();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                        mRemoteResult = false;
+                    }
+                    if (mRemoteResult == false) {
+                        setStatusMessage("Cannot stop remote", Color.RED);
+                    }
+                }
+            }).start();
+            return mRemoteResult;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see com.hmc.project.hmc.aidl.IMediaController#pause()
+         */
+        @Override
+        public boolean pause() throws RemoteException {
+            if (mRemoteMediaController == null)
+                return false;
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mRemoteResult = mRemoteMediaController.pause();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                        mRemoteResult = false;
+                    }
+                    if (mRemoteResult == false) {
+                        setStatusMessage("Cannot pause remote", Color.RED);
+                    }
+                }
+            }).start();
+            return mRemoteResult;
+        }
+
+    }
+
+    class LocalMediaController extends IMediaController.Stub {
 
         private boolean mMediaPlayerPaused;
 
@@ -776,18 +923,6 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             return retVal;
         }
 
-
-        /*
-         * (non-Javadoc)
-         * @see com.hmc.project.hmc.aidl.IMediaController#next()
-         */
-        @Override
-        public boolean next() throws RemoteException {
-            HMCUserNotifications.normalToast(mContext, "next()");
-            // TODO Auto-generated method stub
-            return false;
-        }
-
         /*
          * (non-Javadoc)
          * @see com.hmc.project.hmc.aidl.IMediaController#pause()
@@ -815,16 +950,6 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 e.printStackTrace();
             }
             return retVal;
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see com.hmc.project.hmc.aidl.IMediaController#prev()
-         */
-        @Override
-        public boolean prev() throws RemoteException {
-            HMCUserNotifications.normalToast(mContext, "previous()");
-            return false;
         }
     }
 

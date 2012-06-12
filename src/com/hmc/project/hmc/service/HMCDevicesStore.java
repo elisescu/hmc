@@ -374,6 +374,11 @@ public class HMCDevicesStore {
         return retVal;
     }
 
+    public HMCDeviceProxy getExternalDevice(String from) {
+        HMCDeviceProxy retVal = mListOfExternalDevices.get(from);
+        return retVal;
+    }
+
     /**
      * Load.
      *

@@ -32,6 +32,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
@@ -215,6 +216,14 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        releaseMediaPlayer();
+        doCleanUp();
+        doUnbindService();
+    }
+
     /*
      * (non-Javadoc)
      * @see android.app.Activity#onDestroy()
@@ -279,7 +288,15 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         holder = mSurfaceView.getHolder();
         holder.addCallback(this);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        
+
+        doBindService();
+    }
+
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+
         // Create a new media player and set the listeners
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setDisplay(holder);
@@ -288,13 +305,10 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnVideoSizeChangedListener(this);
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        
+
         mMediaController = new MediaController();
 
-        doBindService();
     }
-
-    
     // resources list listener
     OnItemClickListener mOnListItemListener = new OnItemClickListener() {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -396,6 +410,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             }
         });
         AlertDialog alert = builder.create();
+        alert.getWindow().setBackgroundDrawable(new ColorDrawable(0));
         alert.show();
     }
 
@@ -560,17 +575,23 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         Log.v(TAG, "startVideoPlayback");
         holder.setFixedSize(mVideoWidth, mVideoHeight);
 
-        VideoPlayerActivity.this.runOnUiThread(new Runnable() {
-            public void run() {
-                mBigProgressbar.setVisibility(View.VISIBLE);
-            }
-        });
-
         try {
+            
             if (!mMediaPlayerPreparing) {
+                if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.stop();
+                    mMediaPlayer.reset();
+                }
+
                 mMediaPlayer.setDataSource(path);
                 mMediaPlayer.prepareAsync();
                 mMediaPlayerPreparing = true;
+
+                VideoPlayerActivity.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mBigProgressbar.setVisibility(View.VISIBLE);
+                    }
+                });
             }
         } catch (IllegalArgumentException e1) {
             e1.printStackTrace();
@@ -581,7 +602,6 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             setStatusMessage("Called in Illegal state", Color.RED);
             // TODO: handle exception
         }
-
     }
 
     /*
@@ -630,6 +650,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         Log.d(TAG, "onPrepared called");
         mIsVideoReadyToBePlayed = true;
         mMediaPlayerPreparing = false;
+        setStatusMessage(" ", Color.BLACK);
         if (mIsVideoReadyToBePlayed && mIsVideoSizeKnown && !mMediaPlayer.isPlaying()) {
             startVideoPlayback();
         }
@@ -816,6 +837,9 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
     private void releaseMediaPlayer() {
         if (mMediaPlayer != null) {
+            if (mMediaPlayer.isPlaying()) {
+                mMediaPlayer.stop();
+            }
             mMediaPlayer.release();
             mMediaPlayer = null;
         }

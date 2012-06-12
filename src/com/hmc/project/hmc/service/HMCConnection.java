@@ -344,7 +344,7 @@ public class HMCConnection extends IHMCConnection.Stub {
         
         lConnectionConfiguration.setSendPresence(false);
         
-        lConnectionConfiguration.setSecurityMode(SecurityMode.required);
+        lConnectionConfiguration.setSecurityMode(SecurityMode.disabled);
         lConnectionConfiguration.setTruststoreType("BKS");
         lConnectionConfiguration.setTruststorePath("/system/etc/security/cacerts.bks");
         
@@ -354,7 +354,7 @@ public class HMCConnection extends IHMCConnection.Stub {
         try {
             lSslContext = SSLContext.getInstance("TLS");
             lSslContext.init(null, MemorizingTrustManager.getInstanceList(mHMCService),
-                    new java.security.SecureRandom());
+                                    new java.security.SecureRandom());
         } catch (GeneralSecurityException e) {
             Log.w(TAG, "Unable to use MemorizingTrustManager", e);
         }

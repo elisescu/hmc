@@ -59,6 +59,12 @@
             android:launchMode="standard">
         </activity>
         
+        <activity android:name=".ui.mediadevice.VideoPlayerActivity" 
+            android:launchMode="standard"
+            android:screenOrientation="portrait" >
+        </activity>
+        
+         
         
         <service android:name=".service.HMCService">
             <intent-filter>

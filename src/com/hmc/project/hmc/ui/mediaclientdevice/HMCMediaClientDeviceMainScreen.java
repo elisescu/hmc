@@ -32,6 +32,7 @@ import com.hmc.project.hmc.ui.DevicesListActivity;
 import com.hmc.project.hmc.ui.hmcserver.ConfirmHMCInterconnection;
 import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
 import com.hmc.project.hmc.ui.mediadevice.TestsActivity;
+import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -88,6 +89,8 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
 
     private Button mRunTests;
 
+    private Button mDemoButton;
+
     /**
      * Do bind service.
      */
@@ -137,9 +140,11 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
         mSeeDevicesButton = (Button) findViewById(R.id.hmcmediaclient_main_screen_see_devices_button);
         mLogoutButton = (Button) findViewById(R.id.hmcmediaclient_main_screen_logout_button);
         mRunTests = (Button) findViewById(R.id.hmcmediaclient_main_screen_tests_button);
+        mDemoButton = (Button) findViewById(R.id.hmcmediaclient_main_screen_demo_button);
         mSeeDevicesButton.setOnClickListener(mButtonsClickListener);
         mLogoutButton.setOnClickListener(mButtonsClickListener);
         mRunTests.setOnClickListener(mButtonsClickListener);
+        mDemoButton.setOnClickListener(mButtonsClickListener);
     }
 
     /** The m buttons click listener. */
@@ -161,6 +166,14 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
                     break;
                 case R.id.hmcmediaclient_main_screen_tests_button:
                     runSmallTests();
+                    break;
+                case R.id.hmcmediaclient_main_screen_demo_button:
+                    Intent intentDemo = new Intent(HMCMediaClientDeviceMainScreen.this,
+                                            VideoPlayerActivity.class);
+
+                    intentDemo.putExtra(VideoPlayerActivity.PLAYER_MODE_KEY,
+                                            VideoPlayerActivity.PLAYER_MODE_LOCAL);
+                    startActivity(intentDemo);
                     break;
                 default:
                     break;

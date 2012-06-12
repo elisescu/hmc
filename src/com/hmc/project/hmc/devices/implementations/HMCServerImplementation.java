@@ -365,6 +365,20 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         newDevProxy.setLocalImplementation(this);
         // send a hello message to remote anonymous device to negotiate OTR and
         // get information about device which will be approved by the user
+        if (!mDeviceDescriptor.getFingerprint().equals(
+                                HMCOTRManager.getInstance().getLocalFingerprint(
+                                                        mDeviceDescriptor.getFullJID()))) {
+            Log.w(TAG,
+                                    "Reset the fingerprint from "
+                                                            + mDeviceDescriptor.getFingerprint()
+                                                            + "to "
+                                                            + HMCOTRManager.getInstance()
+                                                                                    .getLocalFingerprint(
+                                    mDeviceDescriptor.getFullJID()));
+            mDeviceDescriptor.setFingerprint(HMCOTRManager.getInstance().getLocalFingerprint(
+                                    mDeviceDescriptor.getFullJID()));
+
+        }
         remoteDevDesc = newDevProxy.hello(mDeviceDescriptor);
         // check the descriptor received
         if (remoteDevDesc == null) {

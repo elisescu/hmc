@@ -64,7 +64,7 @@ public class HMCServerMainScreen extends Activity {
             Intent intentDemo = new Intent(HMCServerMainScreen.this,
                     VideoPlayerActivity.class);
             intentDemo.putExtra(VideoPlayerActivity.PLAYER_MODE_KEY,
-                    VideoPlayerActivity.PLAYER_MODE_LOCAL);
+                    VideoPlayerActivity.PLAYER_MODE_REMOTE);
             startActivity(intentDemo);
             return true;
         }
@@ -93,6 +93,8 @@ public class HMCServerMainScreen extends Activity {
                                     Toast.LENGTH_SHORT).show();
         }
     };
+
+    private Button mDemoButton;
 
     /**
      * Do bind service.
@@ -144,6 +146,8 @@ public class HMCServerMainScreen extends Activity {
         mLogoutButton = (Button) findViewById(R.id.hmcserver_main_screen_logout_button);
         mSeeDevicesButton.setOnClickListener(mButtonsClickListener);
         mLogoutButton.setOnClickListener(mButtonsClickListener);
+        mDemoButton = (Button) findViewById(R.id.hmcserver_main_screen_demo_button);
+        mDemoButton.setOnClickListener(mButtonsClickListener);
     }
 
     /** The m buttons click listener. */

@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
@@ -172,9 +173,13 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         HashMap<String, String> vidRes = new HashMap<String, String>();
         // vidRes.put("http://62.107.84.14/vid1.mp4", "vid1.mp4");
         // vidRes.put("http://62.107.84.14/vid2.mp4", "vid2.mp4");
-        vidRes.put("rtsp://62.107.84.14:1234/stream.sdp", "vid1.mp4");
-        vidRes.put("rtsp://62.107.84.14:1235/stream.sdp", "vid2.mp4");
-        vidRes.put("rtsp://62.107.84.14:1236/stream.sdp", "vid3.mp4");
+        // vidRes.put("rtsp://62.107.84.14:1234/stream.sdp", "vid1.mp4");
+        // vidRes.put("rtsp://62.107.84.14:1235/stream.sdp", "vid2.mp4");
+        // vidRes.put("rtsp://62.107.84.14:1236/stream.sdp", "vid3.mp4");
+        vidRes.put("/sdcard/DCIM/Trailers/vid1.mp4", "video 1");
+        vidRes.put("/sdcard/DCIM/Trailers/vid2.mp4", "video 2");
+        vidRes.put("/sdcard/DCIM/Trailers/vid3.mp4", "video 3");
+
         return vidRes;
     }
 
@@ -267,47 +272,50 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
         if (mPlayerMode.equals(PLAYER_MODE_LOCAL)) {
             setContentView(R.layout.video_player_activity_small);
-
-            mSmallProgressbar = (ProgressBar) findViewById(R.id.vidAct_smallProgressBar);
-            mStatusTextView = (TextView) findViewById(R.id.vidAct_statusText);
-
-            mStatusTextView.setText("Wait please");
-            mSmallProgressbar.setVisibility(View.VISIBLE);
-
-            mHMCApplication = (HMCApplication) getApplication();
-
-            mPlayStopButton = (Button) findViewById(R.id.vidAct_PlayStop);
-            mPauseResumeButton = (Button) findViewById(R.id.vidAct_PauseResume);
-            mPreviousButton = (Button) findViewById(R.id.vidAct_ButtPrev);
-            mNextButton = (Button) findViewById(R.id.vidAct_ButtNext);
-            mRendererNameTxtView = (TextView) findViewById(R.id.vidAct_RenderName);
-            mVideoListView = (ListView) findViewById(R.id.vidAct_ResourcesList);
-            mVideoTitle = (TextView) findViewById(R.id.vidAct_streamTitle);
-            mRemoteInitButton = (Button) findViewById(R.id.vidAct_initRemoteButton);
-            mCloseButton = (Button) findViewById(R.id.vidAct_Close);
-
-            mPlayStopButton.setOnClickListener(mOnClickListener);
-            mPauseResumeButton.setOnClickListener(mOnClickListener);
-            mPreviousButton.setOnClickListener(mOnClickListener);
-            mNextButton.setOnClickListener(mOnClickListener);
-            mRendererNameTxtView.setOnClickListener(mOnClickListener);
-            mRemoteInitButton.setOnClickListener(mOnClickListener);
-            mCloseButton.setOnClickListener(mOnClickListener);
-
-            mVideoListView.setOnItemClickListener(mOnListItemListener);
-            mVideoResourcesListAdapter = new VideoResAdapter(this);
-            mVideoListView.setAdapter(mVideoResourcesListAdapter);
-
-            mRemoteRenderers = new HashMap<String, VideoPlayerActivity.RemoteMediaRenderer>();
-            mContext = this;
-            mBigProgressbar = (ProgressBar) findViewById(R.id.vidAct_bigProgressBar);
-            Log.d(TAG, "Entering in LOCAL-controlled mode");
         } else if (mPlayerMode.equals(PLAYER_MODE_REMOTE)) {
             Log.d(TAG, "Entering in REMOTE-controlled mode");
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            setContentView(R.layout.video_player_activity_full);
         } else {
             HMCUserNotifications.normalToast(this, "Unknow demo mode");
             finish();
         }
+
+        mSmallProgressbar = (ProgressBar) findViewById(R.id.vidAct_smallProgressBar);
+        mStatusTextView = (TextView) findViewById(R.id.vidAct_statusText);
+
+        mStatusTextView.setText("Wait please");
+        mSmallProgressbar.setVisibility(View.VISIBLE);
+
+        mHMCApplication = (HMCApplication) getApplication();
+
+        mPlayStopButton = (Button) findViewById(R.id.vidAct_PlayStop);
+        mPauseResumeButton = (Button) findViewById(R.id.vidAct_PauseResume);
+        mPreviousButton = (Button) findViewById(R.id.vidAct_ButtPrev);
+        mNextButton = (Button) findViewById(R.id.vidAct_ButtNext);
+        mRendererNameTxtView = (TextView) findViewById(R.id.vidAct_RenderName);
+        mVideoListView = (ListView) findViewById(R.id.vidAct_ResourcesList);
+        mVideoTitle = (TextView) findViewById(R.id.vidAct_streamTitle);
+        mRemoteInitButton = (Button) findViewById(R.id.vidAct_initRemoteButton);
+        mCloseButton = (Button) findViewById(R.id.vidAct_Close);
+
+        mPlayStopButton.setOnClickListener(mOnClickListener);
+        mPauseResumeButton.setOnClickListener(mOnClickListener);
+        mPreviousButton.setOnClickListener(mOnClickListener);
+        mNextButton.setOnClickListener(mOnClickListener);
+        mRendererNameTxtView.setOnClickListener(mOnClickListener);
+        mRemoteInitButton.setOnClickListener(mOnClickListener);
+        mCloseButton.setOnClickListener(mOnClickListener);
+
+        mVideoListView.setOnItemClickListener(mOnListItemListener);
+        mVideoResourcesListAdapter = new VideoResAdapter(this);
+        mVideoListView.setAdapter(mVideoResourcesListAdapter);
+
+        mRemoteRenderers = new HashMap<String, VideoPlayerActivity.RemoteMediaRenderer>();
+        mContext = this;
+        mBigProgressbar = (ProgressBar) findViewById(R.id.vidAct_bigProgressBar);
+        Log.d(TAG, "Entering in LOCAL-controlled mode");
+
         mSurfaceView = (SurfaceView) findViewById(R.id.vidAct_SurfaceView);
         mSurfaceHolder = mSurfaceView.getHolder();
         mSurfaceHolder.addCallback(this);

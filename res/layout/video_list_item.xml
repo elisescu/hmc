@@ -6,8 +6,8 @@
  
     <ImageView
         android:id="@+id/video_logo"
-        android:layout_width="16px"
-        android:layout_height="16px"
+        android:layout_width="48px"
+        android:layout_height="48px"
         android:layout_marginLeft="5px"
         android:layout_marginRight="20px"
         android:layout_marginTop="5px"
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@+id/label"
-        android:textSize="14px"
+        android:textSize="24px"
         android:gravity="center_vertical"
         android:layout_gravity="center_vertical">
     </TextView>

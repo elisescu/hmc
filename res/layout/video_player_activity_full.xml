@@ -52,39 +52,48 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
+
                 <Button
                     android:id="@+id/vidAct_ButtPrev"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:text="Prev"
-                    android:visibility="gone" />
-
-                <Button
-                    android:id="@+id/vidAct_PlayStop"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:layout_toRightOf="@+id/vidAct_ButtPrev"
-                    android:text="Play"
-                    android:visibility="gone" />
-
-                <Button
-                    android:id="@+id/vidAct_PauseResume"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="24dp"
-                    android:layout_toLeftOf="@+id/vidAct_ButtNext"
-                    android:text="Pause"
-                    android:visibility="gone" />
-
+                    android:visibility="gone"
+                    android:text="Prev" />
+                
                 <Button
                     android:id="@+id/vidAct_ButtNext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:text="Next"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    android:text="Next" />
+
+                <Button
+                    android:id="@+id/vidAct_PlayStop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:visibility="gone"
+                    android:text="Play" />
+
+                <Button
+                    android:id="@+id/vidAct_PauseResume"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_toLeftOf="@+id/vidAct_Close"
+                    android:text="Pause" />
+
+                <Button
+                    android:id="@+id/vidAct_Close"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:visibility="gone"
+                    android:layout_alignParentTop="true"
+                    android:text="Close" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -109,6 +118,16 @@
                     android:layout_below="@+id/vidAct_playOnText"
                     android:text="Local device"
                     android:textAppearance="?android:attr/textAppearanceLarge" />
+                
+                <Button
+                    android:id="@+id/vidAct_initRemoteButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:visibility="invisible"
+                    android:text="Init" />
+                                
             </RelativeLayout>
         </LinearLayout>
 

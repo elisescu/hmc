@@ -143,6 +143,11 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
     private String _initLocalRender(String params, HMCDeviceProxy fromDev) {
         Log.d(TAG, "Starting the video activity");
         boolean res = false;
+
+        if (mLocalMediaRenderer != null) {
+            return true + "";
+        }
+
         if (mRenderingListener != null) {
             try {
                 res = mRenderingListener.initRendering();
@@ -159,10 +164,14 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         mRenderingListener = rendList;
     }
 
+
     public void setLocalRender(IMediaRenderer rend) {
         mLocalMediaRenderer = rend;
     }
 
+    public void unsetLocalRender() {
+        mLocalMediaRenderer = null;
+    }
     /**
      * @param params
      * @param fromDev

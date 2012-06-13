@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.hmc.project.hmc.HMCApplication;
 import com.hmc.project.hmc.R;
 import com.hmc.project.hmc.aidl.IHMCConnection;
+import com.hmc.project.hmc.aidl.IHMCRenderingListener;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListActivity;
@@ -55,6 +56,20 @@ public class HMCServerMainScreen extends Activity {
     /** The m logout button. */
     private Button mLogoutButton;
 
+    private IHMCRenderingListener mRenderingListener = new IHMCRenderingListener.Stub() {
+
+        @Override
+        public boolean initRendering() throws RemoteException {
+            Log.d(TAG, "Starting rendering on local device");
+            Intent intentDemo = new Intent(HMCServerMainScreen.this,
+                    VideoPlayerActivity.class);
+            intentDemo.putExtra(VideoPlayerActivity.PLAYER_MODE_KEY,
+                    VideoPlayerActivity.PLAYER_MODE_LOCAL);
+            startActivity(intentDemo);
+            return true;
+        }
+    };
+
     /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -65,6 +80,8 @@ public class HMCServerMainScreen extends Activity {
                     mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(), "",
                                             HMCDeviceItf.TYPE.HMC_SERVER,
                                             mHMCApplication.getHMCName());
+
+                    mHMCConnection.getHMCManager().setLocalRenderingListener(mRenderingListener);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

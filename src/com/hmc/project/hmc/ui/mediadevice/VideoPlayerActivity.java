@@ -204,7 +204,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
     private SurfaceView mSurfaceView;
 
-    private SurfaceHolder holder;
+    private SurfaceHolder mSurfaceHolder;
 
     private MediaPlayer mMediaPlayer;
 
@@ -301,28 +301,20 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             mRemoteRenderers = new HashMap<String, VideoPlayerActivity.RemoteMediaRenderer>();
             mContext = this;
             mBigProgressbar = (ProgressBar) findViewById(R.id.vidAct_bigProgressBar);
+            Log.d(TAG, "Entering in LOCAL-controlled mode");
         } else if (mPlayerMode.equals(PLAYER_MODE_REMOTE)) {
-
+            Log.d(TAG, "Entering in REMOTE-controlled mode");
         } else {
             HMCUserNotifications.normalToast(this, "Unknow demo mode");
             finish();
         }
         mSurfaceView = (SurfaceView) findViewById(R.id.vidAct_SurfaceView);
-        holder = mSurfaceView.getHolder();
-        holder.addCallback(this);
-        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-
-        doBindService();
-    }
-
-    
-    @Override
-    public void onResume() {
-        super.onResume();
+        mSurfaceHolder = mSurfaceView.getHolder();
+        mSurfaceHolder.addCallback(this);
+        mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         // Create a new media player and set the listeners
         mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setDisplay(holder);
         mMediaPlayer.setOnBufferingUpdateListener(this);
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnPreparedListener(this);
@@ -331,6 +323,12 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
         mLocalMediaRenderer = new LocalMediaRenderer();
 
+        doBindService();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
     // resources list listener
     OnItemClickListener mOnListItemListener = new OnItemClickListener() {
@@ -631,7 +629,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
     private void startVideoPlayback() {
         Log.v(TAG, "startVideoPlayback");
-        holder.setFixedSize(mVideoWidth, mVideoHeight);
+        mSurfaceHolder.setFixedSize(mVideoWidth, mVideoHeight);
         try {
         mMediaPlayer.start();
         } catch (IllegalStateException e) {
@@ -650,7 +648,11 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     private void playVideoResource(String path) throws IOException {
         doCleanUp();
         Log.v(TAG, "startVideoPlayback");
-        holder.setFixedSize(mVideoWidth, mVideoHeight);
+        VideoPlayerActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                mSurfaceHolder.setFixedSize(mVideoWidth, mVideoHeight);
+            }
+        });
 
         try {
             
@@ -702,6 +704,14 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         mSurfaceCreated = true;
+        if (!holder.equals(mSurfaceHolder)) {
+            Log.e(TAG, "Strange surface created !!!!!!!!!!!!");
+        }
+
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setDisplay(mSurfaceHolder);
+        }
+
         setStatusMessage("Ready", Color.WHITE);
     }
 
@@ -812,11 +822,14 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         }
 
         public boolean init() {
-            try {
-                mRemoteMediaController = mHMCManager.initRemoteRender(mFullJID);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                mRemoteMediaController = null;
+            if (!mInitialized) {
+                try {
+                    mRemoteMediaController = mHMCManager.initRemoteRender(mFullJID);
+                    mInitialized = true;
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    mRemoteMediaController = null;
+                }
             }
             return (mRemoteMediaController != null);
         }
@@ -911,6 +924,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 public void run() {
                     try {
                         mRemoteResult = mRemoteMediaController.close();
+                        mInitialized = false;
                     } catch (RemoteException e) {
                         e.printStackTrace();
                         mRemoteResult = false;
@@ -1023,6 +1037,15 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     @Override
     protected void onPause() {
         super.onPause();
+        if (mHMCManager != null) {
+            try {
+                mHMCManager.unsetLocalMediaRender();
+            } catch (RemoteException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
         releaseMediaPlayer();
         doCleanUp();
     }

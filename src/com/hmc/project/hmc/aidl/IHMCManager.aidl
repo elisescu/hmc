@@ -31,5 +31,7 @@ interface IHMCManager {
 	boolean initRemoteRender_TEMP(String fullJID, IAsyncRPCReplyListener listener);
 	IMediaRenderer initRemoteRender(String fullJID);
 	void setLocalMediaRender(IMediaRenderer rend);
+	void unsetLocalMediaRender();
+	
 	void setLocalRenderingListener(IHMCRenderingListener rend);
 }

@@ -863,4 +863,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             mLocalImplementation.setRenderingListener(rend);
         }
     }
+
+    @Override
+    public void unsetLocalMediaRender() throws RemoteException {
+        if (mLocalImplementation != null) {
+            mLocalImplementation.unsetLocalRender();
+        }
+    }
 }

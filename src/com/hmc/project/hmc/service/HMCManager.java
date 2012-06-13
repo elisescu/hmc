@@ -40,8 +40,10 @@ import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
 import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
+import com.hmc.project.hmc.aidl.IHMCRenderingListener;
 import com.hmc.project.hmc.aidl.IHMCServerHndl;
-import com.hmc.project.hmc.aidl.IMediaController;
+import com.hmc.project.hmc.aidl.IMediaRenderer;
+import com.hmc.project.hmc.aidl.IMediaRenderer;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.handlers.HMCMediaClientHandler;
 import com.hmc.project.hmc.devices.handlers.HMCServerHandler;
@@ -831,9 +833,9 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
      * com.hmc.project.hmc.aidl.IHMCManager#initRemoteRender(java.lang.String)
      */
     @Override
-    public IMediaController initRemoteRender(String fullJID) throws RemoteException {
+    public IMediaRenderer initRemoteRender(String fullJID) throws RemoteException {
         HMCDeviceProxy devProxy;
-        IMediaController retVal = null;
+        IMediaRenderer retVal = null;
         devProxy = mHMCDevicesStore.getLocalDevice(fullJID);
 
         if (devProxy == null) {
@@ -842,8 +844,23 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
 
         if (devProxy != null) {
             retVal = devProxy.getMediaController();
+            devProxy.initRemoteRenderer();
         }
 
         return retVal;
+    }
+
+    @Override
+    public void setLocalMediaRender(IMediaRenderer rend) throws RemoteException {
+        if (mLocalImplementation != null) {
+            mLocalImplementation.setLocalRender(rend);
+        }
+    }
+
+    @Override
+    public void setLocalRenderingListener(IHMCRenderingListener rend) throws RemoteException {
+        if (mLocalImplementation != null) {
+            mLocalImplementation.setRenderingListener(rend);
+        }
     }
 }

@@ -7,6 +7,8 @@
 
 package com.hmc.project.hmc.utils;
 
+import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity;
+
 import android.content.Context;
 import android.widget.Toast;
 
@@ -23,6 +25,11 @@ public class HMCUserNotifications {
      * @param msg the msg
      */
     public static void normalToast(Context ctx, String msg) {
+        ctx.runOnUiThread(new Runnable() {
+            public void run() {
+
+            }
+        });
         Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
     }
 }

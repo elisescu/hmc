@@ -78,20 +78,27 @@
                     android:text="Next" />
 
                 <Button
-                    android:id="@+id/vidAct_PauseResume"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:text="Pause" />
-
-                <Button
                     android:id="@+id/vidAct_PlayStop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
                     android:text="Play" />
+
+                <Button
+                    android:id="@+id/vidAct_PauseResume"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/vidAct_Close"
+                    android:text="Pause" />
+
+                <Button
+                    android:id="@+id/vidAct_Close"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:text="Close" />
 
             </RelativeLayout>
 

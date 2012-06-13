@@ -7,8 +7,11 @@
 
 package com.hmc.project.hmc.devices.implementations;
 
+import android.os.RemoteException;
 import android.util.Log;
 
+import com.hmc.project.hmc.aidl.IHMCRenderingListener;
+import com.hmc.project.hmc.aidl.IMediaRenderer;
 import com.hmc.project.hmc.aidl.IUserRequestsListener;
 import com.hmc.project.hmc.devices.interfaces.HMCDeviceItf;
 import com.hmc.project.hmc.devices.interfaces.HMCMediaDeviceItf;
@@ -34,6 +37,10 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
     
     /** The m user requests listener. */
     protected IUserRequestsListener mUserRequestsListener;
+
+    private IHMCRenderingListener mRenderingListener;
+
+    private IMediaRenderer mLocalMediaRenderer;
 
     /**
      * Instantiates a new hMC device implementation.
@@ -64,11 +71,96 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
                     return _testAsyncCommand(params, fromDev);
                 case HMCDeviceItf.CMD_TEST_SYNC_COMMAND:
                     return _testSyncCommand(params, fromDev);
+                case HMCDeviceItf.CMD_INIT_RENDERING:
+                    return _initLocalRender(params, fromDev);
+                case HMCDeviceItf.CMD_CLOSE_RENDERING:
+                    return _closeLocalRender(params, fromDev);
+                case HMCDeviceItf.CMD_PLAY:
+                    return _playOnLocalRender(params, fromDev);
+                case HMCDeviceItf.CMD_PAUSE:
+                    return _pauseLocalRender(params, fromDev);
+                case HMCDeviceItf.CMD_STOP:
+                    return _stopLocalRender(params, fromDev);
                 default:
                     return "invalid-operation";
             }
         }
         return "not-authenticated";
+    }
+
+    private String _stopLocalRender(String params, HMCDeviceProxy fromDev) {
+        boolean retVal = false;
+        if (mLocalMediaRenderer != null) {
+            try {
+                retVal = mLocalMediaRenderer.stop();
+            } catch (RemoteException e) {
+                retVal = false;
+                e.printStackTrace();
+            }
+        }
+        return retVal + "";
+    }
+
+    private String _playOnLocalRender(String params, HMCDeviceProxy fromDev) {
+        boolean retVal = false;
+        if (mLocalMediaRenderer != null) {
+            try {
+                retVal = mLocalMediaRenderer.play(params);
+            } catch (RemoteException e) {
+                retVal = false;
+                e.printStackTrace();
+            }
+        }
+        return retVal + "";
+    }
+
+    private String _pauseLocalRender(String params, HMCDeviceProxy fromDev) {
+        boolean retVal = false;
+        if (mLocalMediaRenderer != null) {
+            try {
+                retVal = mLocalMediaRenderer.pause();
+            } catch (RemoteException e) {
+                retVal = false;
+                e.printStackTrace();
+            }
+        }
+        return retVal + "";
+    }
+
+    private String _closeLocalRender(String params, HMCDeviceProxy fromDev) {
+        boolean retVal = false;
+        if (mLocalMediaRenderer != null) {
+            try {
+                retVal = mLocalMediaRenderer.close();
+            } catch (RemoteException e) {
+                retVal = false;
+                e.printStackTrace();
+            }
+        }
+        return retVal + "";
+    }
+
+    private String _initLocalRender(String params, HMCDeviceProxy fromDev) {
+        Log.d(TAG, "Starting the video activity");
+        boolean res = false;
+        if (mRenderingListener != null) {
+            try {
+                res = mRenderingListener.initRendering();
+            } catch (RemoteException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                res = false;
+            }
+        }
+        return res + "";
+    }
+
+    public void setRenderingListener(IHMCRenderingListener rendList) {
+        mRenderingListener = rendList;
+    }
+
+    public void setLocalRender(IMediaRenderer rend) {
+        mLocalMediaRenderer = rend;
     }
 
     /**

@@ -48,8 +48,15 @@ public interface HMCDeviceItf {
     /** The Constant CMD_TEST_SYNC_COMMAND. */
     static final int CMD_TEST_SYNC_COMMAND = HMC_DEVICE_INITIAL_COMMAND + 4;
 
+    static final int CMD_PLAY = HMC_DEVICE_INITIAL_COMMAND + 5;
+    static final int CMD_PAUSE = HMC_DEVICE_INITIAL_COMMAND + 6;
+    static final int CMD_STOP = HMC_DEVICE_INITIAL_COMMAND + 7;
+    static final int CMD_INIT_RENDERING = HMC_DEVICE_INITIAL_COMMAND + 8;
+    static final int CMD_CLOSE_RENDERING = HMC_DEVICE_INITIAL_COMMAND + 9;
+    static final int CMD_START_DEMO_ACTIVITY = HMC_DEVICE_INITIAL_COMMAND + 10;
+
     /** The Constant HMC_DEVICE_LAST_COMMAND. */
-    static final int HMC_DEVICE_LAST_COMMAND = CMD_TEST_ASYNC_COMMAND;
+    static final int HMC_DEVICE_LAST_COMMAND = CMD_START_DEMO_ACTIVITY;
 	
     /**
      * Remote increment.

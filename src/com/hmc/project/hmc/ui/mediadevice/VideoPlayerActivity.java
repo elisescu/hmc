@@ -23,10 +23,10 @@ import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListAdapter;
 import com.hmc.project.hmc.ui.Login;
-import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.LocalMediaController;
-import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.RemoteMediaController;
+import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.LocalMediaRenderer;
+import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.RemoteMediaRenderer;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
-import com.hmc.project.hmc.aidl.IMediaController;
+import com.hmc.project.hmc.aidl.IMediaRenderer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -102,8 +102,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     private HashMap<String, String>  mLocalDevNamesHashMap;
     private String mSelectedRenderFullJID = "local";
     private HashMap<String, String> mVideoResourcesList;
-    private RemoteMediaController mSelectedRender;
-    private HashMap<String, RemoteMediaController> mRemoteRenderers;
+    private RemoteMediaRenderer mSelectedRender;
+    private HashMap<String, RemoteMediaRenderer> mRemoteRenderers;
     
     /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -119,21 +119,27 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                     mLocalDevNamesHashMap = (HashMap<String, String>) mHMCConnection
                                             .getHMCManager().getListOfLocalDevices();
                     Iterator<String> iter = mLocalDevNamesHashMap.keySet().iterator();
-                    mLocalDevicesJIDs = new CharSequence[mLocalDevNamesHashMap.size() + 1];
-                    mLocalDevicesNames = new CharSequence[mLocalDevNamesHashMap.size() + 1];
+                    mLocalDevicesJIDs = new CharSequence[mLocalDevNamesHashMap.size()];
+                    mLocalDevicesNames = new CharSequence[mLocalDevNamesHashMap.size()];
                     int i = 0;
                     mLocalDevicesJIDs[i] = "local";
                     mLocalDevicesNames[i] = "Local device";
                     i++;
                     while (iter.hasNext()) {
                         String val = iter.next();
-                        mLocalDevicesJIDs[i] = val;
-                        mLocalDevicesNames[i] = mLocalDevNamesHashMap.get(val);
-                        i++;
+                        // don't add the local device two times, as we have it
+                        // in the list of devices
+                        if (!val.equals(mHMCApplication.getUsername())) {
+                            mLocalDevicesJIDs[i] = val;
+                            mLocalDevicesNames[i] = mLocalDevNamesHashMap.get(val);
+                            i++;
+                        }
                     }
                     
                     mVideoResourcesList = getVideoResourcesList();
                     mVideoResourcesListAdapter.setVideoResources(mVideoResourcesList);
+                    
+                    mHMCManager.setLocalMediaRender(mLocalMediaRenderer);
 
                 } catch (RemoteException e) {
                     e.printStackTrace();
@@ -166,8 +172,9 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         HashMap<String, String> vidRes = new HashMap<String, String>();
         // vidRes.put("http://62.107.84.14/vid1.mp4", "vid1.mp4");
         // vidRes.put("http://62.107.84.14/vid2.mp4", "vid2.mp4");
-        vidRes.put("rtsp://62.107.84.14:1235/stream.sdp", "vid1.mp4");
+        vidRes.put("rtsp://62.107.84.14:1234/stream.sdp", "vid1.mp4");
         vidRes.put("rtsp://62.107.84.14:1235/stream.sdp", "vid2.mp4");
+        vidRes.put("rtsp://62.107.84.14:1236/stream.sdp", "vid3.mp4");
         return vidRes;
     }
 
@@ -201,9 +208,11 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
     private MediaPlayer mMediaPlayer;
 
-    private LocalMediaController mLocalMediaController;
+    private LocalMediaRenderer mLocalMediaRenderer;
 
     private Button mRemoteInitButton;
+
+    private Button mCloseButton;
 
     /**
      * Do bind service.
@@ -275,6 +284,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             mVideoListView = (ListView) findViewById(R.id.vidAct_ResourcesList);
             mVideoTitle = (TextView) findViewById(R.id.vidAct_streamTitle);
             mRemoteInitButton = (Button) findViewById(R.id.vidAct_initRemoteButton);
+            mCloseButton = (Button) findViewById(R.id.vidAct_Close);
 
             mPlayStopButton.setOnClickListener(mOnClickListener);
             mPauseResumeButton.setOnClickListener(mOnClickListener);
@@ -282,12 +292,13 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             mNextButton.setOnClickListener(mOnClickListener);
             mRendererNameTxtView.setOnClickListener(mOnClickListener);
             mRemoteInitButton.setOnClickListener(mOnClickListener);
+            mCloseButton.setOnClickListener(mOnClickListener);
 
             mVideoListView.setOnItemClickListener(mOnListItemListener);
             mVideoResourcesListAdapter = new VideoResAdapter(this);
             mVideoListView.setAdapter(mVideoResourcesListAdapter);
 
-            mRemoteRenderers = new HashMap<String, VideoPlayerActivity.RemoteMediaController>();
+            mRemoteRenderers = new HashMap<String, VideoPlayerActivity.RemoteMediaRenderer>();
             mContext = this;
             mBigProgressbar = (ProgressBar) findViewById(R.id.vidAct_bigProgressBar);
         } else if (mPlayerMode.equals(PLAYER_MODE_REMOTE)) {
@@ -318,7 +329,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         mMediaPlayer.setOnVideoSizeChangedListener(this);
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-        mLocalMediaController = new LocalMediaController();
+        mLocalMediaRenderer = new LocalMediaRenderer();
 
     }
     // resources list listener
@@ -353,6 +364,9 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 case R.id.vidAct_initRemoteButton:
                     initRemoteRender();
                     break;
+                case R.id.vidAct_Close:
+                    closeRender();
+                    break;
                 default:
                     break;
             }
@@ -360,12 +374,33 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         }
     };
 
+    private void closeRender() {
+        boolean result = false;
+        try {
+            if (mSelectedRenderFullJID.equals("local")) {
+                result = mLocalMediaRenderer.close();
+            } else {
+                // send command to remote
+                result = mSelectedRender.close();
+            }
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        if (!result) {
+            setStatusMessage("Cannot close", Color.RED);
+            HMCUserNotifications.normalToast(mContext, "Error: cannot play");
+        }
+    }
+
     private void initRemoteRender() {
         setStatusMessage("Initializing remote...: " + mSelectedRenderFullJID, Color.WHITE);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 boolean result = mSelectedRender.init();
+                Log.d(TAG, "!!!!!!!!!!!Initialized = " + result);
                 if (!result) {
                     setStatusMessage("Cannot initialize", Color.RED);
                 } else {
@@ -376,20 +411,20 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     }
 
     private void pauseResume() {
-        boolean playbackResult = false;
+        boolean result = false;
         try {
             if (mSelectedRenderFullJID.equals("local")) {
-                playbackResult = mLocalMediaController.pause();
+                result = mLocalMediaRenderer.pause();
             } else {
                 // send command to remote
-                playbackResult = mSelectedRender.pause();
+                result = mSelectedRender.pause();
             }
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
-        if (!playbackResult) {
+        if (!result) {
             setStatusMessage("Cannot pause", Color.RED);
             HMCUserNotifications.normalToast(mContext, "Error: cannot play");
         }
@@ -404,7 +439,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             boolean playbackResult = false;
 
             if (mSelectedRenderFullJID.equals("local")) {
-                playbackResult = mLocalMediaController.play(videoResource);
+                playbackResult = mLocalMediaRenderer.play(videoResource);
             } else {
                 // send command to remote
                 playbackResult = mSelectedRender.play(videoResource);
@@ -446,7 +481,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 if (mRemoteRenderers.containsKey(mSelectedRenderFullJID)) {
                     mSelectedRender = mRemoteRenderers.get(mSelectedRenderFullJID);
                 } else {
-                    mSelectedRender = new RemoteMediaController(mSelectedRenderFullJID);
+                    mSelectedRender = new RemoteMediaRenderer(mSelectedRenderFullJID);
                     mRemoteRenderers.put(mSelectedRenderFullJID, mSelectedRender);
                 }
             }
@@ -763,15 +798,15 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         });
     }
 
-    class RemoteMediaController extends IMediaController.Stub {
+    class RemoteMediaRenderer extends IMediaRenderer.Stub {
 
         private String mFullJID;
         private boolean mInitialized;
         private boolean mRemoteResult;
-        IMediaController mRemoteMediaController;
+        IMediaRenderer mRemoteMediaController = null;
         private String mStringPath;
 
-        public RemoteMediaController(String fullJID) {
+        public RemoteMediaRenderer(String fullJID) {
             mFullJID = fullJID;
             mInitialized = false;
         }
@@ -866,9 +901,31 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             return mRemoteResult;
         }
 
+        @Override
+        public boolean close() throws RemoteException {
+            if (mRemoteMediaController == null)
+                return false;
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mRemoteResult = mRemoteMediaController.close();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                        mRemoteResult = false;
+                    }
+                    if (mRemoteResult == false) {
+                        setStatusMessage("Cannot close remote renderer", Color.RED);
+                    }
+                }
+            }).start();
+            return mRemoteResult;
+        }
+
     }
 
-    class LocalMediaController extends IMediaController.Stub {
+    class LocalMediaRenderer extends IMediaRenderer.Stub {
 
         private boolean mMediaPlayerPaused;
 
@@ -915,7 +972,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             boolean retVal = false;
             HMCUserNotifications.normalToast(mContext, "stop()");
             try {
-                mMediaPlayer.pause();
+                mMediaPlayer.stop();
                 retVal = true;
             } catch (IllegalStateException e) {
                 e.printStackTrace();
@@ -950,6 +1007,16 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 e.printStackTrace();
             }
             return retVal;
+        }
+
+        @Override
+        public boolean close() throws RemoteException {
+            if (mContext != null) {
+                mContext.finish();
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

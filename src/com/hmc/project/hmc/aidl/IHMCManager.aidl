@@ -12,7 +12,8 @@ import com.hmc.project.hmc.aidl.IHMCMediaClientHndl;
 import com.hmc.project.hmc.aidl.IHMCMediaServiceHndl;
 import com.hmc.project.hmc.aidl.IHMCDevicesListener;
 import com.hmc.project.hmc.aidl.IAsyncRPCReplyListener;
-import com.hmc.project.hmc.aidl.IMediaController;
+import com.hmc.project.hmc.aidl.IMediaRenderer;
+import com.hmc.project.hmc.aidl.IHMCRenderingListener;
 
 interface IHMCManager {
 	void init(String deviceName, String userName, int devType, String hmcName);
@@ -28,6 +29,7 @@ interface IHMCManager {
 	void setUserReplyHMCInterconnection(boolean val);
 	Map getListOfExternalDevices();
 	boolean initRemoteRender_TEMP(String fullJID, IAsyncRPCReplyListener listener);
-	IMediaController initRemoteRender(String fullJID);
-	
+	IMediaRenderer initRemoteRender(String fullJID);
+	void setLocalMediaRender(IMediaRenderer rend);
+	void setLocalRenderingListener(IHMCRenderingListener rend);
 }

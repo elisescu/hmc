@@ -23,7 +23,8 @@ import android.media.audiofx.Equalizer;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.hmc.project.hmc.aidl.IMediaController;
+import com.hmc.project.hmc.aidl.IMediaRenderer;
+import com.hmc.project.hmc.aidl.IMediaRenderer;
 import com.hmc.project.hmc.devices.implementations.DeviceDescriptor;
 import com.hmc.project.hmc.devices.implementations.HMCDeviceImplementation;
 import com.hmc.project.hmc.devices.implementations.HMCMediaDeviceImplementation;
@@ -88,7 +89,7 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     /** The m async results. */
     private ASyncResults mAsyncResults;
 
-    private IMediaController mRemotePlayerProxy;
+    private IMediaRenderer mRemotePlayerProxy;
 
     /**
      * Instantiates a new hMC device proxy.
@@ -783,15 +784,14 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
     /**
      * @return
      */
-    public IMediaController getMediaController() {
+    public IMediaRenderer getMediaController() {
         if (mRemotePlayerProxy == null) {
             mRemotePlayerProxy = new MediaPlayerProxy();
         }
-
         return mRemotePlayerProxy;
     }
 
-    class MediaPlayerProxy extends IMediaController.Stub {
+    class MediaPlayerProxy extends IMediaRenderer.Stub {
 
         /*
          * (non-Javadoc)
@@ -799,8 +799,10 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
          */
         @Override
         public boolean play(String path) throws RemoteException {
-            Log.d(TAG, "Going to call PLAY on remote " + mDeviceDescriptor.getFullJID());
-            return true;
+            boolean retVal = false;
+            String reply = sendCommandSync(CMD_PLAY, path);
+            retVal = Boolean.parseBoolean(reply);
+            return retVal;
         }
 
         /*
@@ -809,8 +811,10 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
          */
         @Override
         public boolean stop() throws RemoteException {
-            Log.d(TAG, "Going to call STOP on remote " + mDeviceDescriptor.getFullJID());
-            return true;
+            boolean retVal = false;
+            String reply = sendCommandSync(CMD_STOP, "");
+            retVal = Boolean.parseBoolean(reply);
+            return retVal;
         }
 
         /*
@@ -819,10 +823,27 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
          */
         @Override
         public boolean pause() throws RemoteException {
-            Log.d(TAG, "Going to call PAUSE on remote " + mDeviceDescriptor.getFullJID());
-            return true;
+            boolean retVal = false;
+            String reply = sendCommandSync(CMD_PAUSE, "");
+            retVal = Boolean.parseBoolean(reply);
+            return retVal;
         }
 
+        @Override
+        public boolean close() throws RemoteException {
+            boolean retVal = false;
+            String reply = sendCommandSync(CMD_CLOSE_RENDERING, "");
+            retVal = Boolean.parseBoolean(reply);
+            return retVal;
+        }
+
+    }
+
+    public boolean initRemoteRenderer() {
+        boolean retVal = false;
+        String reply = sendCommandSync(CMD_INIT_RENDERING, "");
+        retVal = Boolean.parseBoolean(reply);
+        return retVal;
     }
 
 }

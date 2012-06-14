@@ -36,6 +36,8 @@ public class SecureChat implements MessageListener {
     
     /** The Constant MAX_OTR_TIMEOUT. */
     private static final long MAX_OTR_TIMEOUT = 4000;
+
+    private static final int MAX_OTR_RETRIES = 3;
     
     /** The m xmpp chat. */
     private Chat mXMPPChat;
@@ -61,6 +63,9 @@ public class SecureChat implements MessageListener {
     /** The m this. */
     private SecureChat mThis;
     
+    String mStartOTRLock = "mStartOTRLock";
+    String mStopOTRLock = "mStopOTRLock";
+
     /** The m decrypted message. */
     private String mDecryptedMessage;
 
@@ -135,13 +140,11 @@ public class SecureChat implements MessageListener {
 
         try {
             HMCOTRManager.getInstance().getOtrEngine().startSession(mOtrSessionId);
-
             // wait now for the OTR negotiation to take place
-            synchronized (mOtrSessionId) {
-                mOtrSessionId.wait(MAX_OTR_TIMEOUT);
+            synchronized (mStartOTRLock) {
+                mStartOTRLock.wait(MAX_OTR_TIMEOUT);
             }
             if (mOTRStatus == SecureChatState.PLAINTEXT) {
-                Log.e(TAG, "Could not start an ecrypted OTR session");
                 return false;
             }
         } catch (InterruptedException e) {
@@ -170,6 +173,15 @@ public class SecureChat implements MessageListener {
         } catch (OtrException e) {
             e.printStackTrace();
             return false;
+        }
+
+        synchronized (mStopOTRLock) {
+            try {
+                mStopOTRLock.wait(MAX_OTR_TIMEOUT);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
         return true;
@@ -245,7 +257,14 @@ public class SecureChat implements MessageListener {
         if (mOTRStatus == SecureChatState.PLAINTEXT) {
             startOtrSession();
             if (mOTRStatus == SecureChatState.PLAINTEXT) {
-                Log.e(TAG, "Could not start an ecrypted OTR session");
+                for (int i = 0; i < MAX_OTR_RETRIES; i++) {
+                    Log.w(TAG, "Cannot start OTR session. Retrying " + i);
+                    stopOtrSession();
+                    startOtrSession();
+                    if (mOTRStatus == SecureChatState.ENCRYPTED) {
+                        break;
+                    }
+                }
             }
         }
 
@@ -282,7 +301,9 @@ public class SecureChat implements MessageListener {
      * @param msg the msg
      */
     public void injectMessage(String msg) {
-        Log.d(TAG, "Inject OTR message: " + msg);
+        int maxLength = 10;
+        int lg = msg.length() > maxLength ? maxLength : msg.length();
+        Log.d(TAG, "Inject OTR message: " + msg.substring(0, lg) + "...");
         try {
             mXMPPChat.sendMessage(buildSendingMessage(msg));
         } catch (XMPPException e) {
@@ -299,13 +320,11 @@ public class SecureChat implements MessageListener {
     public void otrStatusChanged(SessionStatus sessionStatus) {
         mOTRStatus = toChatState(sessionStatus);
         Log.e(TAG, "Otr status changed to: " + mOTRStatus);
-
-        if (mOTRStatus == SecureChatState.ENCRYPTED) {
-            // let know that we negotiated the OTR session
-            synchronized (mOtrSessionId) {
-                mOtrSessionId.notify();
-            }
-            Log.e(TAG, "We need to authenticate now and verify the fingerprints");
+        synchronized (mStartOTRLock) {
+            mStartOTRLock.notify();
+        }
+        synchronized (mStopOTRLock) {
+            mStopOTRLock.notify();
         }
     }
 

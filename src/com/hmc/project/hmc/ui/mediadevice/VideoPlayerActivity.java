@@ -830,15 +830,14 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         }
 
         public boolean init() {
-            if (!mInitialized) {
-                try {
-                    mRemoteMediaController = mHMCManager.initRemoteRender(mFullJID);
-                    mInitialized = true;
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                    mRemoteMediaController = null;
-                }
+            try {
+                mRemoteMediaController = mHMCManager.initRemoteRender(mFullJID);
+                mInitialized = true;
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                mRemoteMediaController = null;
             }
+
             return (mRemoteMediaController != null);
         }
 

@@ -65,7 +65,7 @@ public class HMCMediaClientDeviceMainScreen extends Activity {
             Intent intentDemo = new Intent(HMCMediaClientDeviceMainScreen.this,
                     VideoPlayerActivity.class);
             intentDemo.putExtra(VideoPlayerActivity.PLAYER_MODE_KEY,
-                    VideoPlayerActivity.PLAYER_MODE_LOCAL);
+                                    VideoPlayerActivity.PLAYER_MODE_REMOTE);
             startActivity(intentDemo);
             return true;
         }

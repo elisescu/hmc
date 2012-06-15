@@ -50,7 +50,13 @@
                 android:summary="@string/hmc_hmcname_summary"
                 android:dialogTitle="@string/hmc_hmcname_dialog_title"
                 android:singleLine="true" />
-
+        
+       <EditTextPreference
+                android:key="hmc_srvaddr_key"
+                android:title="Streaming server address"
+                android:summary="Enter new address"
+                android:dialogTitle="Enter the new address"
+                android:singleLine="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>

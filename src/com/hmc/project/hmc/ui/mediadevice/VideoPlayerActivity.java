@@ -23,6 +23,8 @@ import com.hmc.project.hmc.aidl.IHMCManager;
 import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.DevicesListAdapter;
 import com.hmc.project.hmc.ui.Login;
+import com.hmc.project.hmc.ui.hmcserver.AddNewDeviceWizzard;
+import com.hmc.project.hmc.ui.hmcserver.HMCInterconnectionWizzard;
 import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.LocalMediaRenderer;
 import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.RemoteMediaRenderer;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
@@ -30,11 +32,13 @@ import com.hmc.project.hmc.aidl.IMediaRenderer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -48,8 +52,12 @@ import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -58,6 +66,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -105,6 +114,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     private HashMap<String, String> mVideoResourcesList;
     private RemoteMediaRenderer mSelectedRender;
     private HashMap<String, RemoteMediaRenderer> mRemoteRenderers;
+    String mStreamingServerAddress;
     
     /** The m connection. */
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -137,8 +147,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                         }
                     }
                     
-                    mVideoResourcesList = getVideoResourcesList();
-                    mVideoResourcesListAdapter.setVideoResources(mVideoResourcesList);
+                    updateListOfResources();
                     
                     mHMCManager.setLocalMediaRender(mLocalMediaRenderer);
 
@@ -162,12 +171,18 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
         }
 
+
         public void onServiceDisconnected(ComponentName className) {
             mBoundService = null;
             Toast.makeText(VideoPlayerActivity.this, R.string.local_service_disconnected,
                                     Toast.LENGTH_SHORT).show();
         }
     };
+
+    private void updateListOfResources() {
+        mVideoResourcesList = getVideoResourcesList();
+        mVideoResourcesListAdapter.setVideoResources(mVideoResourcesList);
+    }
 
     private HashMap<String, String> getVideoResourcesList() {
         HashMap<String, String> vidRes = new HashMap<String, String>();
@@ -176,10 +191,10 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         // vidRes.put("rtsp://62.107.84.14:1234/stream.sdp", "vid1.mp4");
         // vidRes.put("rtsp://62.107.84.14:1235/stream.sdp", "vid2.mp4");
         // vidRes.put("rtsp://62.107.84.14:1236/stream.sdp", "vid3.mp4");
-        vidRes.put("/sdcard/DCIM/Trailers/vid1.mp4", "video 1");
-        vidRes.put("/sdcard/DCIM/Trailers/vid2.mp4", "video 2");
-        vidRes.put("/sdcard/DCIM/Trailers/vid3.mp4", "video 3");
-
+        // vidRes.put("/sdcard/DCIM/Trailers/vid1.mp4", "video 1");
+        // vidRes.put("/sdcard/DCIM/Trailers/vid2.mp4", "video 2");
+        // vidRes.put("/sdcard/DCIM/Trailers/vid3.mp4", "video 3");
+        vidRes.put("http://" + mStreamingServerAddress + "/vid1.mp4", "vid2.mp4");
         return vidRes;
     }
 
@@ -329,9 +344,64 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         mMediaPlayer.setOnVideoSizeChangedListener(this);
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
+        mStreamingServerAddress = mHMCApplication.getStreamingAddress();
+
         mLocalMediaRenderer = new LocalMediaRenderer();
 
         doBindService();
+    }
+
+    @Override
+    public final boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.video_player_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public final boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.vidAct_menu_streaming_server:
+                changeStreamingServerAddr();
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void changeStreamingServerAddr() {
+        // This example shows how to add a custom layout to an AlertDialog
+        LayoutInflater factory = LayoutInflater.from(this);
+        final View textEntryView = factory.inflate(R.layout.new_server_address_dialog, null);
+        AlertDialog.Builder dialBuilder = new AlertDialog.Builder(VideoPlayerActivity.this).setIcon(R.drawable.server);
+        dialBuilder.setTitle("Enter new address");
+        dialBuilder.setView(textEntryView);
+        dialBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                EditText newAddr = (EditText) textEntryView
+                        .findViewById(R.id.vidAct_newServerAddress);
+                        mStreamingServerAddress = newAddr.getText().toString();
+                Log.d(TAG, "Changed server address to : " + mStreamingServerAddress);
+                        
+                updateListOfResources();
+
+                SharedPreferences settings = PreferenceManager
+                        .getDefaultSharedPreferences(mHMCApplication);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString(HMCApplication.HMCAPP_SERVER_ADDRESS_KEY,
+                                mStreamingServerAddress);
+                    }
+                });
+        dialBuilder.setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+
+                                /* User clicked cancel so do some stuff */
+                            }
+        });
+        Dialog dial = dialBuilder.create();
+        dial.show();
     }
 
     @Override
@@ -345,7 +415,9 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             mResourceSelectedPosition = position;
             String selectedResource = mVideoResourcesListAdapter
                                     .getResourceNameFromPosition(mResourceSelectedPosition);
-            Toast.makeText(getApplicationContext(), "Selected " + selectedResource,
+            String selectedResourceURI = mVideoResourcesListAdapter
+                    .getResourceURIFromPosition(mResourceSelectedPosition);
+            Toast.makeText(getApplicationContext(), "Selected " + selectedResourceURI,
                                     Toast.LENGTH_SHORT)
                                     .show();
             mVideoTitle.setText(selectedResource);
@@ -539,6 +611,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
         /** The m temp list. */
         private HashMap<String, String> mTempList;
+        private VideoResAdapter mThis;
         /**
          * @param context
          * @param textViewResourceId
@@ -557,8 +630,10 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
          */
         public void setVideoResources(HashMap<String, String> list) {
             mTempList = list;
+            mThis = this;
             mActivity.runOnUiThread(new Runnable() {
                 public void run() {
+                    mThis.clear();
                     Iterator<String> iter = mTempList.keySet().iterator();
                     while (iter.hasNext()) {
                         String val = iter.next();

@@ -26,6 +26,8 @@ public class HMCApplication extends Application {
     /** The Constant TAG. */
     private static final String TAG = "HMCApplication";
     
+    public static String HMCAPP_SERVER_ADDRESS_KEY = "hmc_stream_server_addr";
+    
     /** The m preference listener. */
     private final HMCPreferenceListener mPreferenceListener = new HMCPreferenceListener();
     
@@ -56,6 +58,8 @@ public class HMCApplication extends Application {
     /** The m external storage available. */
     boolean mExternalStorageAvailable = false;
     
+    private String mStreamingServerAddress;
+
     /** The m external storage writeable. */
     boolean mExternalStorageWriteable = false;
 
@@ -88,6 +92,11 @@ public class HMCApplication extends Application {
         Log.d(TAG, "------------Configuration: " + mUsername + " " + mPassword.length() + " "
                                 + mDeviceName
                                 + " " + mDeviceType);
+
+        HMCAPP_SERVER_ADDRESS_KEY = "hmc_srvaddr_key";
+
+        mStreamingServerAddress = mSettings.getString(HMCAPP_SERVER_ADDRESS_KEY, "127.0.0.1");
+
         mSettings.registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
 
@@ -98,6 +107,10 @@ public class HMCApplication extends Application {
     public void onTerminate() {
         super.onTerminate();
         mSettings.unregisterOnSharedPreferenceChangeListener(mPreferenceListener);
+    }
+
+    public String getStreamingAddress() {
+        return mStreamingServerAddress;
     }
 
     /**
@@ -229,6 +242,7 @@ public class HMCApplication extends Application {
             mPassword = mSettings.getString("hmc_pass_key", "");
             mDeviceName = mSettings.getString("hmc_devname_key", "");
             mHMCName = mSettings.getString("hmc_hmcname_key", "");
+            mStreamingServerAddress = mSettings.getString(HMCAPP_SERVER_ADDRESS_KEY, "127.0.0.1");
 
             try {
                 mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));

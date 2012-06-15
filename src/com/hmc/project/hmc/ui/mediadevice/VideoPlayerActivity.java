@@ -195,6 +195,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         // vidRes.put("/sdcard/DCIM/Trailers/vid2.mp4", "video 2");
         // vidRes.put("/sdcard/DCIM/Trailers/vid3.mp4", "video 3");
         vidRes.put("http://" + mStreamingServerAddress + "/vid1.mp4", "vid2.mp4");
+        Log.d(TAG, "Resources are of the form: http://" + mStreamingServerAddress
+                + "/nume_fisier.ext");
         return vidRes;
     }
 
@@ -391,6 +393,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString(HMCApplication.HMCAPP_SERVER_ADDRESS_KEY,
                                 mStreamingServerAddress);
+                editor.commit();
                     }
                 });
         dialBuilder.setNegativeButton("Cancel",
@@ -631,6 +634,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         public void setVideoResources(HashMap<String, String> list) {
             mTempList = list;
             mThis = this;
+            mResourcesNames.clear();
+            Log.d(TAG, "Clearing all existing entries. Now having: " + mResourcesNames.size());
             mActivity.runOnUiThread(new Runnable() {
                 public void run() {
                     mThis.clear();

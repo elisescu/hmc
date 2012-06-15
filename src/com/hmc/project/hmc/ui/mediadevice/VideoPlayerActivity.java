@@ -27,6 +27,7 @@ import com.hmc.project.hmc.ui.hmcserver.AddNewDeviceWizzard;
 import com.hmc.project.hmc.ui.hmcserver.HMCInterconnectionWizzard;
 import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.LocalMediaRenderer;
 import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity.RemoteMediaRenderer;
+import com.hmc.project.hmc.utils.EasyHttpClient;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 import com.hmc.project.hmc.aidl.IMediaRenderer;
 
@@ -53,6 +54,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -136,13 +139,17 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                     mLocalDevicesJIDs[i] = "local";
                     mLocalDevicesNames[i] = "Local device";
                     i++;
-                    while (iter.hasNext()) {
+                    while (iter.hasNext() && i < mLocalDevicesJIDs.length) {
                         String val = iter.next();
                         // don't add the local device two times, as we have it
                         // in the list of devices
                         if (!val.equals(mHMCApplication.getUsername())) {
-                            mLocalDevicesJIDs[i] = val;
-                            mLocalDevicesNames[i] = mLocalDevNamesHashMap.get(val);
+                            try {
+                                mLocalDevicesJIDs[i] = val;
+                                mLocalDevicesNames[i] = mLocalDevNamesHashMap.get(val);
+                            } catch (IndexOutOfBoundsException e) {
+                                e.printStackTrace();
+                            }
                             i++;
                         }
                     }
@@ -185,19 +192,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     }
 
     private HashMap<String, String> getVideoResourcesList() {
-        HashMap<String, String> vidRes = new HashMap<String, String>();
-        // vidRes.put("http://62.107.84.14/vid1.mp4", "vid1.mp4");
-        // vidRes.put("http://62.107.84.14/vid2.mp4", "vid2.mp4");
-        // vidRes.put("rtsp://62.107.84.14:1234/stream.sdp", "vid1.mp4");
-        // vidRes.put("rtsp://62.107.84.14:1235/stream.sdp", "vid2.mp4");
-        // vidRes.put("rtsp://62.107.84.14:1236/stream.sdp", "vid3.mp4");
-        // vidRes.put("/sdcard/DCIM/Trailers/vid1.mp4", "video 1");
-        // vidRes.put("/sdcard/DCIM/Trailers/vid2.mp4", "video 2");
-        // vidRes.put("/sdcard/DCIM/Trailers/vid3.mp4", "video 3");
-        vidRes.put("http://" + mStreamingServerAddress + "/vid1.mp4", "vid2.mp4");
-        Log.d(TAG, "Resources are of the form: http://" + mStreamingServerAddress
-                + "/nume_fisier.ext");
-        return vidRes;
+        refreshVideoResources();
+        return mVideoResources;
     }
 
     private String mPlayerMode = "not-set";
@@ -235,6 +231,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     private Button mRemoteInitButton;
 
     private Button mCloseButton;
+
+    private HashMap<String, String> mVideoResources;
 
     /**
      * Do bind service.
@@ -328,6 +326,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         mVideoResourcesListAdapter = new VideoResAdapter(this);
         mVideoListView.setAdapter(mVideoResourcesListAdapter);
 
+        mVideoResources = new HashMap<String, String>();
+
         mRemoteRenderers = new HashMap<String, VideoPlayerActivity.RemoteMediaRenderer>();
         mContext = this;
         mBigProgressbar = (ProgressBar) findViewById(R.id.vidAct_bigProgressBar);
@@ -367,9 +367,46 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             case R.id.vidAct_menu_streaming_server:
                 changeStreamingServerAddr();
                 return true;
+            case R.id.vidAct_refreshResources:
+                updateListOfResources();
+                return true;
             default:
                 return false;
         }
+    }
+
+    private void refreshVideoResources() {
+        // get the HTTP content from streaming server
+        EasyHttpClient client = new EasyHttpClient();
+        String url = "http://" + mStreamingServerAddress + "/hmc/conf.txt";
+        Log.d(TAG, "Requesting data from:" + url);
+        String httpResul = null;
+        try {
+            httpResul = client.get(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mVideoResources.clear();
+
+        if (httpResul == null) {
+            return;
+        }
+
+        if (httpResul.contains("<!DOCTYPE HTML PUBLIC")) {
+            Log.d(TAG, "Error retriving the list of streaming resources");
+            setStatusMessage("Cannot read streaming files", Color.RED);
+            return;
+        }
+
+        String[] lines = httpResul.split(System.getProperty("line.separator"));
+        for (int i=0;i<lines.length;i++) {
+            String resource = lines[i];
+            String fullResource = "http://" + mStreamingServerAddress + "/hmc/"+resource;
+            mVideoResources.put(fullResource, resource);
+        }
+        
+        Log.d(TAG, "Got from ServerL: !!!!!!!!!!!!! \n\n\n\n" + httpResul);
     }
 
     private void changeStreamingServerAddr() {

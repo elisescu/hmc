@@ -265,6 +265,14 @@ public class Login extends Activity {
     private OnClickListener mLoginListener = new OnClickListener() {
         public void onClick(View v) {
 
+            String currUsername = mUsernameEditText.getText().toString();
+            String currPassword = mPasswordEditText.getText().toString();
+            if (!mHMCApplication.getUsername().equals(currUsername)) {
+                mHMCApplication.setUsername(currUsername);
+                mHMCApplication.setPassword(currPassword);
+                clearHMCData();
+            }
+
             // start HMCService
             if (!mServiceIsStarted) {
                 startService(new Intent(Login.this,
@@ -272,10 +280,6 @@ public class Login extends Activity {
                 mServiceIsStarted = true;
             }
 
-            String currUsername = mUsernameEditText.getText().toString();
-            String currPassword = mPasswordEditText.getText().toString();
-            mHMCApplication.setUsername(currUsername);
-            mHMCApplication.setPassword(currPassword);
 
             // bind to HMCService so that we get the HMCConnection
             if (!mServiceIsBound) {

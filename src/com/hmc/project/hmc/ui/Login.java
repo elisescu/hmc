@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -45,6 +46,7 @@ import com.hmc.project.hmc.service.HMCService;
 import com.hmc.project.hmc.ui.hmcserver.AddNewDeviceWizzard;
 import com.hmc.project.hmc.ui.hmcserver.HMCServerMainScreen;
 import com.hmc.project.hmc.ui.mediaclientdevice.HMCMediaClientDeviceMainScreen;
+import com.hmc.project.hmc.ui.mediadevice.VideoPlayerActivity;
 import com.hmc.project.hmc.ui.mediaservicedevice.HMCMediaServiceDeviceMainScreen;
 import com.hmc.project.hmc.utils.HMCUserNotifications;
 
@@ -84,7 +86,7 @@ public class Login extends Activity {
     HMCConnectionListener mConnectionListener = new HMCConnectionListener();
     
     /** The m start button. */
-    private Button mStartButton;
+    private Button mLoginButton;
     
     /** The m stop button. */
     private Button mStopButton;
@@ -109,6 +111,8 @@ public class Login extends Activity {
     
     /** The m password edit text. */
     private EditText mPasswordEditText;
+
+    private TextView mStatusTextView;
 
     /* (non-Javadoc)
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
@@ -194,14 +198,16 @@ public class Login extends Activity {
         }
 
         // Watch for button clicks.
-        mStartButton = (Button) findViewById(R.id.LoginButton);
-        mStartButton.setOnClickListener(mLoginListener);
+        mLoginButton = (Button) findViewById(R.id.LoginButton);
+        mLoginButton.setOnClickListener(mLoginListener);
         
         mUsernameEditText = (EditText) findViewById(R.id.login_username_editText);
         mPasswordEditText = (EditText) findViewById(R.id.login_password_editText);
 
         mUsernameEditText.setText(mHMCApplication.getUsername());
         mPasswordEditText.setText(mHMCApplication.getPassword());
+
+        mStatusTextView = (TextView) findViewById(R.id.login_connectionStatus);
 
 
         mLoginProgressbar = (ProgressBar) findViewById(R.id.loginProgressBar);
@@ -277,6 +283,10 @@ public class Login extends Activity {
             }
         }
     };
+
+    private int mStatusColor;
+
+    private String mStatusText;
     
     /**
      * Disconnect and stop service.
@@ -305,6 +315,17 @@ public class Login extends Activity {
                     HMCService.class));
             mServiceIsStarted = false;
         }
+    }
+
+    public void setStatusMessage(String text, int color) {
+        mStatusColor = color;
+        mStatusText = text;
+        Login.this.runOnUiThread(new Runnable() {
+            public void run() {
+                mStatusTextView.setTextColor(mStatusColor);
+                mStatusTextView.setText(mStatusText);
+            }
+        });
     }
 
     /**
@@ -347,16 +368,27 @@ public class Login extends Activity {
                 mDeviceType = mHMCApplication.getDeviceType();
                 mDeviceName = mHMCApplication.getDeviceName();
 
+                Login.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mLoginButton.setEnabled(false);
+                    }
+                });
+
                 if (mHMCConnection != null) {
                     try {
                         Log.d(TAG, "Username: " + mUsername + " on device: " + mDeviceName);
+                        setStatusMessage("Connecting...", Color.WHITE);
                         mHMCConnection.registerConnectionListener(mConnectionListener);
                         mHMCConnection.connectAsync(mUsername, mPassword, 5222);
                     } catch (RemoteException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
+                } else {
+                    setStatusMessage("HMC Connectio is invalid", Color.RED);
                 }
+            } else {
+                setStatusMessage("HMC not configured", Color.RED);
             }
         }
 
@@ -389,7 +421,15 @@ public class Login extends Activity {
         @Override
         public void connectionClosedOnError(String arg0) throws RemoteException {
             mHMCApplication.setConnected(false);
+
+            Login.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    mLoginButton.setEnabled(true);
+                }
+            });
+            
             Log.e(TAG, "XMPP connection was closed with the error:" + arg0);
+            setStatusMessage("Connection closed! ", Color.RED);
         }
 
         /* (non-Javadoc)
@@ -400,14 +440,18 @@ public class Login extends Activity {
             Log.d(TAG, "Connection successful"+success);
 
             if (success) {
+                setStatusMessage("Initializing HMC...", Color.WHITE);
                 mHMCConnection.getHMCManager().init(mHMCApplication.getDeviceName(),
                                         mHMCApplication.getUsername(),
                                         mHMCApplication.getDeviceType(),
                                         mHMCApplication.getHMCName());
+            } else {
+                setStatusMessage("Error on connecting", Color.RED);
             }
 
             Login.this.runOnUiThread(new Runnable() {
                 public void run() {
+                    mLoginButton.setEnabled(true);
                     mLoginProgressbar.setVisibility(ProgressBar.INVISIBLE);
                 }
             });
@@ -434,8 +478,14 @@ public class Login extends Activity {
                 finish();
             } else {
                 HMCUserNotifications.normalToast(Login.this, "Login failed");
+                setStatusMessage("Error on connecting", Color.RED);
                 disconnectAndStopService();
             }
+        }
+
+        @Override
+        public void connectionProgress(String status) throws RemoteException {
+            setStatusMessage(status, Color.WHITE);
         }
     }
 }

@@ -54,4 +54,11 @@
             android:layout_marginTop="32dp"
             android:text="Login" />
 
+        <TextView
+            android:id="@+id/login_connectionStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/LoginButton"
+            android:text="" />
+
     </RelativeLayout>

@@ -14,4 +14,5 @@ interface IConnectionListener {
     //void reconnectionFailed(String arg0);
     //void reconnectionSuccessful();
     void connectionSuccessful(boolean success);
+    void connectionProgress(String status);
 }

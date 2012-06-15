@@ -63,6 +63,9 @@ public class HMCApplication extends Application {
     /** The m external storage writeable. */
     boolean mExternalStorageWriteable = false;
 
+    public static String HMCAPP_FULLJID_KEY;
+
+    public static String HMCAPP_PASSWORD_KEY;
 
     /* (non-Javadoc)
      * @see android.app.Application#onCreate()
@@ -72,10 +75,15 @@ public class HMCApplication extends Application {
         super.onCreate();
         mSettings = PreferenceManager.getDefaultSharedPreferences(this);
 
-        mUsername = mSettings.getString("hmc_jid_key", "");
-        mPassword = mSettings.getString("hmc_pass_key", "");
+        HMCAPP_SERVER_ADDRESS_KEY = "hmc_srvaddr_key";
+        HMCAPP_FULLJID_KEY = "hmc_jid_key";
+        HMCAPP_PASSWORD_KEY = "hmc_pass_key";
+
+        mUsername = mSettings.getString(HMCAPP_FULLJID_KEY, "");
+        mPassword = mSettings.getString(HMCAPP_PASSWORD_KEY, "");
         mDeviceName = mSettings.getString("hmc_devname_key", "");
         mHMCName = mSettings.getString("hmc_hmcname_key", "");
+        mStreamingServerAddress = mSettings.getString(HMCAPP_SERVER_ADDRESS_KEY, "127.0.0.1");
 
         try {
             mDeviceType = Integer.parseInt(mSettings.getString("hmc_device_type", "-1"));
@@ -92,10 +100,6 @@ public class HMCApplication extends Application {
         Log.d(TAG, "------------Configuration: " + mUsername + " " + mPassword.length() + " "
                                 + mDeviceName
                                 + " " + mDeviceType);
-
-        HMCAPP_SERVER_ADDRESS_KEY = "hmc_srvaddr_key";
-
-        mStreamingServerAddress = mSettings.getString(HMCAPP_SERVER_ADDRESS_KEY, "127.0.0.1");
 
         mSettings.registerOnSharedPreferenceChangeListener(mPreferenceListener);
     }
@@ -169,9 +173,30 @@ public class HMCApplication extends Application {
         return mExternalStorageAvailable && mExternalStorageWriteable;
     }
 
+    public void setUsername(String s) {
+        mUsername = s;
+
+        // save to preferences
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(HMCApplication.HMCAPP_FULLJID_KEY, s);
+        editor.commit();
+    }
+
+    public void setPassword(String s) {
+        mPassword= s;
+
+        // save to preferences
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(HMCApplication.HMCAPP_PASSWORD_KEY, s);
+        editor.commit();
+
+    }
+    
     /**
      * Gets the username.
-     *
+     * 
      * @return the username
      */
     public String getUsername() {
@@ -238,8 +263,8 @@ public class HMCApplication extends Application {
          */
         @Override
         public void onSharedPreferenceChanged(SharedPreferences  sharedPreferences, String key) {
-            mUsername = mSettings.getString("hmc_jid_key", "");
-            mPassword = mSettings.getString("hmc_pass_key", "");
+            mUsername = mSettings.getString(HMCAPP_FULLJID_KEY, "");
+            mPassword = mSettings.getString(HMCAPP_PASSWORD_KEY, "");
             mDeviceName = mSettings.getString("hmc_devname_key", "");
             mHMCName = mSettings.getString("hmc_hmcname_key", "");
             mStreamingServerAddress = mSettings.getString(HMCAPP_SERVER_ADDRESS_KEY, "127.0.0.1");

@@ -344,7 +344,7 @@ public class HMCConnection extends IHMCConnection.Stub {
         
         lConnectionConfiguration.setSendPresence(false);
         
-        lConnectionConfiguration.setSecurityMode(SecurityMode.disabled);
+        lConnectionConfiguration.setSecurityMode(SecurityMode.enabled);
         lConnectionConfiguration.setTruststoreType("BKS");
         lConnectionConfiguration.setTruststorePath("/system/etc/security/cacerts.bks");
         

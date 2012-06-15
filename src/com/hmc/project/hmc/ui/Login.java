@@ -23,6 +23,7 @@ import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -265,6 +266,11 @@ public class Login extends Activity {
                 mServiceIsStarted = true;
             }
 
+            String currUsername = mUsernameEditText.getText().toString();
+            String currPassword = mPasswordEditText.getText().toString();
+            mHMCApplication.setUsername(currUsername);
+            mHMCApplication.setPassword(currPassword);
+
             // bind to HMCService so that we get the HMCConnection
             if (!mServiceIsBound) {
                 doBindService();
@@ -337,6 +343,7 @@ public class Login extends Activity {
 
                 mUsername = mHMCApplication.getUsername();
                 mPassword = mHMCApplication.getPassword();
+
                 mDeviceType = mHMCApplication.getDeviceType();
                 mDeviceName = mHMCApplication.getDeviceName();
 

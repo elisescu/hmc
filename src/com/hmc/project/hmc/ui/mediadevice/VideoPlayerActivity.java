@@ -41,6 +41,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
@@ -66,12 +67,14 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -338,6 +341,23 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         mLocalMediaRenderer = new LocalMediaRenderer();
 
         doBindService();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        // LayoutParams lp = mSurfaceView.getLayoutParams();
+        // lp.width = getWindowManager().getDefaultDisplay().getHeight();
+        // lp.height = getWindowManager().getDefaultDisplay().getWidth();
+        // mSurfaceHolder.setFixedSize(lp.width, lp.height);
+        // mSurfaceView.setLayoutParams(lp);
+        // LinearLayout ln = (LinearLayout)
+        // findViewById(R.id.vidAct_ButtonsLayout);
+        // ln.setVisibility(View.GONE);
+        // }
+
     }
 
     @Override

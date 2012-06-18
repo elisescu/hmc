@@ -406,16 +406,18 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 return null;
             }
 
-            if (!httpResult.contains("start_list_tag")) {
+            String[] lines = httpResult.split(System.getProperty("line.separator"));
+            
+            if ((lines.length < 2) || !lines[0].contains("start_list_tag")) {
                 Log.d(TAG, "Error retriving the list of streaming resources");
                 setStatusMessage("Cannot read streaming files", Color.RED);
                 return null;
             }
-
-            String[] lines = httpResult.split(System.getProperty("line.separator"));
-            for (int i = 0; i < lines.length; i++) {
+            
+            String streamingAddress = lines[1];
+            for (int i = 2; i < lines.length; i++) {
                 String resource = lines[i];
-                String fullResource = "http://" + mStreamingServerAddress + "/hmc/" + resource;
+                String fullResource = "http://" + streamingAddress + "/hmc/" + resource;
                 if (!"start_list_tag".equals(resource)) {
                     mVideoResources.put(fullResource, resource);
                 }

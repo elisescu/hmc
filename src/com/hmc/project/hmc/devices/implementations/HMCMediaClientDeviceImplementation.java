@@ -76,9 +76,9 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
         String retVal = "";
         long startTime, totalDuration, localDuration;
         int failedNo = 0;
-        int testOTRNo = 50;
-        int testShortRPCNo = 50;
-        int testBigRPCNo = 10;
+        int testOTRNo = 5;
+        int testShortRPCNo = 5;
+        int testBigRPCNo = 2;
         HMCAnonymousDeviceProxy anonProxy = mHMCManager.createAnonymousProxy(fullJID);
         
 

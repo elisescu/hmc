@@ -237,12 +237,10 @@ public class SecureChat implements MessageListener {
                     }
                 }
             }).start();
-        } else if (msg.getBody().startsWith("?OTR:")) {
-            // TODO: check and fix this work around
-            // refresh the OTR session:
-            Log.d(TAG, "Received unknown OTR message. Should we refresh the session??");
         } else {
-            Log.d(TAG, "Received unecrypted or null message: " + msg.getBody());
+            int maxLength = 20;
+            int lg = msg.getBody().length() > maxLength ? maxLength : msg.getBody().length();
+            Log.d(TAG, "Messace not decrypted. Received: " + msg.getBody().substring(0, lg));
         }
 
     }
@@ -301,7 +299,7 @@ public class SecureChat implements MessageListener {
      * @param msg the msg
      */
     public void injectMessage(String msg) {
-        int maxLength = 10;
+        int maxLength = 20;
         int lg = msg.length() > maxLength ? maxLength : msg.length();
         Log.d(TAG, "Inject OTR message: " + msg.substring(0, lg) + "...");
         try {

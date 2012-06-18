@@ -44,7 +44,7 @@ public class HMCOTRManager implements OtrEngineHost {
     
     /** The Constant mHMCOTRPolicy. */
     private static final OtrPolicy mHMCOTRPolicy = new OtrPolicyImpl(OtrPolicy.ALLOW_V2
-                            | OtrPolicy.ERROR_START_AKE);
+            | OtrPolicy.ERROR_START_AKE);
 
     /**
      * Instantiates a new hMCOTR manager.
@@ -124,6 +124,15 @@ public class HMCOTRManager implements OtrEngineHost {
     public void showWarning(SessionID sessionID, String warning) {
         // TODO Auto-generated method stub
         Log.w(TAG, "OTR warning for session <" + sessionID.toString() + ">: " + warning);
+
+        SecureChat errChat = mChats.get(sessionID);
+
+        if (errChat != null) {
+            Log.d(TAG, "Try to recreate OTR session: " + sessionID);
+            // errChat.stopOtrSession();
+            errChat.startOtrSession();
+        }
+
     }
 
     /* (non-Javadoc)
@@ -133,6 +142,13 @@ public class HMCOTRManager implements OtrEngineHost {
     public void showError(SessionID sessionID, String error) {
         // TODO Auto-generated method stub
         Log.e(TAG, "OTR error for session <" + sessionID.toString() + ">: " + error);
+        SecureChat errChat = mChats.get(sessionID);
+
+        if (errChat != null) {
+            Log.d(TAG, "Try to recreate OTR session: " + sessionID);
+            // errChat.stopOtrSession();
+            errChat.startOtrSession();
+        }
     }
 
     /* (non-Javadoc)

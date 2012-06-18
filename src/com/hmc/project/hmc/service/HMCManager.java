@@ -642,13 +642,13 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                 .iterator();
         while (iter.hasNext()) {
             HMCDeviceProxy devPrx = iter.next();
-            devPrx.cleanOTRSession();
+            // devPrx.cleanOTRSession();
         }
 
         iter = mAnonymousDevices.values().iterator();
         while (iter.hasNext()) {
             HMCDeviceProxy devPrx = iter.next();
-            devPrx.cleanOTRSession();
+            // devPrx.cleanOTRSession();
         }
     }
 

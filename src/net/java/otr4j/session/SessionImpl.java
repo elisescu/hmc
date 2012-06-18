@@ -20,6 +20,8 @@ import java.util.Vector;
 import java.util.logging.Logger;
 import javax.crypto.interfaces.DHPublicKey;
 
+import android.util.Log;
+
 import net.java.otr4j.OtrEngineHost;
 import net.java.otr4j.OtrEngineListener;
 import net.java.otr4j.OtrException;
@@ -69,6 +71,8 @@ public class SessionImpl implements Session {
 		private int type;
 		private byte[] value;
 	}
+
+    private static final String TAG = "OTR Session Implementation";
 
 	private SessionID sessionID;
 	private OtrEngineHost host;
@@ -429,7 +433,7 @@ public class SessionImpl implements Session {
 					SerializationConstants.TYPE_LEN_MAC);
 
 			if (!Arrays.equals(computedMAC, data.mac)) {
-				logger.finest("MAC verification failed, ignoring message");
+                    Log.d(TAG, "MAC verification failed, ignoring message");
 				return null;
 			}
 
@@ -713,8 +717,10 @@ public class SessionImpl implements Session {
 	 * @see net.java.otr4j.session.ISession#startSession()
 	 */
 	public void startSession() throws OtrException {
-		if (this.getSessionStatus() == SessionStatus.ENCRYPTED)
-			return;
+        if (this.getSessionStatus() == SessionStatus.ENCRYPTED) {
+            setSessionStatus(SessionStatus.PLAINTEXT);
+        }
+        // return;
 
 		if (!getSessionPolicy().getAllowV2())
 			throw new UnsupportedOperationException();

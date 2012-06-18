@@ -79,8 +79,12 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
         int testOTRNo = 5;
         int testShortRPCNo = 5;
         int testBigRPCNo = 2;
-        HMCAnonymousDeviceProxy anonProxy = mHMCManager.createAnonymousProxy(fullJID);
         
+        HMCDeviceProxy anonProxy = mHMCManager.getDeviceProxy(fullJID);
+        
+        if (anonProxy == null) {
+            return "Error when testing...";
+        }
 
         retVal += "Time for start and stop OTR session: ";
         // test multiple start-stop OTR
@@ -149,7 +153,6 @@ public class HMCMediaClientDeviceImplementation extends HMCMediaDeviceImplementa
 
 
         anonProxy.cleanOTRSession();
-        mHMCManager.deleteAnonymousProxy(fullJID);
 
         return retVal;
     }

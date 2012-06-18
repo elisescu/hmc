@@ -870,4 +870,17 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             mLocalImplementation.unsetLocalRender();
         }
     }
+
+    public HMCDeviceProxy getDeviceProxy(String fullJID) {
+        HMCDeviceProxy retVal = null;
+
+        retVal = mHMCDevicesStore.getListOfExternalDevices().get(fullJID);
+
+        if (retVal == null) {
+            retVal = mHMCDevicesStore.getListOfLocalDevices().get(fullJID);
+        }
+
+        return retVal;
+
+    }
 }

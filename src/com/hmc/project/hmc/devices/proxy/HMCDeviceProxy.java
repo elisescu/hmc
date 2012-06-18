@@ -846,4 +846,12 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
         return retVal;
     }
 
+    /**
+     * needed for testing purposes: start and stop the OTR session on the secure
+     * chat reference.
+     */
+    public boolean test_StartAndStopOTR() {
+        return mSecureChat.startOtrSession() && mSecureChat.stopOtrSession();
+    }
+
 }

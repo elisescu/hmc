@@ -588,6 +588,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             } else {
                 // send command to remote
                 playbackResult = mSelectedRender.play(videoResource);
+                playbackResult = true;
             }
 
             if (!playbackResult) {

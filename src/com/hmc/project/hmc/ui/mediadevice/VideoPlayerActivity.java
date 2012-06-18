@@ -50,6 +50,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnVideoSizeChangedListener;
 import android.opengl.Visibility;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -187,13 +188,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     };
 
     private void updateListOfResources() {
-        mVideoResourcesList = getVideoResourcesList();
-        mVideoResourcesListAdapter.setVideoResources(mVideoResourcesList);
-    }
-
-    private HashMap<String, String> getVideoResourcesList() {
-        refreshVideoResources();
-        return mVideoResources;
+        new RetreiveVideoResources().execute();
     }
 
     private String mPlayerMode = "not-set";
@@ -338,14 +333,6 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         mSurfaceHolder.addCallback(this);
         mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        // Create a new media player and set the listeners
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setOnBufferingUpdateListener(this);
-        mMediaPlayer.setOnCompletionListener(this);
-        mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.setOnVideoSizeChangedListener(this);
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-
         mStreamingServerAddress = mHMCApplication.getStreamingAddress();
 
         mLocalMediaRenderer = new LocalMediaRenderer();
@@ -375,38 +362,52 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         }
     }
 
-    private void refreshVideoResources() {
-        // get the HTTP content from streaming server
-        EasyHttpClient client = new EasyHttpClient();
-        String url = "http://" + mStreamingServerAddress + "/hmc/conf.txt";
-        Log.d(TAG, "Requesting data from:" + url);
-        String httpResul = null;
-        try {
-            httpResul = client.get(url);
-        } catch (Exception e) {
-            e.printStackTrace();
+    private class RetreiveVideoResources extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            // get the HTTP content from streaming server
+            EasyHttpClient client = new EasyHttpClient();
+            String url = "http://" + mStreamingServerAddress + "/hmc/conf.txt";
+            Log.d(TAG, "Requesting data from:" + url);
+            String httpResult = null;
+            setStatusMessage("Retreiving video resources...", Color.WHITE);
+            try {
+                httpResult = client.get(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+                setStatusMessage("Cannot access streaming server", Color.RED);
+                return null;
+            }
+
+            mVideoResources.clear();
+
+            if (httpResult == null) {
+                return null;
+            }
+
+            if (!httpResult.contains("start_list_tag")) {
+                Log.d(TAG, "Error retriving the list of streaming resources");
+                setStatusMessage("Cannot read streaming files", Color.RED);
+                return null;
+            }
+
+            String[] lines = httpResult.split(System.getProperty("line.separator"));
+            for (int i = 0; i < lines.length; i++) {
+                String resource = lines[i];
+                String fullResource = "http://" + mStreamingServerAddress + "/hmc/" + resource;
+                if (!"start_list_tag".equals(resource)) {
+                    mVideoResources.put(fullResource, resource);
+                }
+            }
+            return null;
         }
 
-        mVideoResources.clear();
-
-        if (httpResul == null) {
-            return;
+        protected void onPostExecute(Void result) {
+            setStatusMessage("", Color.BLACK);
+            mVideoResourcesListAdapter.setVideoResources(mVideoResources);
         }
 
-        if (httpResul.contains("<!DOCTYPE HTML PUBLIC")) {
-            Log.d(TAG, "Error retriving the list of streaming resources");
-            setStatusMessage("Cannot read streaming files", Color.RED);
-            return;
-        }
-
-        String[] lines = httpResul.split(System.getProperty("line.separator"));
-        for (int i=0;i<lines.length;i++) {
-            String resource = lines[i];
-            String fullResource = "http://" + mStreamingServerAddress + "/hmc/"+resource;
-            mVideoResources.put(fullResource, resource);
-        }
-        
-        Log.d(TAG, "Got from ServerL: !!!!!!!!!!!!! \n\n\n\n" + httpResul);
     }
 
     private void changeStreamingServerAddr() {
@@ -414,12 +415,16 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         LayoutInflater factory = LayoutInflater.from(this);
         final View textEntryView = factory.inflate(R.layout.new_server_address_dialog, null);
         AlertDialog.Builder dialBuilder = new AlertDialog.Builder(VideoPlayerActivity.this).setIcon(R.drawable.server);
-        dialBuilder.setTitle("Enter new address");
+        dialBuilder.setTitle("Streaming server address");
+        EditText newAddr = (EditText) textEntryView.findViewById(R.id.vidAct_newServerAddress);
+        newAddr.setText(mHMCApplication.getStreamingAddress(), TextView.BufferType.EDITABLE);
+
         dialBuilder.setView(textEntryView);
         dialBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                 EditText newAddr = (EditText) textEntryView
                         .findViewById(R.id.vidAct_newServerAddress);
+
                         mStreamingServerAddress = newAddr.getText().toString();
                 Log.d(TAG, "Changed server address to : " + mStreamingServerAddress);
                         
@@ -767,11 +772,26 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 mBigProgressbar.setVisibility(View.INVISIBLE);
             }
         });
-
     }
 
     private void playVideoResource(String path) throws IOException {
+        releaseMediaPlayer();
         doCleanUp();
+
+        if (!mSurfaceCreated || mMediaPlayerPreparing) {
+            setStatusMessage("Cannot start playback", Color.RED);
+            return;
+        }
+
+        // Create a new media player and set the listeners
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setOnBufferingUpdateListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
+        mMediaPlayer.setOnPreparedListener(this);
+        mMediaPlayer.setOnVideoSizeChangedListener(this);
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setDisplay(mSurfaceHolder);
+
         Log.v(TAG, "startVideoPlayback");
         VideoPlayerActivity.this.runOnUiThread(new Runnable() {
             public void run() {
@@ -833,10 +853,6 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             Log.e(TAG, "Strange surface created !!!!!!!!!!!!");
         }
 
-        if (mMediaPlayer != null) {
-            mMediaPlayer.setDisplay(mSurfaceHolder);
-        }
-
         setStatusMessage("Ready", Color.WHITE);
     }
 
@@ -881,11 +897,13 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             VideoPlayerActivity.this.runOnUiThread(new Runnable() {
                 public void run() {
                     mBigProgressbar.setVisibility(View.INVISIBLE);
-                    setStatusMessage("Couldn't start playbacl", Color.RED);
+                    setStatusMessage("Couldn't start playback", Color.RED);
                 }
             });
         }
+        mMediaPlayerPreparing = false;
 
+        releaseMediaPlayer();
         doCleanUp();
     }
 
@@ -920,6 +938,9 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
         Log.d(TAG, "onBufferingUpdate percent:" + percent);
         setStatusMessage("Buffering: " + percent + "%", Color.WHITE);
+        if (percent == 100) {
+            setStatusMessage("", Color.BLACK);
+        }
     }
 
     public void setStatusMessage(String text, int color) {

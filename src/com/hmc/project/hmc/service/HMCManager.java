@@ -506,8 +506,11 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
                                 HMCDeviceProxy localDev = devicesIter.next();
 
                                 // TODO: fix this bad approach
-                                if (localDev.getDeviceDescriptor().getDeviceType() != HMCDeviceItf.TYPE.HMC_SERVER) {
-                                    HMCMediaDeviceProxy mediaDev = (HMCMediaDeviceProxy) localDev;
+                                // if
+                                // (localDev.getDeviceDescriptor().getDeviceType()
+                                // != HMCDeviceItf.TYPE.HMC_SERVER)
+                                {
+                                    HMCDeviceProxy mediaDev = localDev;
                                     mediaDev.externalDeviceAddedNotification(
                                                             mTempDeviceDesc.getDeviceDescriptor(),
                                                             mHMCName);

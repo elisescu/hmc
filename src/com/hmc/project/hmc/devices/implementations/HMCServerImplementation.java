@@ -244,6 +244,14 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         return locDevsList;
     }
 
+    private HMCDevicesList getListOfExternalHMCDevices() {
+        HashMap<String, DeviceDescriptor> ourExternalDevices = mHMCManager
+                .getListOfExternalDevicesDescriptors();
+        HMCDevicesList locDevsList = new HMCDevicesList("external HMC", true, ourExternalDevices);
+
+        return locDevsList;
+    }
+
     /* (non-Javadoc)
      * @see com.hmc.project.hmc.devices.interfaces.HMCServerItf#getListOfNewHMCDevices(java.lang.String)
      */
@@ -431,6 +439,10 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             // now that we have the specific proxy, added also in our list of
             // devices
             specificDevPrxy.sendListOfDevices(getListOfLocalHMCDevices());
+            HMCDevicesList extDevs = getListOfExternalHMCDevices();
+            if (extDevs.getNoDevices() > 0) {
+                specificDevPrxy.setExternalDevicesList(extDevs);
+            }
         }
 
         return remoteUserReply;

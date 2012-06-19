@@ -224,6 +224,10 @@ public class HMCDevicesList {
         } catch (TransformerException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (NullPointerException e2) {
+            retVal = "";
+            e2.printStackTrace();
+            // TODO: handle exception
         }
         return retVal;
     }

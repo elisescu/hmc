@@ -94,6 +94,27 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         return "not-authenticated";
     }
 
+    /**
+     * _external device added notification.
+     * 
+     * @param params
+     *            the parameters received from remote
+     */
+    private void _externalDeviceAddedNotification(String params) {
+        DeviceDescriptor newDev = DeviceDescriptor.fromXMLString(params);
+        externalDeviceAddedNotification(newDev);
+    }
+
+    /**
+     * External device added notification.
+     * 
+     * @param newDev
+     *            the new dev
+     */
+    private void externalDeviceAddedNotification(DeviceDescriptor newDev) {
+        mHMCManager.externalDeviceAddedNotification(newDev);
+    }
+
     private String _playFromPos(String params, HMCDeviceProxy fromDev) {
         String posStr, path;
         int pos = 0, sepPos;
@@ -317,6 +338,9 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
         switch (opCode) {
             case HMCDeviceItf.CMD_TEST_NOTIFICATION:
                 testNotification(params);
+                break;
+            case CMD_EXTERNAL_DEVICE_ADDED_NOTIFICATION:
+                _externalDeviceAddedNotification(params);
                 break;
             default:
                 Log.e(TAG, "Received unknown notification:" + opCode + " with params: " + params);

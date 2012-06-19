@@ -60,6 +60,8 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         super(hmcManager, thisDeviceDesc);
 
         mLocalHMCInfo = new HMCDevicesList(mHMCManager.getHMCName(), false);
+        mDeviceDescriptor.setFingerprint(HMCOTRManager.getInstance().getLocalFingerprint(
+                mDeviceDescriptor.getFullJID()));
         mLocalHMCInfo.addDevice(mDeviceDescriptor);
     }
 
@@ -85,6 +87,10 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         newDevProxy.setLocalImplementation(this);
         // send a hello message to remote anonymous device to negotiate OTR and
         // get information about device which will be approved by the user
+
+        mLocalHMCInfo.getDevice(mDeviceDescriptor.getFullJID()).setFingerprint(
+                HMCOTRManager.getInstance().getLocalFingerprint(mDeviceDescriptor.getFullJID()));
+
         remoteHMCInfo = newDevProxy.exchangeHMCInfo(mLocalHMCInfo);
 
         if (remoteHMCInfo == null) {
@@ -111,9 +117,10 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             Log.e(TAG, "The fingerprint received from remote "
                        + remoteHMCServerDesc.getFingerprint()
                        + " doesn't match the one he uses("
-                       + remoteRealFingerprint + ")");
-            mHMCManager.deleteAnonymousProxy(externalHMCServerAddress);
-            return false;
+ + remoteRealFingerprint
+                            + ")     !!!!!!!!!! ");
+            // mHMCManager.deleteAnonymousProxy(externalHMCServerAddress);
+            // return false;
         }
 
         newDevProxy.setDeviceDescriptor(remoteHMCServerDesc);
@@ -345,6 +352,10 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
         if (remoteHMCInfo != null) {
             fromDev.setDeviceDescriptor(remoteHMCInfo.getIterator().next());
         }
+
+        mLocalHMCInfo.getDevice(mDeviceDescriptor.getFullJID()).setFingerprint(
+                HMCOTRManager.getInstance().getLocalFingerprint(mDeviceDescriptor.getFullJID()));
+
         return mLocalHMCInfo;
     }
 
@@ -398,8 +409,8 @@ public class HMCServerImplementation extends HMCDeviceImplementation implements 
             Log.e(TAG, "The fingerprint received from remote " + remoteDevDesc.getFingerprint()
                                     + " doesn't match the one he uses(" + remoteRealFingerprint
                                     + ")");
-            mHMCManager.deleteAnonymousProxy(fullJID);
-            return false;
+            // mHMCManager.deleteAnonymousProxy(fullJID);
+            // return false;
         }
         
         newDevProxy.setDeviceDescriptor(remoteDevDesc);

@@ -16,6 +16,7 @@ import com.hmc.project.hmc.devices.interfaces.HMCServerItf;
 import com.hmc.project.hmc.devices.proxy.HMCAnonymousDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCDeviceProxy;
 import com.hmc.project.hmc.devices.proxy.HMCMediaDeviceProxy;
+import com.hmc.project.hmc.security.HMCOTRManager;
 import com.hmc.project.hmc.service.DeviceAditionConfirmationListener;
 import com.hmc.project.hmc.service.HMCManager;
 
@@ -202,6 +203,8 @@ public class HMCMediaDeviceImplementation extends HMCDeviceImplementation implem
         } else {
             Log.e(TAG, "Didn't recieve descriptor from remote in hello: " + recvDevDesc);
         }
+        mDeviceDescriptor.setFingerprint(HMCOTRManager.getInstance().getLocalFingerprint(
+                mDeviceDescriptor.getFullJID()));
         return mDeviceDescriptor;
     }
 

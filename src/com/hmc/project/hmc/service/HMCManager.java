@@ -278,7 +278,8 @@ public class HMCManager extends IHMCManager.Stub implements ChatManagerListener,
             }
 
             HMCSecurityPolicy.getInstance()
-                                    .setHMCSecurityPolicy(HMCSecurityPolicy.TRUST_HMC_ALWAYS);
+.setHMCSecurityPolicy(
+                    HMCSecurityPolicy.TRUST_EVERYBODY_ALWAYS);
 
             mState = STATE_INITIALIZED;
         } else {

@@ -643,8 +643,15 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 playbackResult = mLocalMediaRenderer.play(videoResource);
             } else {
                 // send command to remote
-                playbackResult = mSelectedRender.play(videoResource);
-                playbackResult = true;
+
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                    playbackResult = mSelectedRender.playFromPosition(
+                            mMediaPlayer.getCurrentPosition(), videoResource);
+                    playbackResult = true;
+                } else {
+                    playbackResult = mSelectedRender.play(videoResource);
+                    playbackResult = true;
+                }
             }
 
             if (!playbackResult) {
@@ -715,6 +722,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     private int mStatusColor;
 
     private String mStatusText;
+
+    private int mStartPosition;
 
     private void goBlooey(Throwable t) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -840,9 +849,9 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         Log.v(TAG, "startVideoPlayback");
         mSurfaceHolder.setFixedSize(mVideoWidth, mVideoHeight);
         try {
-        mMediaPlayer.start();
+            mMediaPlayer.seekTo(mStartPosition);
+            mMediaPlayer.start();
         } catch (IllegalStateException e) {
-
             e.printStackTrace();
         }
 
@@ -894,6 +903,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         releaseMediaPlayer();
         doCleanUp();
 
+        mStartPosition = 0;
+
         if (!mSurfaceCreated || mMediaPlayerPreparing) {
             setStatusMessage("Cannot start playback", Color.RED);
             return;
@@ -917,6 +928,61 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
         try {
             
+            if (!mMediaPlayerPreparing) {
+                if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.stop();
+                    mMediaPlayer.reset();
+                }
+
+                mMediaPlayer.setDataSource(path);
+                mMediaPlayer.prepareAsync();
+                mMediaPlayerPreparing = true;
+
+                VideoPlayerActivity.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mBigProgressbar.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        } catch (IllegalArgumentException e1) {
+            e1.printStackTrace();
+            setStatusMessage("Called with Illegal argument", Color.RED);
+            // TODO: handle exception
+        } catch (IllegalStateException e2) {
+            e2.printStackTrace();
+            setStatusMessage("Called in Illegal state", Color.RED);
+            // TODO: handle exception
+        }
+    }
+
+    private void playVideoResource(int pos, String path) throws IOException {
+        releaseMediaPlayer();
+        doCleanUp();
+
+        mStartPosition = pos;
+        if (!mSurfaceCreated || mMediaPlayerPreparing) {
+            setStatusMessage("Cannot start playback", Color.RED);
+            return;
+        }
+
+        // Create a new media player and set the listeners
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setOnBufferingUpdateListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
+        mMediaPlayer.setOnPreparedListener(this);
+        mMediaPlayer.setOnVideoSizeChangedListener(this);
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setDisplay(mSurfaceHolder);
+
+        Log.v(TAG, "startVideoPlayback");
+        VideoPlayerActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                mSurfaceHolder.setFixedSize(mVideoWidth, mVideoHeight);
+            }
+        });
+
+        try {
+
             if (!mMediaPlayerPreparing) {
                 if (mMediaPlayer.isPlaying()) {
                     mMediaPlayer.stop();
@@ -1078,6 +1144,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         IMediaRenderer mRemoteMediaController = null;
         private String mStringPath;
         private boolean mRemoteProcessing = false;
+        private int mPlayPosition;
 
         public RemoteMediaRenderer(String fullJID) {
             mFullJID = fullJID;
@@ -1257,6 +1324,34 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             return mRemoteResult;
         }
 
+        @Override
+        public boolean playFromPosition(int pos, String path) throws RemoteException {
+            if (mRemoteMediaController == null || mRemoteProcessing)
+                return false;
+
+            mStringPath = path;
+            mPlayPosition = pos;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mRemoteProcessing = true;
+                    try {
+                        mRemoteResult = mRemoteMediaController.playFromPosition(mPlayPosition,
+                                mStringPath);
+                        mInitialized = false;
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                        mRemoteResult = false;
+                    }
+                    if (mRemoteResult == false) {
+                        setStatusMessage("Cannot seek remote", Color.RED);
+                    }
+                    mRemoteProcessing = false;
+                }
+            }).start();
+            return mRemoteResult;
+        }
+
     }
 
     class LocalMediaRenderer extends IMediaRenderer.Stub {
@@ -1362,6 +1457,36 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         public boolean seekBackward() throws RemoteException {
             return goBackwards();
         }
+
+        @Override
+        public boolean playFromPosition(int pos, String path) throws RemoteException {
+            HMCUserNotifications.normalToast(mContext, "play(" + path + ")");
+            boolean res = false;
+
+            if (mSurfaceCreated) {
+                try {
+                    playVideoResource(pos, path);
+                    res = true;
+                } catch (IOException e) {
+                    res = false;
+                    e.printStackTrace();
+                }
+            } else {
+                HMCUserNotifications.normalToast(mContext, "Cannot render video!");
+                setStatusMessage("Error: surface view", Color.RED);
+                res = false;
+            }
+
+            if (res == false) {
+                VideoPlayerActivity.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mBigProgressbar.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+
+            return res;
+        }
     }
 
     @Override
@@ -1371,7 +1496,6 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             try {
                 mHMCManager.unsetLocalMediaRender();
             } catch (RemoteException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

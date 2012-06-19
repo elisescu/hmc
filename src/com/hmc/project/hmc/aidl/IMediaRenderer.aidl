@@ -7,5 +7,6 @@ interface IMediaRenderer {
     boolean seekBackward();
     boolean close();
     boolean pause();
+    boolean playFromPosition(int pos, String path);
 
 }

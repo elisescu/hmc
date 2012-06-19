@@ -852,6 +852,14 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
             retVal = Boolean.parseBoolean(reply);
             return retVal;
         }
+
+        @Override
+        public boolean playFromPosition(int pos, String path) throws RemoteException {
+            boolean retVal = false;
+            String reply = sendCommandSync(CMD_PLAY_FROM_POS, pos + "|" + path);
+            retVal = Boolean.parseBoolean(reply);
+            return retVal;
+        }
     }
 
     public boolean initRemoteRenderer() {

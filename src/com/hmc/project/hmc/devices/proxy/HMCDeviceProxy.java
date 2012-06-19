@@ -837,6 +837,21 @@ public class HMCDeviceProxy implements HMCDeviceItf, SecuredMessageListener {
             return retVal;
         }
 
+        @Override
+        public boolean seekFordard() throws RemoteException {
+            boolean retVal = false;
+            String reply = sendCommandSync(CMD_SEEK_FORWARD, "");
+            retVal = Boolean.parseBoolean(reply);
+            return retVal;
+        }
+
+        @Override
+        public boolean seekBackward() throws RemoteException {
+            boolean retVal = false;
+            String reply = sendCommandSync(CMD_SEEK_BACKWARD, "");
+            retVal = Boolean.parseBoolean(reply);
+            return retVal;
+        }
     }
 
     public boolean initRemoteRenderer() {

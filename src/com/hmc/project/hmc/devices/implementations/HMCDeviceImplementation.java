@@ -79,6 +79,10 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
                     return _playOnLocalRender(params, fromDev);
                 case HMCDeviceItf.CMD_PAUSE:
                     return _pauseLocalRender(params, fromDev);
+                case HMCDeviceItf.CMD_SEEK_BACKWARD:
+                    return _seekBackards(params, fromDev);
+                case HMCDeviceItf.CMD_SEEK_FORWARD:
+                    return _seekForwards(params, fromDev);
                 case HMCDeviceItf.CMD_STOP:
                     return _stopLocalRender(params, fromDev);
                 default:
@@ -86,6 +90,32 @@ public class HMCDeviceImplementation implements HMCDeviceItf {
             }
         }
         return "not-authenticated";
+    }
+
+    private String _seekForwards(String params, HMCDeviceProxy fromDev) {
+        boolean retVal = false;
+        if (mLocalMediaRenderer != null) {
+            try {
+                retVal = mLocalMediaRenderer.seekFordard();
+            } catch (RemoteException e) {
+                retVal = false;
+                e.printStackTrace();
+            }
+        }
+        return retVal + "";
+    }
+
+    private String _seekBackards(String params, HMCDeviceProxy fromDev) {
+        boolean retVal = false;
+        if (mLocalMediaRenderer != null) {
+            try {
+                retVal = mLocalMediaRenderer.seekBackward();
+            } catch (RemoteException e) {
+                retVal = false;
+                e.printStackTrace();
+            }
+        }
+        return retVal + "";
     }
 
     private String _stopLocalRender(String params, HMCDeviceProxy fromDev) {

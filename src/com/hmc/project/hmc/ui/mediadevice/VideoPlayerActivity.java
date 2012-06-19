@@ -94,6 +94,8 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
     public static final String PLAYER_MODE_REMOTE = "remote";
     public static final String PLAYER_MODE_LOCAL = "local";
 
+    protected static final int SEEK_VAL = 5000;
+
     /** The m hmc connection. */
     private IHMCConnection mHMCConnection;
 
@@ -512,12 +514,46 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 case R.id.vidAct_Close:
                     closeRender();
                     break;
+                case R.id.vidAct_ButtNext:
+                    seekPlayerForwards();
+                    break;
+                case R.id.vidAct_ButtPrev:
+                    seekPlayerBackwards();
+                    break;
                 default:
                     break;
             }
 
         }
     };
+
+    private void seekPlayerBackwards() {
+        try {
+            if (mSelectedRenderFullJID.equals("local")) {
+                mLocalMediaRenderer.seekBackward();
+            } else {
+                // send command to remote
+                mSelectedRender.seekBackward();
+            }
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void seekPlayerForwards() {
+        try {
+            if (mSelectedRenderFullJID.equals("local")) {
+                mLocalMediaRenderer.seekFordard();
+            } else {
+                // send command to remote
+                mSelectedRender.seekFordard();
+            }
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
     private void closeRender() {
         boolean result = false;
@@ -553,6 +589,26 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 }
             }
         }).start();
+    }
+
+    private void seekForward() {
+        boolean result = false;
+        try {
+            if (mSelectedRenderFullJID.equals("local")) {
+                result = mLocalMediaRenderer.pause();
+            } else {
+                // send command to remote
+                result = mSelectedRender.pause();
+            }
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        if (!result) {
+            setStatusMessage("Cannot pause", Color.RED);
+            HMCUserNotifications.normalToast(mContext, "Error: cannot play");
+        }
     }
 
     private void pauseResume() {
@@ -797,6 +853,43 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         });
     }
 
+    private boolean goForwards() {
+        boolean retVal = false;
+        if (mMediaPlayer != null) {
+            try {
+                int length = mMediaPlayer.getDuration();
+                int currPos = mMediaPlayer.getCurrentPosition();
+                if (length > 0) {
+                    int seekVal = (currPos + SEEK_VAL) > length ? length : (currPos + SEEK_VAL);
+                    mMediaPlayer.seekTo(seekVal);
+                    retVal = true;
+                }
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return retVal;
+    }
+
+    private boolean goBackwards() {
+        boolean retVal = false;
+        if (mMediaPlayer != null) {
+            try {
+                int length = mMediaPlayer.getDuration();
+                int currPos = mMediaPlayer.getCurrentPosition();
+                if (length > 0 && currPos > 0) {
+                    int seekVal = (currPos - SEEK_VAL) < 0 ? 0 : (currPos - SEEK_VAL);
+                    mMediaPlayer.seekTo(seekVal);
+                    retVal = true;
+                }
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+        }
+        return retVal;
+    }
+
     private void playVideoResource(String path) throws IOException {
         releaseMediaPlayer();
         doCleanUp();
@@ -984,6 +1077,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
         private boolean mRemoteResult;
         IMediaRenderer mRemoteMediaController = null;
         private String mStringPath;
+        private boolean mRemoteProcessing = false;
 
         public RemoteMediaRenderer(String fullJID) {
             mFullJID = fullJID;
@@ -1008,7 +1102,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
          */
         @Override
         public boolean play(String path) throws RemoteException {
-            if (mRemoteMediaController == null)
+            if (mRemoteMediaController == null || mRemoteProcessing)
                 return false;
 
             mStringPath = path;
@@ -1017,6 +1111,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                 @Override
                 public void run() {
                     try {
+                        mRemoteProcessing = true;
                         mRemoteResult = mRemoteMediaController.play(mStringPath);
                     } catch (RemoteException e) {
                         e.printStackTrace();
@@ -1025,6 +1120,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                     if (mRemoteResult == false) {
                         setStatusMessage("Cannot play remote", Color.RED);
                     }
+                    mRemoteProcessing = false;
                 }
             }).start();
             return mRemoteResult;
@@ -1036,12 +1132,13 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
          */
         @Override
         public boolean stop() throws RemoteException {
-            if (mRemoteMediaController == null)
+            if (mRemoteMediaController == null || mRemoteProcessing)
                 return false;
 
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    mRemoteProcessing = true;
                     try {
                         mRemoteResult = mRemoteMediaController.stop();
                     } catch (RemoteException e) {
@@ -1051,6 +1148,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                     if (mRemoteResult == false) {
                         setStatusMessage("Cannot stop remote", Color.RED);
                     }
+                    mRemoteProcessing = false;
                 }
             }).start();
             return mRemoteResult;
@@ -1062,12 +1160,13 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
          */
         @Override
         public boolean pause() throws RemoteException {
-            if (mRemoteMediaController == null)
+            if (mRemoteMediaController == null || mRemoteProcessing)
                 return false;
 
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    mRemoteProcessing = true;
                     try {
                         mRemoteResult = mRemoteMediaController.pause();
                     } catch (RemoteException e) {
@@ -1077,6 +1176,7 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                     if (mRemoteResult == false) {
                         setStatusMessage("Cannot pause remote", Color.RED);
                     }
+                    mRemoteProcessing = false;
                 }
             }).start();
             return mRemoteResult;
@@ -1084,12 +1184,13 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
         @Override
         public boolean close() throws RemoteException {
-            if (mRemoteMediaController == null)
+            if (mRemoteMediaController == null || mRemoteProcessing)
                 return false;
 
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    mRemoteProcessing = true;
                     try {
                         mRemoteResult = mRemoteMediaController.close();
                         mInitialized = false;
@@ -1100,6 +1201,57 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                     if (mRemoteResult == false) {
                         setStatusMessage("Cannot close remote renderer", Color.RED);
                     }
+                    mRemoteProcessing = false;
+                }
+            }).start();
+            return mRemoteResult;
+        }
+
+        @Override
+        public boolean seekFordard() throws RemoteException {
+            if (mRemoteMediaController == null || mRemoteProcessing)
+                return false;
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mRemoteProcessing = true;
+                    try {
+                        mRemoteResult = mRemoteMediaController.seekFordard();
+                        mInitialized = false;
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                        mRemoteResult = false;
+                    }
+                    if (mRemoteResult == false) {
+                        setStatusMessage("Cannot seek remote", Color.RED);
+                    }
+                    mRemoteProcessing = false;
+                }
+            }).start();
+            return mRemoteResult;
+        }
+
+        @Override
+        public boolean seekBackward() throws RemoteException {
+            if (mRemoteMediaController == null || mRemoteProcessing)
+                return false;
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mRemoteProcessing = true;
+                    try {
+                        mRemoteResult = mRemoteMediaController.seekBackward();
+                        mInitialized = false;
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                        mRemoteResult = false;
+                    }
+                    if (mRemoteResult == false) {
+                        setStatusMessage("Cannot seek remote", Color.RED);
+                    }
+                    mRemoteProcessing = false;
                 }
             }).start();
             return mRemoteResult;
@@ -1199,6 +1351,16 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
             } else {
                 return false;
             }
+        }
+
+        @Override
+        public boolean seekFordard() throws RemoteException {
+            return goForwards();
+        }
+
+        @Override
+        public boolean seekBackward() throws RemoteException {
+            return goBackwards();
         }
     }
 

@@ -157,7 +157,9 @@ public class DevicesListActivity extends Activity {
     void doUnbindService() {
         if (mIsBound) {
             try {
-                mHMCConnection.getHMCManager().unregisterDevicesListener(mHMCDevicesListener);
+                if (mHMCConnection != null) {
+                    mHMCConnection.getHMCManager().unregisterDevicesListener(mHMCDevicesListener);
+                }
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -195,8 +197,9 @@ public class DevicesListActivity extends Activity {
         // make sure we ended up in this activity with the app connected to XMPP
         // server
         if (!mHMCApplication.isConnected()) {
-            doUnbindService();
-            finish();
+            // doUnbindService();
+            // finish();
+            Toast.makeText(this, "not connected??", Toast.LENGTH_SHORT).show();
         }
 
         mListTitle = (TextView) this.findViewById(R.id.main_screen_list_title);

@@ -138,9 +138,17 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
 
                     mLocalDevNamesHashMap = (HashMap<String, String>) mHMCConnection
                                             .getHMCManager().getListOfLocalDevices();
+
+                    HashMap<String, String> lExternalDevNamesHashMap = (HashMap<String, String>) mHMCConnection
+                            .getHMCManager().getListOfExternalDevices();
+
+                    mLocalDevicesJIDs = new CharSequence[mLocalDevNamesHashMap.size()
+                            + lExternalDevNamesHashMap.size()];
+                    mLocalDevicesNames = new CharSequence[mLocalDevNamesHashMap.size()
+                            + lExternalDevNamesHashMap.size()];
+
                     Iterator<String> iter = mLocalDevNamesHashMap.keySet().iterator();
-                    mLocalDevicesJIDs = new CharSequence[mLocalDevNamesHashMap.size()];
-                    mLocalDevicesNames = new CharSequence[mLocalDevNamesHashMap.size()];
+
                     int i = 0;
                     mLocalDevicesJIDs[i] = "local";
                     mLocalDevicesNames[i] = "Local device";
@@ -160,6 +168,20 @@ public class VideoPlayerActivity extends Activity implements SurfaceHolder.Callb
                         }
                     }
                     
+                    iter = lExternalDevNamesHashMap.keySet().iterator();
+                    while (iter.hasNext() && i < mLocalDevicesJIDs.length) {
+                        String val = iter.next();
+                        // don't add the local device two times, as we have it
+                        // in the list of devices
+                        try {
+                            mLocalDevicesJIDs[i] = val;
+                            mLocalDevicesNames[i] = lExternalDevNamesHashMap.get(val);
+                        } catch (IndexOutOfBoundsException e) {
+                            e.printStackTrace();
+                        }
+                        i++;
+                    }
+
                     updateListOfResources();
                     
                     mHMCManager.setLocalMediaRender(mLocalMediaRenderer);

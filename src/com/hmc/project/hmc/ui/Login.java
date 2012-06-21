@@ -136,10 +136,28 @@ public class Login extends Activity {
                 return true;
             case R.id.login_menu_clearHMC:
                 clearHMCData();
+            case R.id.login_menu_clearHMC_soft:
+                clearHMCData_soft();
                 return true;
             default:
                 return false;
         }
+    }
+
+    private void clearHMCData_soft() {
+        // delete the files where we keep info about local and extenral devices
+
+        // TODO: improve the horrible way of clearing HMC data
+        File f = new File("/sdcard/HMCDeviceStore.dat");
+        if (f.exists()) {
+            f.delete();
+        }
+        f = new File("/sdcard/HMCDeviceStore.dat_ext");
+        if (f.exists()) {
+            f.delete();
+        }
+
+        Toast.makeText(Login.this, "Deleted devices store files", Toast.LENGTH_SHORT).show();
     }
 
     /**
